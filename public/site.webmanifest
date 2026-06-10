@@ -1,0 +1,22 @@
+{
+    "name": "NEARSEO - Le SEO local propulsé par l'IA",
+    "short_name": "NEARSEO",
+    "description": "Générez des articles optimisés pour Google en 3 informations seulement",
+    "icons": [
+        {
+            "src": "/android-chrome-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/android-chrome-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+    "theme_color": "#8c4a2f",
+    "background_color": "#f7f9ff",
+    "display": "standalone",
+    "start_url": "/"
+} 
