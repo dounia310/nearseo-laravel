@@ -27,6 +27,21 @@
     <aside class="w-full lg:w-96 bg-white border-l border-gray-200 flex flex-col">
         <div class="p-6 border-b bg-white/95">
             <h3 class="text-2xl font-bold text-gray-800 mb-6">Articles à proximité</h3>
+
+            <!-- Barre de recherche (pour searchLocation) -->
+            <div class="mb-6">
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2" for="searchCity">
+                    Rechercher une ville
+                </label>
+                <input
+                    id="searchCity"
+                    type="text"
+                    placeholder="Ex: Casablanca"
+                    class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                />
+                <p class="text-xs text-gray-500 mt-2">Appuie sur Entrée pour chercher.</p>
+            </div>
+
             <div class="space-y-4">
                 <div class="flex justify-between items-center mb-1">
                     <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Rayon de recherche</label>
@@ -115,8 +130,8 @@
     
     // Initialisation de la carte OpenStreetMap
     function initMap() {
-        // Centre par défaut sur la France
-        const defaultCenter = [46.603354, 1.888334];
+        // Centre par défaut sur le Maroc
+        const defaultCenter = [31.7917, -7.0926];
         
         map = L.map('map').setView(defaultCenter, 6);
         

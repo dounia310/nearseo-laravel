@@ -13,7 +13,7 @@
         </div>
         <a href="{{ route('ai.create') }}" class="bg-[#C97C5D] text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:opacity-90 transition-all shadow-md active:scale-95">
             <span class="material-symbols-outlined">add_circle</span>
-             Nouvel article
+            Nouvel article
         </a>
     </div>
 
@@ -40,68 +40,72 @@
     <div class="bg-white border rounded-xl overflow-hidden shadow-sm">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-gray-50 text-gray-500 border-b">
-                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider">Titre de l'article</th>
-                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider">Statut</th>
-                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider">Vues</th>
-                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider">Score SEO</th>
-                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider">Date</th>
-                        <th class="px-6 py-4 text-right text-xs font-bold uppercase tracking-wider">Actions</th>
+                <thead class="bg-gray-50 border-b">
+                    <tr class="text-left">
+                        <th class="px-6 py-4 text-xs text-gray-500 uppercase font-bold">Titre</th>
+                        <th class="px-6 py-4 text-xs text-gray-500 uppercase font-bold">Statut</th>
+                        <th class="px-6 py-4 text-xs text-gray-500 uppercase font-bold">Vues</th>
+                        <th class="px-6 py-4 text-xs text-gray-500 uppercase font-bold">Score SEO</th>
+                        <th class="px-6 py-4 text-right text-xs text-gray-500 uppercase font-bold">Actions</th>
                     </tr>
                 </thead>
-                <tbody id="articlesTableBody" class="divide-y divide-gray-200">
+                <tbody id="articlesTableBody" class="divide-y divide-gray-100">
                     @forelse($articles as $article)
-                    <tr class="hover:bg-gray-50 transition-colors duration-150 group" data-status="{{ $article->status }}" data-title="{{ strtolower($article->title) }}">
-                        <td class="px-6 py-5">
-                            <a href="{{ route('articles.edit', $article) }}" class="font-semibold text-gray-800 hover:text-primary transition-colors block">
-                                {{ $article->title }}
-                            </a>
-                            <span class="text-xs text-green-600 bg-green-100 px-2 py-0.5 rounded mt-1 inline-block">Humain + IA</span>
+                    <tr class="user-row hover:bg-gray-50 transition-colors cursor-pointer" 
+                        data-id="{{ $article->id }}"
+                        data-title="{{ strtolower($article->title) }}"
+                        data-status="{{ $article->status }}">
+                        
+                        <td class="px-6 py-4">
+                            <div class="font-semibold text-gray-800">{{ $article->title }}</div>
+                            <div class="text-xs text-gray-500">Publié le {{ $article->created_at->format('d/m/Y') }}</div>
                         </td>
-                        <td class="px-6 py-5">
-                            @if($article->status === 'published')
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-bold">
-                                <span class="w-1.5 h-1.5 rounded-full bg-green-600"></span>
-                                Publié
-                            </span>
+                        
+                        <td class="px-6 py-4">
+                            @if($article->scheduled_for && $article->status === 'draft')
+                                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-700">
+                                    <span class="material-symbols-outlined text-sm">schedule</span>
+                                    Programmé le {{ $article->scheduled_for->format('d/m/Y H:i') }}
+                                </span>
+                            @elseif($article->status === 'published')
+                                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-green-100 text-green-700">
+                                    <span class="material-symbols-outlined text-sm">check_circle</span>
+                                    Publié
+                                </span>
                             @else
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-bold">
-                                <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
-                                Brouillon
-                            </span>
+                                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-600">
+                                    <span class="material-symbols-outlined text-sm">edit_note</span>
+                                    Brouillon
+                                </span>
                             @endif
                         </td>
-                        <td class="px-6 py-5 text-gray-600">{{ number_format($article->views ?? 0) }}</td>
-                        <td class="px-6 py-5">
-                            <div class="flex items-center gap-3">
-                                <div class="w-16 bg-gray-200 rounded-full h-1.5 overflow-hidden">
-                                    <div class="{{ $article->seo_score >= 70 ? 'bg-green-600' : 'bg-orange-500' }} h-full" style="width: {{ $article->seo_score ?? 0 }}%"></div>
+                        
+                        <td class="px-6 py-4">{{ number_format($article->views ?? 0) }}</td>
+                        
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-2">
+                                <div class="w-10 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                    <div class="bg-green-600 h-full" style="width: {{ $article->seo_score ?? 0 }}%"></div>
                                 </div>
-                                <span class="font-bold {{ $article->seo_score >= 70 ? 'text-green-600' : 'text-orange-500' }} text-sm">{{ $article->seo_score ?? 0 }}</span>
+                                <span class="text-sm font-bold text-green-700">{{ $article->seo_score ?? 0 }}</span>
                             </div>
                         </td>
-                        <td class="px-6 py-5 text-gray-500 text-sm whitespace-nowrap">{{ $article->created_at->format('d M Y') }}</td>
-                        <td class="px-6 py-5 text-right">
-                            <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <a href="{{ route('articles.edit', $article) }}" class="p-2 text-gray-400 hover:text-primary transition-colors">
-                                    <span class="material-symbols-outlined text-lg">edit</span>
-                                </a>
-                                <a href="{{ route('articles.show', $article) }}" class="p-2 text-gray-400 hover:text-primary transition-colors">
-                                    <span class="material-symbols-outlined text-lg">visibility</span>
-                                </a>
-                                <button onclick="deleteArticle({{ $article->id }}, '{{ $article->title }}')" class="p-2 text-gray-400 hover:text-red-500 transition-colors">
-                                    <span class="material-symbols-outlined text-lg">delete</span>
-                                </button>
-                            </div>
+                        
+                        <td class="px-6 py-4 text-right space-x-2">
+                            <a href="{{ route('articles.edit', $article) }}" class="p-1.5 text-gray-500 hover:text-primary hover:bg-orange-50 rounded inline-block transition-colors" title="Modifier">
+                                <span class="material-symbols-outlined text-lg">edit</span>
+                            </a>
+                            <button onclick="deleteArticle({{ $article->id }}, '{{ addslashes($article->title) }}')" class="p-1.5 text-gray-500 hover:text-red-600 rounded inline-block transition-colors" title="Supprimer">
+                                <span class="material-symbols-outlined text-lg">delete</span>
+                            </button>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+                        <td colspan="5" class="px-6 py-12 text-center text-gray-500">
                             <span class="material-symbols-outlined text-4xl mb-2 block">article</span>
-                            <p>Aucun article pour le moment.</p>
-                            <a href="{{ route('ai.create') }}" class="text-primary hover:underline mt-2 inline-block">Créez votre premier article</a>
+                            Aucun article pour le moment.
+                            <a href="{{ route('ai.create') }}" class="text-primary hover:underline block mt-2">Créez votre premier article</a>
                         </td>
                     </tr>
                     @endforelse
@@ -179,7 +183,7 @@
         var status = activeFilter ? activeFilter.dataset.status : 'all';
         
         rows.forEach(function(row) {
-            if (row.cells) {
+            if (row.cells && row.cells.length > 0) {
                 var title = row.dataset.title || '';
                 var rowStatus = row.dataset.status || '';
                 
@@ -196,7 +200,6 @@
     }
     
     function filterByStatus(status) {
-        // Update button styles
         var btns = document.querySelectorAll('.filter-btn');
         btns.forEach(function(btn) {
             btn.classList.remove('bg-primary', 'text-white');
@@ -209,12 +212,11 @@
             activeBtn.classList.remove('bg-white', 'border', 'border-gray-300', 'text-gray-600');
         }
         
-        // Filter rows
         var rows = document.querySelectorAll('#articlesTableBody tr');
         var searchTerm = document.getElementById('searchInput') ? document.getElementById('searchInput').value.toLowerCase() : '';
         
         rows.forEach(function(row) {
-            if (row.cells) {
+            if (row.cells && row.cells.length > 0) {
                 var title = row.dataset.title || '';
                 var rowStatus = row.dataset.status || '';
                 

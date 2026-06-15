@@ -4,6 +4,22 @@
 @section('header-title', 'Tableau de bord')
 
 @section('content')
+<!-- Alerte de rappel hebdomadaire -->
+@if(isset($weeklyReminder) && $weeklyReminder)
+<div class="bg-amber-50 border-l-4 border-amber-500 rounded-lg p-4 mb-6">
+    <div class="flex items-center gap-3">
+        <span class="material-symbols-outlined text-amber-500">schedule</span>
+        <div class="flex-1">
+            <p class="text-amber-800 font-medium">Rappel hebdomadaire</p>
+            <p class="text-amber-700 text-sm">Cela fait {{ $daysSinceLastArticle ?? 0 }} jours que vous n'avez pas publié d'article.</p>
+        </div>
+        <a href="{{ route('ai.create') }}" class="bg-amber-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-amber-600">
+            Créer un article
+        </a>
+    </div>
+</div>
+@endif
+
 <!-- Hero Welcome Section -->
 <div class="mb-8">
     <div class="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl p-8">
@@ -377,12 +393,11 @@
         }
         
         // Mettre en évidence le bouton actif
-        var target = event && event.target ? event.target : null;
+        var target = window.event && window.event.target ? window.event.target : null;
         if (target) {
             target.classList.add('bg-primary', 'text-white');
             target.classList.remove('bg-gray-100', 'text-gray-700');
         } else {
-            // Fallback: trouver le bouton correspondant à la période
             var allBtns = document.querySelectorAll('.period-btn');
             var periodMap = { 'week': 0, 'month': 1 };
             var idx = periodMap[period] || 1;

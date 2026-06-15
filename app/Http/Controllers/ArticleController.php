@@ -3,18 +3,31 @@
 namespace App\Http\Controllers;
 
 use App\Models\Article;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class ArticleController extends Controller
 {
     /**
-     * Afficher la liste des articles
+     * Afficher la liste des articles (Web) ou retourner JSON (API)
      */
-    public function index()
+    public function index(Request $request)
     {
+        // ⭐ Détection si c'est une requête API
+        if ($request->is('api/*') || $request->wantsJson()) {
+            // Pour l'API : retourner JSON
+            $articles = Article::with('user')
+                ->orderBy('created_at', 'desc')
+                ->paginate(10);
+            
+            return response()->json($articles);
+        }
+        
+        // Pour le web : retourner la vue Blade
         $articles = Article::where('user_id', Auth::id())
             ->orderBy('created_at', 'desc')
             ->paginate(10);
@@ -31,7 +44,7 @@ class ArticleController extends Controller
     }
     
     /**
-     * Enregistrer un nouvel article
+     * Enregistrer un nouvel article (avec planification)
      */
     public function store(Request $request)
     {
@@ -39,8 +52,15 @@ class ArticleController extends Controller
             'title' => 'required|max:255',
             'content' => 'required',
             'focus_keyword' => 'nullable|max:100',
-            'status' => 'in:draft,published'
+            'status' => 'in:draft,published',
+            'scheduled_date' => 'nullable|date',
+            'scheduled_time' => 'nullable|date_format:H:i'
         ]);
+        
+        $scheduledFor = null;
+        if ($request->has('scheduled_date') && $request->has('scheduled_time')) {
+            $scheduledFor = Carbon::parse($request->scheduled_date . ' ' . $request->scheduled_time);
+        }
         
         $article = Article::create([
             'user_id' => Auth::id(),
@@ -48,11 +68,17 @@ class ArticleController extends Controller
             'slug' => Str::slug($validated['title']),
             'content' => $validated['content'],
             'focus_keyword' => $validated['focus_keyword'] ?? null,
-            'status' => $validated['status'] ?? 'draft',
+            'status' => $scheduledFor ? 'draft' : ($request->status ?? 'draft'),
+            'scheduled_for' => $scheduledFor,
+            'scheduled_status' => $scheduledFor ? 'pending' : null,
             'seo_score' => $this->calculateSeoScore($validated['content'], $validated['focus_keyword'] ?? '')
         ]);
         
-        return redirect()->route('articles.index')->with('success', 'Article créé avec succès !');
+        $message = $scheduledFor 
+            ? 'Article programmé pour le ' . $scheduledFor->format('d/m/Y à H:i')
+            : 'Article créé avec succès !';
+        
+        return redirect()->route('articles.index')->with('success', $message);
     }
     
     /**
@@ -80,7 +106,7 @@ class ArticleController extends Controller
     }
     
     /**
-     * Mettre à jour un article
+     * Mettre à jour un article (avec notification de publication)
      */
     public function update(Request $request, Article $article)
     {
@@ -96,6 +122,9 @@ class ArticleController extends Controller
             'status' => 'in:draft,published'
         ]);
         
+        // Vérifier si l'article vient d'être publié
+        $wasPublished = ($validated['status'] === 'published' && $article->status !== 'published');
+        
         $article->update([
             'title' => $validated['title'],
             'slug' => Str::slug($validated['title']),
@@ -104,6 +133,22 @@ class ArticleController extends Controller
             'status' => $validated['status'],
             'seo_score' => $this->calculateSeoScore($validated['content'], $validated['focus_keyword'] ?? '')
         ]);
+        
+        // Si l'article vient d'être publié
+        if ($wasPublished) {
+            // Mettre à jour la date de dernière publication de l'utilisateur
+            Auth::user()->update([
+                'last_article_published_at' => now()
+            ]);
+            
+            // Envoyer une notification de félicitations
+            Notification::create([
+                'user_id' => Auth::id(),
+                'title' => 'Article publié !',
+                'message' => 'Félicitations ! Votre article "' . $article->title . '" a été publié avec succès.',
+                'type' => 'success'
+            ]);
+        }
         
         return redirect()->route('articles.index')->with('success', 'Article mis à jour !');
     }
@@ -121,6 +166,61 @@ class ArticleController extends Controller
         $article->delete();
         
         return redirect()->route('articles.index')->with('success', 'Article supprimé avec succès');
+    }
+    
+    /**
+     * PAGE BLOG PUBLIC - Afficher la liste des articles
+     */
+    public function blog()
+    {
+        $user = auth()->user();
+        
+        $articles = Article::where('user_id', $user->id)
+            ->where('status', 'published')
+            ->orderBy('created_at', 'desc')
+            ->paginate(6);
+        
+        $recentArticles = Article::where('user_id', $user->id)
+            ->where('status', 'published')
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+        
+        $archives = Article::where('user_id', $user->id)
+            ->where('status', 'published')
+            ->selectRaw('YEAR(created_at) as year, MONTH(created_at) as month, COUNT(*) as count')
+            ->groupBy('year', 'month')
+            ->orderBy('year', 'desc')
+            ->orderBy('month', 'desc')
+            ->get();
+        
+        $allTags = Article::where('user_id', $user->id)
+            ->where('status', 'published')
+            ->whereNotNull('tags')
+            ->pluck('tags')
+            ->map(fn($tag) => explode(',', $tag))
+            ->flatten()
+            ->map('trim')
+            ->filter()
+            ->countBy()
+            ->sortDesc()
+            ->take(15);
+        
+        return view('blog.index', compact('articles', 'user', 'recentArticles', 'archives', 'allTags'));
+    }
+    
+    /**
+     * PAGE BLOG PUBLIC - Afficher un article individuel
+     */
+    public function showBlog($slug)
+    {
+        $article = Article::where('slug', $slug)
+            ->where('status', 'published')
+            ->firstOrFail();
+        
+        $article->increment('views');
+        
+        return view('blog.show', compact('article'));
     }
     
     /**

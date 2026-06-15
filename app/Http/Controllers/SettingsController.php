@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Article;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 
 class SettingsController extends Controller
 {
@@ -13,76 +15,47 @@ class SettingsController extends Controller
     {
         $user = Auth::user();
         
-        // Paramètres du blog
-        $blogSettings = [
-            'name' => 'Mon Blog Local Expert',
-            'subdomain' => 'monblog',
-            'description' => 'Expertise locale et conseils personnalisés pour optimiser votre visibilité.'
-        ];
+        // Données communes
+        $settings = $user->settings ?? [];
         
-        // Abonnement
-        $subscription = [
-            'plan' => 'Pro Agency',
-            'price' => '49€',
-            'features' => ['Blogs illimités', 'IA Premium', 'Audit SEO hebdomadaire']
-        ];
+        // Si l'utilisateur est admin, charger les données supplémentaires
+        if ($user->role === 'admin') {
+            $totalUsers = User::count();
+            $totalArticles = Article::count();
+            $totalViews = Article::sum('views');
+            $avgSeoScore = round(Article::avg('seo_score') ?? 0);
+            
+            $articlesByCity = Article::where('status', 'published')
+                ->whereNotNull('address')
+                ->select('address', DB::raw('count(*) as count'))
+                ->groupBy('address')
+                ->orderBy('count', 'desc')
+                ->limit(10)
+                ->get();
+            
+            $users = User::withCount('articles')->paginate(10);
+            
+            return view('dashboard.settings', compact('settings', 'totalUsers', 'totalArticles', 'totalViews', 'avgSeoScore', 'articlesByCity', 'users'));
+        }
         
-        // Factures
-        $invoices = [
-            ['id' => 'INV-001', 'date' => '01 Oct 2024', 'description' => 'Abonnement Pro Agency', 'amount' => '49,00€'],
-            ['id' => 'INV-002', 'date' => '01 Sep 2024', 'description' => 'Abonnement Pro Agency', 'amount' => '49,00€'],
-            ['id' => 'INV-003', 'date' => '01 Août 2024', 'description' => 'Abonnement Pro Agency', 'amount' => '49,00€'],
-            ['id' => 'INV-004', 'date' => '01 Juil 2024', 'description' => 'Abonnement Pro Agency', 'amount' => '49,00€'],
-        ];
-        
-        // Sessions actives
-        $sessions = [
-            [
-                'id' => 's1',
-                'device' => 'MacBook Pro - Chrome',
-                'location' => 'Paris, France',
-                'last_active' => 'Actuel',
-                'is_current' => true,
-                'icon' => 'desktop_windows'
-            ],
-            [
-                'id' => 's2',
-                'device' => 'iPhone 14 - App Mobile',
-                'location' => 'Lyon, France',
-                'last_active' => 'Il y a 2 jours',
-                'is_current' => false,
-                'icon' => 'smartphone'
-            ]
-        ];
-        
-        return view('dashboard.settings', compact('blogSettings', 'subscription', 'invoices', 'sessions'));
+        return view('dashboard.settings', compact('settings'));
     }
     
     public function update(Request $request)
     {
-        /** @var \App\Models\User $user */
         $user = Auth::user();
+        $settings = $user->settings ?? [];
         
         $validated = $request->validate([
-            'language' => 'in:fr,en',
+            'language' => 'in:fr,en,ar',
             'theme' => 'in:light,dark,auto',
-            'email_notifications' => 'boolean',
-            'weekly_report' => 'boolean'
+            'weekly_report' => 'boolean',
+            'security_alerts' => 'boolean'
         ]);
         
-        // Récupérer les paramètres existants
-        $settings = $user->settings ?? [];
-        if (!is_array($settings)) {
-            $settings = [];
-        }
-        
-        // Fusionner avec les nouveaux paramètres
         $settings = array_merge($settings, $validated);
-        
-        // Mettre à jour
-        User::where('id', $user->id)->update([
-            'settings' => $settings
-        ]);
+        $user->settings = $settings;
+        $user->save();
         
         return response()->json(['success' => true]);
     }
@@ -94,17 +67,25 @@ class SettingsController extends Controller
             'new_password' => 'required|string|min:8|confirmed'
         ]);
         
-        /** @var \App\Models\User $user */
         $user = Auth::user();
         
         if (!Hash::check($validated['current_password'], $user->password)) {
             return response()->json(['error' => 'Mot de passe incorrect'], 422);
         }
         
-        // Mettre à jour le mot de passe
-        User::where('id', $user->id)->update([
-            'password' => Hash::make($validated['new_password'])
-        ]);
+        $user->password = Hash::make($validated['new_password']);
+        $user->save();
+        
+        return response()->json(['success' => true]);
+    }
+    
+    public function updateTheme(Request $request)
+    {
+        $user = Auth::user();
+        $settings = $user->settings ?? [];
+        $settings['theme'] = $request->theme;
+        $user->settings = $settings;
+        $user->save();
         
         return response()->json(['success' => true]);
     }

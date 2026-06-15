@@ -1,57 +1,154 @@
 <?php
+// app/Http/Controllers/AIController.php
 
 namespace App\Http\Controllers;
 
-use App\Services\SeoAnalyzerService;
 use App\Services\GeminiService;
+use App\Services\SeoAnalyzerService;
+use App\Models\Article;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class AIController extends Controller
 {
-    public function __construct()
+    protected GeminiService $gemini;
+    
+    public function __construct(GeminiService $gemini)
     {
-        // Pas de constructeur spécifique
+        $this->gemini = $gemini;
     }
-
+    
+    /**
+     * Page de génération d'article IA
+     */
     public function create()
     {
         return view('dashboard.ai.create');
     }
-
+    
+    /**
+     * Vérifier la connexion à l'API Gemini
+     */
+    public function checkConnection()
+    {
+        $result = $this->gemini->checkConnection();
+        return response()->json($result);
+    }
+    
+    /**
+     * Générer un article premium avec Gemini
+     */
     public function generate(Request $request)
     {
+        Log::info('AI Generate request received', $request->all());
+        
         $request->validate([
-            'subject' => 'required|string|min:5',
+            'business_name' => 'required|string',
+            'subject' => 'required|string',
+            'address' => 'required|string',
             'website' => 'nullable|url',
-            'address' => 'nullable|string',
-            'length' => 'in:short,medium,long'
+            'hours' => 'nullable|string',
+            'goals' => 'nullable|array',
+            'language' => 'nullable|string',
+            'tone' => 'nullable|string',
+            'length' => 'nullable|string|in:short,medium,long',
+            'mode' => 'nullable|string|in:local,online',
+            'geo_quartier' => 'nullable|string',
+            'geo_ville' => 'nullable|string',
+            'geo_pays' => 'nullable|string',
+            'keywords' => 'nullable|string'
         ]);
-
-        // Génération réelle via Gemini
-        $length = $request->input('length', 'medium');
-
-        $gemini = app(GeminiService::class);
-        $articleHtml = $gemini->generateArticle(
-            subject: $request->subject,
-            website: $request->input('website'),
-            address: $request->input('address'),
-            length: $length
-        );
-
-        if (!$articleHtml) {
+        
+        $data = [
+            'mode' => $request->mode ?? 'local',
+            'business_name' => $request->business_name,
+            'topic' => $request->subject,
+            'address' => $request->address,
+            'website' => $request->website ?? '',
+            'hours' => $request->hours ?? '',
+            'goals' => $request->goals ?? [],
+            'language' => $request->language ?? 'Français',
+            'tone' => $request->tone ?? 'Professionnel & Chaleureux',
+            'format' => $request->length ?? 'medium',
+            'geo_quartier' => $request->geo_quartier ?? '',
+            'geo_ville' => $request->geo_ville ?? '',
+            'geo_pays' => $request->geo_pays ?? 'Maroc',
+            'keywords' => $request->keywords ?? ''
+        ];
+        
+        // Générer l'article via Gemini
+        $result = $this->gemini->generateArticle($data);
+        
+        if (!$result['success']) {
             return response()->json([
                 'success' => false,
-                'message' => 'La génération IA a échoué (clé GEMINI_API_KEY absente ou erreur API).'
-            ], 200);
+                'message' => $result['error'] ?? 'Erreur de génération',
+                'code' => $result['code'] ?? 500
+            ], 500);
         }
-
+        
+        // Sauvegarder en base de données
+        $article = Article::create([
+            'user_id' => auth()->id(),
+            'title' => $result['title'],
+            'slug' => Str::slug($result['title']),
+            'content' => $result['content'],
+            'focus_keyword' => $result['focus_keyword'] ?? $data['business_name'],
+            'excerpt' => $result['meta_description'] ?? substr(strip_tags($result['content']), 0, 200),
+            'meta_description' => $result['meta_description'] ?? null,
+            'status' => 'draft',
+            'seo_score' => $this->calculateBasicSeoScore($result['content']),
+            'views' => 0,
+            'address' => $request->address,
+        ]);
+        
+        Log::info('Article saved successfully', ['article_id' => $article->id]);
+        
+        // Retourner l'ID pour redirection vers l'éditeur
         return response()->json([
             'success' => true,
-            'article' => $articleHtml,
+            'article_id' => $article->id,
+            'redirect_url' => route('articles.edit', $article->id),
+            'title' => $result['title'],
+            'message' => 'Article généré ! Complétez les informations dans l\'éditeur.'
         ]);
     }
-
+    
+    /**
+     * Aperçu de l'article généré (redirige vers l'éditeur)
+     */
+    public function preview()
+    {
+        $generated = session('ai_generated');
+        
+        if (!$generated) {
+            return redirect()->route('ai.create')->with('error', 'Aucun article généré');
+        }
+        
+        // Créer un article temporaire avec les données générées
+        $article = Article::create([
+            'user_id' => auth()->id(),
+            'title' => $generated['title'],
+            'slug' => Str::slug($generated['title']),
+            'content' => $generated['content'],
+            'focus_keyword' => $generated['focus_keyword'] ?? '',
+            'excerpt' => $generated['meta_description'] ?? substr(strip_tags($generated['content']), 0, 200),
+            'meta_description' => $generated['meta_description'] ?? null,
+            'status' => 'draft',
+            'seo_score' => $generated['word_count'] ?? 0,
+            'views' => 0,
+        ]);
+        
+        session()->forget('ai_generated');
+        
+        return redirect()->route('articles.edit', $article->id)->with('success', 'Article généré ! Complétez les informations.');
+    }
+    
+    /**
+     * Reformuler un contenu pour les réseaux sociaux
+     */
     public function rewrite(Request $request)
     {
         $request->validate([
@@ -59,32 +156,72 @@ class AIController extends Controller
             'platform' => 'required|in:instagram,twitter,linkedin,facebook'
         ]);
 
+        $prompt = "Reformule ce contenu pour {$request->platform} :\n\n" . $request->content;
+        
+        $result = $this->gemini->generateArticle([
+            'business_name' => 'Reformulation',
+            'topic' => $prompt,
+            'address' => '',
+            'format' => 'short'
+        ]);
+        
+        if ($result['success']) {
+            return response()->json([
+                'success' => true,
+                'content' => $result['content']
+            ]);
+        }
+        
         return response()->json([
-            'success' => true,
-            'content' => 'Contenu reformulé pour ' . $request->platform
+            'success' => false,
+            'content' => substr($request->content, 0, 200) . '...'
         ]);
     }
-
+    
+    /**
+     * Optimiser un contenu pour un mot-clé
+     */
     public function optimize(Request $request)
     {
         $request->validate([
             'content' => 'required|string',
             'keyword' => 'required|string|max:100'
         ]);
-
+        
+        $prompt = "Optimise ce contenu pour le mot-clé '{$request->keyword}'. Garde le sens mais améliore le SEO.\n\nContenu original :\n" . $request->content;
+        
+        $result = $this->gemini->generateArticle([
+            'business_name' => 'Optimisation',
+            'topic' => $prompt,
+            'address' => '',
+            'format' => 'medium'
+        ]);
+        
+        if ($result['success']) {
+            return response()->json([
+                'success' => true,
+                'content' => $result['content']
+            ]);
+        }
+        
         return response()->json([
             'success' => true,
-            'content' => $request->content . ' (optimisé pour ' . $request->keyword . ')'
+            'content' => $request->content
         ]);
     }
-
+    
+    /**
+     * Historique des générations
+     */
     public function history()
     {
-        return response()->json([
-            'generations' => []
-        ]);
+        $generations = \App\Models\AIGeneration::where('user_id', auth()->id())
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+        
+        return view('dashboard.ai.history', compact('generations'));
     }
-
+    
     /**
      * Analyse SEO d'un article
      */
@@ -102,17 +239,62 @@ class AIController extends Controller
                 title: $request->title,
                 keyword: $request->keyword
             );
-
+            
+            // Enrichir avec Gemini pour des recommandations avancées
+            $connection = $this->gemini->checkConnection();
+            if ($connection['success']) {
+                $analysis = $this->gemini->analyzeSeo($request->content, $request->keyword);
+                $result['advanced_recommendations'] = $analysis['recommendations'];
+                $result['advanced_score'] = $analysis['score'];
+            }
+            
             return response()->json($result);
+            
         } catch (\Exception $e) {
+            Log::error('SEO Analysis error: ' . $e->getMessage());
             return response()->json([
                 'error' => $e->getMessage(),
                 'score' => 50,
                 'grade' => 'C',
-                'suggestions' => ['Erreur temporaire'],
+                'suggestions' => ['Erreur temporaire, veuillez réessayer'],
                 'positives' => [],
                 'word_count' => 0
             ], 200);
         }
+    }
+    
+    /**
+     * Suggérer des mots-clés SEO
+     */
+    public function suggestKeywords(Request $request)
+    {
+        $request->validate([
+            'topic' => 'required|string',
+            'location' => 'nullable|string'
+        ]);
+        
+        $keywords = $this->gemini->suggestKeywords($request->topic, $request->location);
+        
+        return response()->json([
+            'success' => true,
+            'keywords' => $keywords
+        ]);
+    }
+    
+    /**
+     * Calculer un score SEO basique
+     */
+    private function calculateBasicSeoScore(string $content): int
+    {
+        $wordCount = str_word_count(strip_tags($content));
+        $score = 50;
+        
+        if ($wordCount >= 1000) $score += 25;
+        elseif ($wordCount >= 500) $score += 15;
+        
+        if (preg_match('/<h[2-3]/i', $content)) $score += 10;
+        if (preg_match('/<img/i', $content)) $score += 10;
+        
+        return min($score, 100);
     }
 }

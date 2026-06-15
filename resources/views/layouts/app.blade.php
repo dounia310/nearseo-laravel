@@ -138,6 +138,50 @@ img[src*="logo"] {
     /* Logo en version sombre pour dark mode */
     .dark img[src*="logo"] {
         filter: brightness(0) invert(1);
+
+
+    /* Favicon circulaire avec fond blanc */
+.link-favicon {
+    border-radius: 50%;
+    background-color: white;
+    padding: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.active-tab-indicator {
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #8c4a2f;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+@keyframes fade-in {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+    animation: fade-in 0.3s ease-out;
+}
+/* Pour que le footer reste toujours en bas */
+aside {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+nav {
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0; /* مهم للـ flex pour le scroll */
+}
+
+.shrink-0 {
+    flex-shrink: 0;
+}
     </style>
     
     @stack('styles')

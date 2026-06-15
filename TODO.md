@@ -1,0 +1,6 @@
+- [ ] Ajouter un endpoint de test connexion Gemini (checkConnection) pour confirmer l’accès depuis le contexte web
+- [ ] Corriger GeminiService : enlever la clé hardcodée, utiliser config/services.php (GEMINI_API_KEY / GEMINI_MODEL)
+- [ ] Améliorer logging GeminiService/AIController (status code, message d’exception complet)
+- [ ] Corriger l’erreur site: aligner le fetch `/api/ai/generate` avec auth Sanctum (ou enlever la protection pour cet endpoint)
+- [ ] Vérifier via navigateur : appel /api/ai/test-connection et /api/ai/generate
+- [ ] Vérifier `storage/logs/laravel.log` et ajuster réseau/TLS si besoin

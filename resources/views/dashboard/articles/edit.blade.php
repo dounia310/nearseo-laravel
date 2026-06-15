@@ -1,3 +1,4 @@
+{{-- resources/views/dashboard/articles/edit.blade.php --}}
 @extends('layouts.app')
 
 @section('title', 'Éditeur d\'article')
@@ -73,6 +74,33 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Planification Section -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mt-6 border">
+            <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">schedule</span>
+                Planification de publication
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Date de publication</label>
+                    <input type="date" id="scheduled_date" class="w-full border rounded-lg px-4 py-2">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Heure de publication</label>
+                    <input type="time" id="scheduled_time" class="w-full border rounded-lg px-4 py-2">
+                </div>
+            </div>
+            <div class="mt-4">
+                <label class="flex items-center gap-2">
+                    <input type="checkbox" id="enable_scheduling" class="rounded text-primary">
+                    <span class="text-sm">Planifier la publication automatique</span>
+                </label>
+            </div>
+            <div id="scheduling_info" class="mt-3 text-sm text-gray-500 hidden">
+                📅 L'article sera publié automatiquement le <span id="display_date"></span>
+            </div>
+        </div>
     </div>
 
     <!-- Right Column: SEO Panel -->
@@ -95,7 +123,7 @@
             <div class="mt-6">
                 <label class="text-xs font-bold uppercase text-gray-500">Mot-clé principal</label>
                 <div class="relative mt-1">
-                    <input type="text" id="keywordInput" value="{{ $article->focus_keyword ?? 'meilleur fleuriste' }}" class="w-full border rounded-lg px-4 py-2 pr-10 focus:ring-1 focus:ring-primary" oninput="updateSeoAnalysis()">
+                    <input type="text" id="keywordInput" value="{{ $article->focus_keyword ?? '' }}" class="w-full border rounded-lg px-4 py-2 pr-10 focus:ring-1 focus:ring-primary" oninput="updateSeoAnalysis()">
                     <span class="material-symbols-outlined absolute right-3 top-2 text-green-600">check_circle</span>
                 </div>
             </div>
@@ -137,7 +165,7 @@
             <button onclick="saveArticle()" class="bg-white border px-6 py-2 rounded-lg hover:bg-gray-50 flex items-center gap-2">
                 <span class="material-symbols-outlined">save</span> Sauvegarder
             </button>
-            <button onclick="scheduleArticle()" class="bg-white border p-2 rounded-lg hover:bg-gray-50">
+            <button onclick="toggleScheduleModal()" class="bg-white border p-2 rounded-lg hover:bg-gray-50">
                 <span class="material-symbols-outlined">schedule</span>
             </button>
         </div>
@@ -158,7 +186,6 @@
     let currentSeoScore = {{ $article->seo_score ?? 0 }};
     let autoSaveTimer = null;
     
-    // Initialisation
     const editor = document.getElementById('editor');
     
     function updateWordCount() {
@@ -181,109 +208,75 @@
         let positives = [];
         let suggestions = [];
         
-        // 1. Analyse du titre
+        // Titre
         document.getElementById('titleCount').innerHTML = title.length + ' / 60';
         document.getElementById('previewTitle').innerHTML = title || 'Titre de l\'article';
         
         if (title.length > 0 && title.length <= 60) {
             score += 15;
-            positives.push(' Titre optimisé (longueur idéale)');
+            positives.push('✓ Titre optimisé (longueur idéale)');
         } else if (title.length > 0) {
-            suggestions.push(' Titre trop long (max 60 caractères)');
+            suggestions.push('✗ Titre trop long (max 60 caractères)');
         } else {
-            suggestions.push(' Ajoutez un titre');
+            suggestions.push('✗ Ajoutez un titre');
         }
         
-        // 2. Analyse de la meta description
+        // Meta description
         document.getElementById('metaCount').innerHTML = metaDesc.length + ' / 160';
-        document.getElementById('previewDescription').innerHTML = metaDesc || 'Description de l\'article...';
+        document.getElementById('previewDescription').innerHTML = metaDesc || 'Description...';
         
         if (metaDesc.length >= 120 && metaDesc.length <= 160) {
             score += 15;
-            positives.push(' Meta description optimisée');
+            positives.push('✓ Meta description optimisée');
         } else if (metaDesc.length > 0) {
-            suggestions.push(' Meta description: ' + metaDesc.length + '/160 caractères');
+            suggestions.push('✗ Meta description: ' + metaDesc.length + '/160 caractères');
         } else {
-            suggestions.push(' Ajoutez une meta description');
+            suggestions.push('✗ Ajoutez une meta description');
         }
         
-        // 3. Analyse du mot-clé
+        // Mot-clé
         if (keyword) {
             const titleHasKeyword = title.toLowerCase().includes(keyword.toLowerCase());
-            const metaHasKeyword = metaDesc.toLowerCase().includes(keyword.toLowerCase());
             const contentHasKeyword = content.toLowerCase().includes(keyword.toLowerCase());
             
             if (titleHasKeyword) {
                 score += 10;
-                positives.push(' Mot-clé présent dans le titre');
+                positives.push('✓ Mot-clé présent dans le titre');
             } else {
-                suggestions.push(' Ajoutez le mot-clé dans le titre');
-            }
-            
-            if (metaHasKeyword) {
-                score += 5;
-                positives.push(' Mot-clé dans la meta description');
+                suggestions.push('✗ Ajoutez le mot-clé dans le titre');
             }
             
             if (contentHasKeyword) {
                 score += 10;
-                positives.push(' Mot-clé présent dans le contenu');
+                positives.push('✓ Mot-clé présent dans le contenu');
             } else {
-                suggestions.push(' Utilisez le mot-clé dans le contenu');
-            }
-            
-            // Densité du mot-clé
-            const keywordCount = (content.toLowerCase().match(new RegExp(keyword.toLowerCase(), 'g')) || []).length;
-            const density = wordCount > 0 ? (keywordCount / wordCount) * 100 : 0;
-            
-            if (density >= 1 && density <= 3) {
-                score += 10;
-                positives.push(' Bonne densité du mot-clé (' + density.toFixed(1) + '%)');
-            } else if (keywordCount > 0) {
-                suggestions.push(' Densité du mot-clé: ' + density.toFixed(1) + '% (idéal: 1-3%)');
+                suggestions.push('✗ Utilisez le mot-clé dans le contenu');
             }
         } else {
-            suggestions.push(' Ajoutez un mot-clé principal');
+            suggestions.push('✗ Ajoutez un mot-clé principal');
         }
         
-        // 4. Longueur du contenu
+        // Longueur
         if (wordCount > 1000) {
             score += 15;
-            positives.push(' Excellent contenu (+1000 mots)');
+            positives.push('✓ Excellent contenu (+1000 mots)');
         } else if (wordCount > 500) {
             score += 10;
-            positives.push(' Bonne longueur (+500 mots)');
+            positives.push('✓ Bonne longueur (+500 mots)');
         } else if (wordCount > 300) {
             score += 5;
-            positives.push('👍 Contenu correct (+300 mots)');
         } else if (wordCount > 0) {
-            suggestions.push(' Ajoutez plus de contenu (500+ mots recommandé)');
+            suggestions.push('✗ Ajoutez plus de contenu (500+ mots)');
         } else {
-            suggestions.push(' Commencez à écrire votre contenu');
+            suggestions.push('✗ Commencez à écrire votre contenu');
         }
         
-        // 5. Structure (titres H2/H3)
+        // Structure
         if (content.includes('<h2>') || content.includes('<h3>')) {
             score += 10;
-            positives.push(' Structure H2/H3 présente');
+            positives.push('✓ Structure H2/H3 présente');
         } else {
-            suggestions.push(' Ajoutez des sous-titres (H2, H3)');
-        }
-        
-        // 6. Images
-        if (editor.innerHTML.includes('<img')) {
-            score += 5;
-            positives.push(' Images présentes');
-        } else {
-            suggestions.push('💡 Ajoutez des images pour enrichir');
-        }
-        
-        // 7. Liens
-        if (editor.innerHTML.includes('<a')) {
-            score += 5;
-            positives.push(' Liens présents');
-        } else {
-            suggestions.push('💡 Ajoutez des liens internes/externes');
+            suggestions.push('✗ Ajoutez des sous-titres (H2, H3)');
         }
         
         currentSeoScore = Math.min(score, 100);
@@ -292,15 +285,14 @@
         // Mettre à jour les listes
         const positiveList = document.getElementById('positivePoints');
         positiveList.innerHTML = positives.length > 0 
-            ? positives.map(function(p) { return '<li class="flex items-start gap-2 text-sm text-green-700"><span class="material-symbols-outlined text-green-600 text-base">check_circle</span> ' + p + '</li>'; }).join('')
+            ? positives.map(p => `<li class="flex items-start gap-2 text-sm text-green-700"><span class="material-symbols-outlined text-green-600 text-base">check_circle</span> ${p}</li>`).join('')
             : '<li class="text-gray-500">Aucun point positif pour le moment</li>';
         
         const suggestionsList = document.getElementById('suggestions');
         suggestionsList.innerHTML = suggestions.length > 0
-            ? suggestions.map(function(s) { return '<li class="flex items-start gap-2 text-sm text-orange-600"><span class="material-symbols-outlined text-orange-500 text-base">warning</span> ' + s + '</li>'; }).join('')
+            ? suggestions.map(s => `<li class="flex items-start gap-2 text-sm text-orange-600"><span class="material-symbols-outlined text-orange-500 text-base">warning</span> ${s}</li>`).join('')
             : '<li class="text-green-600">🎉 Excellent ! Continuez comme ça !</li>';
         
-        // Mettre à jour le statut
         const statusEl = document.getElementById('optimizationStatus');
         if (currentSeoScore >= 80) {
             statusEl.innerHTML = 'Optimisation : Excellente 🎉';
@@ -319,17 +311,14 @@
         const offset = circumference - (score / 100) * circumference;
         const circle = document.getElementById('seoCircle');
         if (circle) circle.style.strokeDashoffset = offset;
-        const scoreSpan = document.getElementById('seoScore');
-        if (scoreSpan) scoreSpan.innerHTML = score;
+        document.getElementById('seoScore').innerHTML = score;
     }
     
-    // Écouter les changements dans l'éditeur
     editor.addEventListener('input', function() {
         currentContent = this.innerHTML;
         updateWordCount();
         updateSeoAnalysis();
         
-        // Auto-save après 3 secondes d'inactivité
         if (autoSaveTimer) clearTimeout(autoSaveTimer);
         autoSaveTimer = setTimeout(saveArticle, 3000);
     });
@@ -356,7 +345,7 @@
             
             if (response.ok) {
                 document.getElementById('lastSave').innerHTML = 'à l\'instant';
-                setTimeout(function() {
+                setTimeout(() => {
                     document.getElementById('lastSave').innerHTML = 'à ' + new Date().toLocaleTimeString();
                 }, 3000);
             }
@@ -387,7 +376,7 @@
                 });
                 
                 if (response.ok) {
-                    alert('Article publié avec succès !');
+                    alert('✅ Article publié avec succès !');
                     window.location.href = '{{ route("articles.index") }}';
                 }
             } catch (error) {
@@ -420,33 +409,35 @@
         updateSeoAnalysis();
     }
     
-    function generateIntroduction() {
-        alert('Fonctionnalité à venir : Génération d\'introduction par IA');
+    function generateIntroduction() { alert('Fonctionnalité à venir : Génération d\'introduction par IA'); }
+    function generateConclusion() { alert('Fonctionnalité à venir : Génération de conclusion par IA'); }
+    function suggestTitles() { alert('Fonctionnalité à venir : Suggestions de titres IA'); }
+    function optimizeSeo() { alert('Fonctionnalité à venir : Optimisation SEO par IA'); }
+    function rewriteForSocial() { alert('Fonctionnalité à venir : Reformulation pour réseaux sociaux'); }
+    function toggleScheduleModal() { alert('Fonctionnalité à venir : Planification de publication'); }
+    
+    // Planification
+    document.getElementById('enable_scheduling')?.addEventListener('change', function() {
+        const schedulingInfo = document.getElementById('scheduling_info');
+        if (this.checked) {
+            schedulingInfo.classList.remove('hidden');
+            updateDisplayDate();
+        } else {
+            schedulingInfo.classList.add('hidden');
+        }
+    });
+    
+    function updateDisplayDate() {
+        const date = document.getElementById('scheduled_date')?.value;
+        const time = document.getElementById('scheduled_time')?.value;
+        if (date && time) {
+            document.getElementById('display_date').innerText = `${date} à ${time}`;
+        }
     }
     
-    function generateConclusion() {
-        alert('Fonctionnalité à venir : Génération de conclusion par IA');
-    }
+    document.getElementById('scheduled_date')?.addEventListener('change', updateDisplayDate);
+    document.getElementById('scheduled_time')?.addEventListener('change', updateDisplayDate);
     
-    function suggestTitles() {
-        alert('Fonctionnalité à venir : Suggestions de titres IA');
-    }
-    
-    function optimizeSeo() {
-        alert('Fonctionnalité à venir : Optimisation SEO par IA');
-    }
-    
-    function rewriteForSocial() {
-        const platform = prompt('Plateforme : (instagram, twitter, linkedin, facebook)');
-        if (platform) alert('Reformulation pour ' + platform + ' à venir');
-    }
-    
-    function scheduleArticle() {
-        const date = prompt('Date de publication (YYYY-MM-DD) :');
-        if (date) alert('Article programmé pour le ' + date);
-    }
-    
-    // Initialiser l'analyse au chargement
     document.addEventListener('DOMContentLoaded', function() {
         updateWordCount();
         updateSeoAnalysis();

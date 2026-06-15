@@ -34,8 +34,17 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Gemini API Configuration
+    |--------------------------------------------------------------------------
+    */
     'gemini' => [
         'api_key' => env('GEMINI_API_KEY'),
+        'model' => env('GEMINI_MODEL', 'gemini-2.5-flash'),
+        'timeout' => env('GEMINI_TIMEOUT', 120),
+        'retry_times' => env('GEMINI_RETRY_TIMES', 3),
+        'retry_milliseconds' => env('GEMINI_RETRY_MS', 1000),
     ],
 
 ];
