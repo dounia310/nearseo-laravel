@@ -147,7 +147,7 @@
                                 <div class="flex items-center justify-center gap-1">
                                     <button onclick="viewUser({{ $user->id }})" 
                                             class="p-1.5 hover:bg-blue-50 rounded-lg transition" 
-                                            title="Voir détails">
+                                            title="Voir les détails">
                                         <span class="material-symbols-outlined text-sm text-blue-600">visibility</span>
                                     </button>
                                     @if($user->id !== auth()->id())
@@ -242,8 +242,66 @@
     </div>
 </div>
 
+<!-- Modal Voir Utilisateur -->
+<div id="viewUserModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] shadow-2xl animate-modal">
+        <!-- En-tête -->
+        <div class="flex justify-between items-center p-6 border-b bg-gradient-to-r from-blue-50 to-purple-50 rounded-t-2xl">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-primary text-2xl">person</span>
+                </div>
+                <div>
+                    <h3 id="modalUserName" class="text-xl font-bold text-gray-900">Chargement...</h3>
+                    <p id="modalUserEmail" class="text-sm text-gray-500">email@example.com</p>
+                </div>
+            </div>
+            <button onclick="closeViewUserModal()" class="text-gray-400 hover:text-gray-600 transition text-2xl">
+                ✕
+            </button>
+        </div>
+
+        <!-- Corps -->
+        <div id="modalUserContent" class="p-6 overflow-y-auto max-h-[60vh] space-y-4">
+            <div class="text-center py-8 text-gray-400">
+                <span class="material-symbols-outlined text-4xl animate-spin">refresh</span>
+                <p class="mt-2">Chargement des données...</p>
+            </div>
+        </div>
+
+        <!-- Pied -->
+        <div class="border-t p-4 flex justify-end gap-3">
+            <button onclick="closeViewUserModal()" 
+                    class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+                Fermer
+            </button>
+            
+        </div>
+    </div>
+</div>
+
+<style>
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+.animate-modal {
+    animation: modalSlideIn 0.3s ease-out;
+}
+</style>
+
 <script>
-// Recherche et filtres
+let currentUserData = null;
+
+// =============================================
+// RECHERCHE ET FILTRES
+// =============================================
 document.getElementById('searchInput').addEventListener('input', filterTable);
 document.getElementById('roleFilter').addEventListener('change', filterTable);
 document.getElementById('sortFilter').addEventListener('change', sortTable);
@@ -286,10 +344,204 @@ function sortTable() {
     rows.forEach(row => tbody.appendChild(row));
 }
 
+// =============================================
+// VOIR UTILISATEUR - MODALE
+// =============================================
 function viewUser(id) {
-    window.location.href = '/admin/users/' + id + '/details';
+    // Afficher le modal
+    const modal = document.getElementById('viewUserModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    
+    // Afficher le chargement
+    document.getElementById('modalUserContent').innerHTML = `
+        <div class="text-center py-8 text-gray-400">
+            <span class="material-symbols-outlined text-4xl animate-spin">refresh</span>
+            <p class="mt-2">Chargement des données...</p>
+        </div>
+    `;
+    document.getElementById('modalUserName').textContent = 'Chargement...';
+    document.getElementById('modalUserEmail').textContent = '...';
+    
+    // Récupérer les données
+    fetch(`/admin/users/${id}/details`, {
+        headers: { 
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Erreur HTTP: ' + response.status);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            currentUserData = data.data;
+            displayUserData(currentUserData);
+        } else {
+            document.getElementById('modalUserContent').innerHTML = `
+                <div class="text-center py-8 text-red-500">
+                    <span class="material-symbols-outlined text-4xl">error</span>
+                    <p class="mt-2">Erreur: ${data.message || 'Données non disponibles'}</p>
+                </div>
+            `;
+        }
+    })
+    .catch(err => {
+        document.getElementById('modalUserContent').innerHTML = `
+            <div class="text-center py-8 text-red-500">
+                <span class="material-symbols-outlined text-4xl">error</span>
+                <p class="mt-2">Erreur de connexion: ${err.message}</p>
+                <button onclick="viewUser(${id})" class="mt-4 px-4 py-2 bg-primary text-white rounded-lg">
+                    Réessayer
+                </button>
+            </div>
+        `;
+    });
 }
 
+// Afficher les informations SANS JSON - AVEC ICONES MATERIAL
+function displayUserData(user) {
+    // Mettre à jour l'en-tête
+    document.getElementById('modalUserName').textContent = user.name;
+    document.getElementById('modalUserEmail').textContent = user.email;
+    
+    // Badge rôle
+    const roleBadge = user.role === 'admin' 
+        ? '<span class="px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium">Administrateur</span>'
+        : '<span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">Utilisateur</span>';
+    
+    // Articles
+    let articlesHtml = '';
+    if (user.articles && user.articles.length > 0) {
+        articlesHtml = `
+            <div class="border-t pt-4 mt-2">
+                <p class="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-lg">article</span>
+                    Articles (${user.articles_count})
+                </p>
+                <div class="space-y-1 max-h-40 overflow-y-auto">
+                    ${user.articles.map(a => `
+                        <div class="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-lg text-sm">
+                            <span class="text-gray-700">${a.title}</span>
+                            <span class="px-2 py-0.5 rounded-full text-xs ${a.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">
+                                ${a.status || 'Brouillon'}
+                            </span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    } else {
+        articlesHtml = `
+            <div class="border-t pt-4 mt-2">
+                <p class="text-sm text-gray-400 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-lg">article</span>
+                    Aucun article publié
+                </p>
+            </div>
+        `;
+    }
+    
+    document.getElementById('modalUserContent').innerHTML = `
+        <div class="grid grid-cols-2 gap-4">
+            <div class="bg-gray-50 rounded-lg p-3">
+                <label class="text-xs text-gray-500 flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm">person</span>
+                    Nom complet
+                </label>
+                <p class="font-medium text-gray-900 mt-1">${user.name}</p>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-3">
+                <label class="text-xs text-gray-500 flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm">email</span>
+                    Email
+                </label>
+                <p class="font-medium text-gray-900 mt-1">${user.email}</p>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-3">
+                <label class="text-xs text-gray-500 flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm">admin_panel_settings</span>
+                    Rôle
+                </label>
+                <div class="mt-1">${roleBadge}</div>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-3">
+                <label class="text-xs text-gray-500 flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm">calendar_today</span>
+                    Inscrit le
+                </label>
+                <p class="font-medium text-gray-900 mt-1">${user.created_at || 'N/A'}</p>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-3">
+                <label class="text-xs text-gray-500 flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm">description</span>
+                    Nombre d'articles
+                </label>
+                <p class="font-medium text-gray-900 mt-1">${user.articles_count || 0}</p>
+            </div>
+        </div>
+        ${articlesHtml}
+    `;
+}
+
+function closeViewUserModal() {
+    document.getElementById('viewUserModal').classList.add('hidden');
+    document.getElementById('viewUserModal').classList.remove('flex');
+}
+
+function closeViewUserModal() {
+    document.getElementById('viewUserModal').classList.add('hidden');
+    document.getElementById('viewUserModal').classList.remove('flex');
+}
+
+
+// Toast notification
+function showToast(message) {
+    const toast = document.createElement('div');
+    toast.textContent = message;
+    toast.style.cssText = `
+        position: fixed; bottom: 20px; right: 20px;
+        background: #1a1a2e; color: white;
+        padding: 12px 24px; border-radius: 12px;
+        z-index: 9999; font-size: 14px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        animation: slideIn 0.3s ease-out;
+    `;
+    document.body.appendChild(toast);
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// Fermer avec la touche Echap
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeViewUserModal();
+        closeCreateUserModal();
+    }
+});
+
+// Fermer en cliquant à l'extérieur
+document.getElementById('viewUserModal')?.addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeViewUserModal();
+    }
+});
+
+document.getElementById('createUserModal')?.addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeCreateUserModal();
+    }
+});
+
+// =============================================
+// TOGGLE ROLE
+// =============================================
 function toggleRole(id, currentRole) {
     const newRole = currentRole === 'admin' ? 'user' : 'admin';
     if (confirm(`Changer le rôle de cet utilisateur vers "${newRole}" ?`)) {
@@ -297,42 +549,57 @@ function toggleRole(id, currentRole) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
             },
             body: JSON.stringify({ role: newRole })
-        }).then(response => response.json())
-          .then(data => {
-              if (data.success) {
-                  window.location.reload();
-              } else {
-                  alert('Erreur: ' + data.error);
-              }
-          });
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast('✅ Rôle modifié avec succès !');
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                alert('Erreur: ' + data.error);
+            }
+        })
+        .catch(err => alert('Erreur: ' + err));
     }
 }
 
+// =============================================
+// DELETE USER
+// =============================================
 function deleteUser(id) {
     if (confirm('⚠️ Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.')) {
         fetch(`/admin/users/${id}`, {
             method: 'DELETE',
             headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
             }
-        }).then(response => response.json())
-          .then(data => {
-              if (data.success) {
-                  window.location.reload();
-              } else {
-                  alert('Erreur: ' + data.error);
-              }
-          });
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast('✅ Utilisateur supprimé !');
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                alert('Erreur: ' + data.error);
+            }
+        })
+        .catch(err => alert('Erreur: ' + err));
     }
 }
 
+// =============================================
+// EXPORT
+// =============================================
 function exportUsers() {
     window.location.href = '{{ route("admin.users.export") }}';
 }
 
+// =============================================
+// CREATE USER MODAL
+// =============================================
 function showCreateUserModal() {
     document.getElementById('createUserModal').classList.remove('hidden');
     document.getElementById('createUserModal').classList.add('flex');
@@ -372,7 +639,7 @@ document.getElementById('createUserForm').addEventListener('submit', async funct
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
             },
             body: JSON.stringify({ name, email, password, role })
         });
@@ -380,9 +647,9 @@ document.getElementById('createUserForm').addEventListener('submit', async funct
         const data = await response.json();
         
         if (response.ok && data.success) {
-            alert('✅ Utilisateur ajouté avec succès !');
+            showToast('✅ Utilisateur ajouté avec succès !');
             closeCreateUserModal();
-            window.location.reload();
+            setTimeout(() => window.location.reload(), 1000);
         } else {
             alert('Erreur: ' + (data.error || data.message || 'Impossible d\'ajouter l\'utilisateur'));
         }
@@ -392,12 +659,6 @@ document.getElementById('createUserForm').addEventListener('submit', async funct
     } finally {
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
-    }
-});
-
-document.getElementById('createUserModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeCreateUserModal();
     }
 });
 </script>

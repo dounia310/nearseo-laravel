@@ -12,53 +12,54 @@ class BlogController extends Controller
 {
     /**
      * Blog d'un utilisateur spécifique
-     * URL: /blog/{username}
+     * URL: /blog/user/{slug}
      */
     public function userBlog($slug)
-{
-    $user = User::where('slug', $slug)->firstOrFail();
+    {
+        $user = User::where('slug', $slug)->firstOrFail();
+        
+        $articles = Article::where('user_id', $user->id)
+            ->where('status', 'published')
+            ->orderBy('created_at', 'desc')
+            ->paginate(6);
+        
+        $recentArticles = Article::where('user_id', $user->id)
+            ->where('status', 'published')
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+        
+        $archives = Article::where('user_id', $user->id)
+            ->where('status', 'published')
+            ->selectRaw('YEAR(created_at) as year, MONTH(created_at) as month, COUNT(*) as count')
+            ->groupBy('year', 'month')
+            ->orderBy('year', 'desc')
+            ->orderBy('month', 'desc')
+            ->get();
+        
+        $allTags = Article::where('user_id', $user->id)
+            ->where('status', 'published')
+            ->whereNotNull('tags')
+            ->pluck('tags')
+            ->map(fn($tag) => explode(',', $tag))
+            ->flatten()
+            ->map('trim')
+            ->filter()
+            ->countBy()
+            ->sortDesc()
+            ->take(15);
+        
+        return view('blog.user-blog', compact('user', 'articles', 'recentArticles', 'archives', 'allTags'));
+    }
     
-    $articles = Article::where('user_id', $user->id)
-        ->where('status', 'published')
-        ->orderBy('created_at', 'desc')
-        ->paginate(6);
-    
-    $recentArticles = Article::where('user_id', $user->id)
-        ->where('status', 'published')
-        ->orderBy('created_at', 'desc')
-        ->limit(5)
-        ->get();
-    
-    $archives = Article::where('user_id', $user->id)
-        ->where('status', 'published')
-        ->selectRaw('YEAR(created_at) as year, MONTH(created_at) as month, COUNT(*) as count')
-        ->groupBy('year', 'month')
-        ->orderBy('year', 'desc')
-        ->orderBy('month', 'desc')
-        ->get();
-    
-    $allTags = Article::where('user_id', $user->id)
-        ->where('status', 'published')
-        ->whereNotNull('tags')
-        ->pluck('tags')
-        ->map(fn($tag) => explode(',', $tag))
-        ->flatten()
-        ->map('trim')
-        ->filter()
-        ->countBy()
-        ->sortDesc()
-        ->take(15);
-    
-    return view('blog.user-blog', compact('user', 'articles', 'recentArticles', 'archives', 'allTags'));
-}
     /**
      * Article spécifique d'un utilisateur
-     * URL: /blog/{username}/{slug}
+     * URL: /blog/user/{username}/{slug}
      */
     public function userArticle($username, $slug)
     {
         // Chercher l'utilisateur
-        $user = User::where('name', $username)->firstOrFail();
+        $user = User::where('slug', $username)->firstOrFail();
         
         // Chercher l'article
         $article = Article::where('user_id', $user->id)
@@ -91,5 +92,33 @@ class BlogController extends Controller
             ->get();
         
         return view('blog.community', compact('articles', 'topUsers'));
+    }
+    
+    /**
+     * Profil public d'un utilisateur
+     * URL: /profile/{username}
+     */
+    public function showProfile($username)
+    {
+        // Chercher l'utilisateur par son slug ou son nom
+        $user = User::where('slug', $username)
+                    ->orWhere('name', $username)
+                    ->firstOrFail();
+        
+        // Récupérer les articles publiés avec pagination
+        $articles = $user->articles()
+                        ->where('status', 'published')
+                        ->orderBy('created_at', 'desc')
+                        ->paginate(10);
+        
+        // Statistiques additionnelles
+        $stats = [
+            'total_articles' => $user->articles()->where('status', 'published')->count(),
+            'total_views' => $user->articles()->where('status', 'published')->sum('views'),
+            'avg_seo_score' => round($user->articles()->where('status', 'published')->avg('seo_score') ?? 0),
+            'followers' => 0, // À implémenter si vous avez un système de followers
+        ];
+        
+        return view('blog.user-profile', compact('user', 'articles', 'stats'));
     }
 }

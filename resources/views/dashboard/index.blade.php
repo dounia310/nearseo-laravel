@@ -219,21 +219,21 @@
     <div class="space-y-6">
         @if(Auth::user()->role === 'admin')
         <!-- ACTIONS ADMIN -->
-        <section class="bg-white border rounded-xl p-6 shadow-sm">
-            <h3 class="font-semibold text-lg mb-4 flex items-center gap-2">
-                <span class="material-symbols-outlined text-primary">admin_meds</span>
-                Administration
-            </h3>
-            <div class="flex flex-col gap-3">
-                <a href="{{ route('admin.users') }}" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-orange-50 transition group">
-                    <span class="font-medium">Gérer les utilisateurs</span>
-                    <span class="material-symbols-outlined text-gray-400 group-hover:translate-x-1 transition">chevron_right</span>
-                </a>
-                <a href="{{ route('admin.settings') }}" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-orange-50 transition group">
-                    <span class="font-medium">Paramètres globaux</span>
-                    <span class="material-symbols-outlined text-gray-400 group-hover:translate-x-1 transition">chevron_right</span>
-                </a>
-            </div>
+<section class="bg-white border rounded-xl p-6 shadow-sm">
+    <h3 class="font-semibold text-lg mb-4 flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary">admin_meds</span>
+        Administration
+    </h3>
+    <div class="flex flex-col gap-3">
+        <a href="{{ route('admin.users') }}" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-orange-50 transition group">
+            <span class="font-medium">Gérer les utilisateurs</span>
+            <span class="material-symbols-outlined text-gray-400 group-hover:translate-x-1 transition">chevron_right</span>
+        </a>
+        <a href="{{ route('settings.index') }}" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-orange-50 transition group">
+            <span class="font-medium">Paramètres globaux</span>
+            <span class="material-symbols-outlined text-gray-400 group-hover:translate-x-1 transition">chevron_right</span>
+        </a>
+    </div>
         </section>
         @else
         <!-- RECOMMANDATIONS IA -->
@@ -291,140 +291,241 @@
 
 @push('styles')
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+    .period-btn {
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .period-btn:hover {
+        transform: scale(1.05);
+    }
+    .period-btn.active {
+        background-color: #8c4a2f;
+        color: white;
+    }
+</style>
 @endpush
 
 @push('scripts')
 <script>
-    // Variables globales
-    var trafficChart = null;
-    var currentPeriod = 'month';
+    // =============================================
+    // DONNÉES DU GRAPHIQUE
+    // =============================================
     
-    // Données du graphique
+    // Données passées depuis le contrôleur
+    var weeklyData = {!! json_encode($weeklyViews ?? [0, 0, 0, 0, 0, 0, 0]) !!};
+    var monthlyData = {!! json_encode($monthlyViews ?? [0, 0, 0, 0]) !!};
+    
+    // Vérifier et corriger les données
+    if (!weeklyData || weeklyData.length === 0) {
+        weeklyData = [0, 0, 0, 0, 0, 0, 0];
+        console.warn('⚠️ Données hebdomadaires vides, utilisation de valeurs par défaut');
+    }
+    if (!monthlyData || monthlyData.length === 0) {
+        monthlyData = [0, 0, 0, 0];
+        console.warn('⚠️ Données mensuelles vides, utilisation de valeurs par défaut');
+    }
+    
+    console.log('📊 Données hebdomadaires:', weeklyData);
+    console.log('📊 Données mensuelles:', monthlyData);
+    
+    // Configuration des données du graphique
     var chartData = {
         week: {
             labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
-            data: {{ json_encode($weeklyViews ?? [0, 0, 0, 0, 0, 0, 0]) }}
+            data: weeklyData
         },
         month: {
             labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'],
-            data: {{ json_encode($monthlyViews ?? [0, 0, 0, 0]) }}
+            data: monthlyData
         }
     };
     
-    // Initialiser le graphique
+    // =============================================
+    // INITIALISATION DU GRAPHIQUE
+    // =============================================
+    
+    var trafficChart = null;
+    var currentPeriod = 'month';
+    
     function initChart() {
         var canvas = document.getElementById('trafficChart');
-        if (!canvas) return;
-        
-        var ctx = canvas.getContext('2d');
-        if (trafficChart) {
-            trafficChart.destroy();
+        if (!canvas) {
+            console.error('❌ Canvas trafficChart non trouvé');
+            return;
         }
         
-        trafficChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: chartData[currentPeriod].labels,
-                datasets: [{
-                    label: 'Vues',
-                    data: chartData[currentPeriod].data,
-                    borderColor: '#8c4a2f',
-                    backgroundColor: 'rgba(140, 74, 47, 0.1)',
-                    tension: 0.4,
-                    fill: true,
-                    pointBackgroundColor: '#8c4a2f',
-                    pointBorderColor: '#ffffff',
-                    pointBorderWidth: 2,
-                    pointRadius: 4,
-                    pointHoverRadius: 6
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        backgroundColor: '#ffffff',
-                        titleColor: '#091d2e',
-                        bodyColor: '#53433d',
-                        borderColor: '#d9c2ba',
-                        borderWidth: 1,
-                        callbacks: {
-                            label: function(context) {
-                                return context.raw + ' vues';
-                            }
-                        }
-                    }
+        var ctx = canvas.getContext('2d');
+        if (!ctx) {
+            console.error('❌ Impossible d\'obtenir le contexte 2D');
+            return;
+        }
+        
+        // Détruire l'ancien graphique s'il existe
+        if (trafficChart) {
+            trafficChart.destroy();
+            trafficChart = null;
+        }
+        
+        try {
+            trafficChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartData[currentPeriod].labels,
+                    datasets: [{
+                        label: 'Vues',
+                        data: chartData[currentPeriod].data,
+                        borderColor: '#8c4a2f',
+                        backgroundColor: 'rgba(140, 74, 47, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#8c4a2f',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        pointHoverBackgroundColor: '#8c4a2f'
+                    }]
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            color: '#e5e7eb'
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
                         },
-                        ticks: {
-                            callback: function(value) {
-                                return value.toLocaleString();
+                        tooltip: {
+                            backgroundColor: 'rgba(255,255,255,0.95)',
+                            titleColor: '#091d2e',
+                            bodyColor: '#53433d',
+                            borderColor: '#d9c2ba',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            padding: 12,
+                            callbacks: {
+                                label: function(context) {
+                                    return context.raw + ' vues';
+                                }
                             }
                         }
                     },
-                    x: {
-                        grid: {
-                            display: false
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0,0,0,0.05)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                font: {
+                                    size: 11,
+                                    family: 'Inter'
+                                },
+                                color: '#6b7280',
+                                callback: function(value) {
+                                    if (value >= 1000) {
+                                        return (value / 1000).toFixed(1) + 'k';
+                                    }
+                                    return value;
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: {
+                                    size: 11,
+                                    family: 'Inter'
+                                },
+                                color: '#6b7280'
+                            }
                         }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
                     }
                 }
-            }
-        });
+            });
+            
+            console.log('✅ Graphique initialisé avec succès');
+        } catch (error) {
+            console.error('❌ Erreur lors de l\'initialisation du graphique:', error);
+        }
     }
     
-    // Changer la période d'affichage
+    // =============================================
+    // CHANGEMENT DE PÉRIODE
+    // =============================================
+    
     function setPeriod(period) {
         currentPeriod = period;
         
         // Mettre à jour les boutons
         var btns = document.querySelectorAll('.period-btn');
-        for (var i = 0; i < btns.length; i++) {
-            btns[i].classList.remove('bg-primary', 'text-white');
-            btns[i].classList.add('bg-gray-100', 'text-gray-700');
+        btns.forEach(function(btn) {
+            btn.classList.remove('bg-primary', 'text-white', 'active');
+            btn.classList.add('bg-gray-100', 'text-gray-700');
+        });
+        
+        // Trouver le bouton cliqué
+        var periodMap = { 'week': 0, 'month': 1 };
+        var idx = periodMap[period];
+        if (btns[idx]) {
+            btns[idx].classList.add('bg-primary', 'text-white', 'active');
+            btns[idx].classList.remove('bg-gray-100', 'text-gray-700');
         }
         
-        // Mettre en évidence le bouton actif
-        var target = window.event && window.event.target ? window.event.target : null;
-        if (target) {
-            target.classList.add('bg-primary', 'text-white');
-            target.classList.remove('bg-gray-100', 'text-gray-700');
-        } else {
-            var allBtns = document.querySelectorAll('.period-btn');
-            var periodMap = { 'week': 0, 'month': 1 };
-            var idx = periodMap[period] || 1;
-            if (allBtns[idx]) {
-                allBtns[idx].classList.add('bg-primary', 'text-white');
-                allBtns[idx].classList.remove('bg-gray-100', 'text-gray-700');
-            }
-        }
-        
-        // Mettre à jour les données du graphique
+        // Mettre à jour le graphique
         if (trafficChart) {
             trafficChart.data.labels = chartData[currentPeriod].labels;
             trafficChart.data.datasets[0].data = chartData[currentPeriod].data;
             trafficChart.update();
+            console.log('📊 Période changée:', period);
         }
     }
     
-    // Attendre le chargement complet de la page
-    document.addEventListener('DOMContentLoaded', function() {
-        initChart();
-    });
+    // =============================================
+    // RESPONSIVE
+    // =============================================
     
-    // Recharger le graphique après rafraîchissement de la page
-    window.addEventListener('load', function() {
+    function resizeChart() {
         if (trafficChart) {
             trafficChart.resize();
         }
+    }
+    
+    // =============================================
+    // INITIALISATION AU CHARGEMENT
+    // =============================================
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🔄 Initialisation du dashboard...');
+        
+        // Délai pour s'assurer que tout est chargé
+        setTimeout(function() {
+            initChart();
+            
+            // Activer le bouton "30 jours" par défaut
+            var btns = document.querySelectorAll('.period-btn');
+            if (btns.length > 1) {
+                btns[1].classList.add('bg-primary', 'text-white', 'active');
+                btns[1].classList.remove('bg-gray-100', 'text-gray-700');
+            }
+        }, 300);
+    });
+    
+    // Recharger le graphique après le chargement complet
+    window.addEventListener('load', function() {
+        setTimeout(resizeChart, 500);
+    });
+    
+    // Redimensionner le graphique lors du changement de taille de la fenêtre
+    window.addEventListener('resize', function() {
+        resizeChart();
     });
 </script>
-@endpush
+@endpush 

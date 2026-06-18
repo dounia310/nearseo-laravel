@@ -8,7 +8,6 @@
     <!-- Page Header Section -->
     <section class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-gutter">
         <div>
-            <h2 class="font-h1 text-h1 text-on-surface mb-2">Communauté NEARSEO</h2>
             <p class="font-body text-body text-on-surface-variant max-w-2xl">Découvrez les dernières tendances du SEO local et les insights de notre communauté d'experts à travers le monde.</p>
         </div>
         <div class="flex items-center gap-3">

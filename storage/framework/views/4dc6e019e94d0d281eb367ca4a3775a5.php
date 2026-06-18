@@ -17,7 +17,7 @@
             theme: {
                 extend: {
                     "colors": {
-                        "on-tertiary-container": "#fffbff",
+                        "on-tertiary-container": "#ffffff",
                         "on-error": "#ffffff",
                         "error-container": "#ffdad6",
                         "inverse-surface": "#203243",
@@ -41,17 +41,17 @@
                         "primary-fixed-dim": "#ffb599",
                         "surface-container-lowest": "#ffffff",
                         "surface-container-highest": "#d1e4fb",
-                        "surface": "#f7f9ff",
+                        "surface": "#ffffff",
                         "on-secondary-fixed-variant": "#304d34",
                         "on-error-container": "#93000a",
                         "inverse-primary": "#ffb599",
-                        "inverse-on-surface": "#e8f2ff",
-                        "tertiary-fixed-dim": "#ffb77c",
-                        "surface-container-low": "#edf4ff",
-                        "surface-bright": "#f7f9ff",
+                        "inverse-on-surface": "#ffffff",
+                        "tertiary-fixed-dim": "#ffffff",
+                        "surface-container-low": "#ffffff",
+                        "surface-bright": "#ffffff",
                         "outline": "#86736c",
                         "error": "#ba1a1a",
-                        "surface-tint": "#8e4c31",
+                        "surface-tint": "#ffffff",
                         "on-secondary-fixed": "#03210c",
                         "tertiary-fixed": "#ffdcc2",
                         "on-primary-fixed-variant": "#71361c",
@@ -63,7 +63,7 @@
                         "on-surface-variant": "#53433d",
                         "on-surface": "#091d2e",
                         "secondary-fixed": "#c9ecc9",
-                        "background": "#f7f9ff"
+"background": "#ffffff"
                     },
                     "borderRadius": {
                         "DEFAULT": "0.125rem",
@@ -117,17 +117,17 @@
 
 .dark {
     background-color: #1a1a2e;
-    color: #eee;
+    color: #fffff;
 }
 
 .dark .bg-white {
-    background-color: #16213e;
-    border-color: #0f3460;
+    background-color: #f3f5fa;
+    border-color: #e6e9ed;
 }
 
 .dark .text-gray-500,
 .dark .text-gray-600 {
-    color: #a0a0a0;
+    color: #fffff;
 }
 img[src*="logo"] {
         background: transparent;
@@ -143,7 +143,7 @@ img[src*="logo"] {
     /* Favicon circulaire avec fond blanc */
 .link-favicon {
     border-radius: 50%;
-    background-color: white;
+    background-color: #fffff;
     padding: 4px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
@@ -182,6 +182,148 @@ nav {
 .shrink-0 {
     flex-shrink: 0;
 }
+/* Mode sombre */
+        .dark {
+            color-scheme: dark;
+        }
+        
+        .dark body {
+            background-color: #1a1a2e;
+            color: #e2e8f0;
+        }
+        
+        .dark .bg-white {
+            background-color: #1e293b !important;
+        }
+        
+        .dark .bg-gray-50 {
+            background-color: #0f172a !important;
+        }
+        
+        .dark .bg-gray-100 {
+            background-color: #1e293b !important;
+        }
+        
+        .dark .border-gray-200 {
+            border-color: #334155 !important;
+        }
+        
+        .dark .text-gray-900 {
+            color: #f1f5f9 !important;
+        }
+        
+        .dark .text-gray-700 {
+            color: #cbd5e1 !important;
+        }
+        
+        .dark .text-gray-500 {
+            color: #94a3b8 !important;
+        }
+        
+        .dark .text-gray-400 {
+            color: #64748b !important;
+        }
+        
+        .dark .text-gray-300 {
+            color: #94a3b8 !important;
+        }
+        
+        .dark .text-gray-600 {
+            color: #94a3b8 !important;
+        }
+        
+        .dark .bg-gray-200 {
+            background-color: #334155 !important;
+        }
+        
+        .dark .bg-gray-300 {
+            background-color: #475569 !important;
+        }
+        
+        .dark .bg-gray-400 {
+            background-color: #64748b !important;
+        }
+        
+        .dark .bg-gray-600 {
+            background-color: #475569 !important;
+        }
+        
+        .dark .bg-gray-700 {
+            background-color: #334155 !important;
+        }
+        
+        .dark .bg-gray-800 {
+            background-color: #1e293b !important;
+        }
+        
+        .dark .bg-gray-900 {
+            background-color: #0f172a !important;
+        }
+        
+        .dark .border {
+            border-color: #334155 !important;
+        }
+        
+        .dark .border-b {
+            border-bottom-color: #334155 !important;
+        }
+        
+        .dark .border-t {
+            border-top-color: #334155 !important;
+        }
+        
+        .dark .border-l {
+            border-left-color: #334155 !important;
+        }
+        
+        .dark .border-r {
+            border-right-color: #334155 !important;
+        }
+        
+        .dark .shadow-sm {
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.5) !important;
+        }
+        
+        .dark .shadow {
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.5), 0 1px 2px -1px rgba(0, 0, 0, 0.5) !important;
+        }
+        
+        .dark .shadow-md {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.5) !important;
+        }
+        
+        .dark .shadow-lg {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.5) !important;
+        }
+        
+        .dark .shadow-xl {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5) !important;
+        }
+        
+        .dark .shadow-2xl {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7) !important;
+        }
+        
+        /* Inputs en mode sombre */
+        .dark input, 
+        .dark select, 
+        .dark textarea {
+            background-color: #1e293b !important;
+            border-color: #334155 !important;
+            color: #f1f5f9 !important;
+        }
+        
+        .dark input:focus, 
+        .dark select:focus, 
+        .dark textarea:focus {
+            border-color: #A24E29 !important;
+            outline: none !important;
+        }
+        
+        .dark input::placeholder, 
+        .dark textarea::placeholder {
+            color: #64748b !important;
+        }
     </style>
     
     <?php echo $__env->yieldPushContent('styles'); ?>

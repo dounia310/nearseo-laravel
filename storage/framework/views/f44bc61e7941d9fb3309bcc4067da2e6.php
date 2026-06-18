@@ -124,35 +124,46 @@
 
 <!-- TopAppBar -->
 <header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md border-b border-outline-variant/30">
-    <div class="max-w-container-max-width mx-auto px-gutter flex justify-between items-center h-20">
-        <div class="flex items-center gap-stack-gap-sm">
+    <div class="max-w-container-max-width mx-auto px-gutter flex justify-between items-center h-24">
+        
+        <!-- Logo agrandi -->
+        <div class="flex items-center">
             <img src="<?php echo e(asset('logo.png')); ?>" 
                  alt="NEARSEO Logo" 
-                 class="h-12 w-auto"
+                 class="h-16 w-auto md:h-20 object-contain"
                  onerror="this.src='<?php echo e(asset('images/logo.png')); ?>'">
         </div>
+        
+        <!-- Navigation desktop -->
         <nav class="hidden md:flex items-center gap-8">
             <a class="text-on-surface-variant font-body text-body hover:text-primary transition-colors" href="#features">Fonctionnalités</a>
             <a class="text-on-surface-variant font-body text-body hover:text-primary transition-colors" href="#pricing">Tarifs</a>
             <a class="text-on-surface-variant font-body text-body hover:text-primary transition-colors" href="<?php echo e(route('community')); ?>">Communauté</a>
+            <a class="text-on-surface-variant font-body text-body hover:text-primary transition-colors flex items-center gap-1" href="<?php echo e(route('help')); ?>">
+                <span class="material-symbols-outlined text-sm">help_outline</span>
+                Aide
+            </a>
             <a href="<?php echo e(route('login')); ?>" class="text-on-surface-variant font-body text-body hover:text-primary transition-colors">Connexion</a>
         </nav>
-        <a href="<?php echo e(route('register')); ?>" class="bg-primary hover:bg-primary-container text-on-primary px-6 py-2.5 rounded-full font-label transition-all active:scale-95">
+        
+        <!-- CTA Button -->
+        <a href="<?php echo e(route('register')); ?>" class="bg-primary hover:bg-primary-container text-on-primary px-6 py-2.5 rounded-full font-label transition-all active:scale-95 whitespace-nowrap">
             Essai gratuit
         </a>
     </div>
 </header>
-
 
 <main class="pt-16">
     <!-- Hero Section -->
     <section class="relative overflow-hidden py-section-margin hero-gradient">
         <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center gap-12">
             <div class="flex-1 space-y-6">
-                <div class="inline-flex items-center gap-2 px-3 py-1 bg-secondary/10 text-secondary rounded-full">
-                    <span class="material-symbols-outlined text-[18px]">auto_awesome</span>
-                    <span class="font-label text-label">NOUVEAU : BLOGGING IA AUTOPILOT</span>
-                </div>
+                <div class="inline-flex items-center gap-2 px-4 py-2 bg-secondary/10 text-secondary rounded-full">
+                <span class="material-symbols-outlined text-[18px]">location_on</span>
+                <span class="font-label text-label">
+                    VOTRE AGENT SEO LOCAL EST EN LIGNE
+                </span>
+            </div>
                 <h1 class="font-h1 text-h1 md:text-[56px] leading-[1.1] text-on-background max-w-2xl">
                     Boostez votre <span class="text-primary">SEO local</span> avec l'Intelligence Organique.
                 </h1>

@@ -141,10 +141,6 @@
 <main class="flex-grow flex items-center justify-center px-gutter py-section-margin">
     <!-- Login Container -->
     <div class="w-full max-w-[440px]">
-        <!-- Logo Section -->
-        <div class="flex justify-center mb-stack-gap-md">
-            <img alt="NEARSEO Logo" class="h-12 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AP1WRLu_EKuaJe9oBaxM7rn6hG6D3S59a96XdvCbHlyIXUW_7P7D3XsoueFyViWT7WQ8k-42FwZ7rl77B1MIpzF2L8F79WsyPIzd9jtxzPgLibhQcM4NluzE7xXHapKSn1mZJfPkYwVKsWaIgVKI9qxh5jZD3ESTe_Hv6HVW3vuFEJrQMvbBBASWHA71QkQTXXVJ1-0oKXstfwix0kjHym4790nXfqkl_BiN6D1xJWb2dHCqQGvAwzp24KBe71qj"/>
-        </div>
         
         <!-- Login Card -->
         <div class="login-card rounded-lg p-card-padding">

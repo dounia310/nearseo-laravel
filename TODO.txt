@@ -1,0 +1,8 @@
+TODO - NEARSEO (à faire demain)
+
+1. Nettoyer le focus_keyword (strip_tags)
+2. Ajouter champ image de couverture
+3. Afficher meta_description dans l'éditeur
+4. Corriger le titre trop long (96/60)
+5. Vérifier que l'article se sauvegarde bien
+6. Tester la publication complète

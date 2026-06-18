@@ -148,6 +148,7 @@ class GeminiService
         $language = $data['language'] ?? 'Français';
         $tone = $data['tone'] ?? 'Professionnel & Chaleureux';
         $format = $data['format'] ?? 'medium';
+        $keyword = $data['business_name'] ?? $topic;
         
         $wordCount = match($format) {
             'short' => 600,
@@ -187,11 +188,15 @@ INSTRUCTIONS GÉNÉRALES :
 SEO ON-PAGE :
 - Générer automatiquement un mot-clé principal à partir du sujet "{$topic}"
 - Titre SEO : différent du sujet, utilise le mot-clé principal près du début, contient un power word, un nombre et un sentiment positif/négatif
-- Meta description : 150-160 caractères incluant le mot-clé principal
+- META DESCRIPTION : Génère UNIQUEMENT UNE META DESCRIPTION de 150-160 caractères incluant le mot-clé principal. Commence par une phrase d'accroche.
+- FORMAT DE LA META DESCRIPTION : "Découvrez [mot-clé principal] ..."
+- La meta description doit être différente du titre.
 - URL courte : /mot-cle-principal
 - Intégrer le mot-clé principal au début du contenu avec densité ~1%
 - Ajouter le mot-clé principal dans certains sous-titres (H2, H3)
-- Ajouter des légendes d'images avec le mot-clé principal en alt text
+- IMAGES ET ALT TEXT : Chaque suggestion d'image doit inclure l'attribut ALT avec le mot-clé principal "{$keyword}"
+- Format des images : <img src="[url]" alt="[mot-clé principal] - description">
+- Exemple : <img src="image.jpg" alt="Restaurant Marrakech - Tajine d'agneau traditionnel">
 - Maillage et netlinking : ajouter des liens internes vers {$website} si fourni, ajouter des liens externes DoFollow vers sources fiables
 - Champ lexical riche et varié
 - Suivre Google EEAT (Expertise, Expérience, Autorité, Confiance)
@@ -261,9 +266,9 @@ STRUCTURE EXIGÉE :
 <div class="image-suggestions">
 <p><strong>Images suggérées :</strong></p>
 <ul>
-<li>Image 1 : [description] - Alt: [mot-clé principal]</li>
-<li>Image 2 : [description] - Alt: [mot-clé principal]</li>
-<li>Image 3 : [description] - Alt: [mot-clé principal]</li>
+<li>Image 1 : [description] - Alt: {$keyword}</li>
+<li>Image 2 : [description] - Alt: {$keyword}</li>
+<li>Image 3 : [description] - Alt: {$keyword}</li>
 </ul>
 </div>
 
@@ -290,15 +295,25 @@ PROMPT;
         preg_match('/<h1>(.*?)<\/h1>/i', $content, $titleMatch);
         $title = $titleMatch[1] ?? "Découvrez {$data['business_name']}";
         
-        // Extraire la meta description
-        preg_match('/Meta description :\s*(.*?)(?=\n|<\/p>)/i', $content, $metaMatch);
-        $metaDescription = $metaMatch[1] ?? substr(strip_tags($content), 0, 160);
+        // Extraire la meta description - amélioré
+        preg_match('/Meta description :\s*(.*?)(?=\n|<\/p>|$)/i', $content, $metaMatch);
+        
+        if (empty($metaMatch)) {
+            // Fallback : générer depuis le contenu
+            $cleanContent = strip_tags($content);
+            $metaDescription = substr($cleanContent, 0, 160);
+        } else {
+            $metaDescription = trim($metaMatch[1]);
+        }
+        
+        // Nettoyer les balises HTML de la meta description
+        $metaDescription = strip_tags($metaDescription);
         
         // Extraire le mot-clé principal
         preg_match('/Mot-clé principal :\s*(.*?)(?=\n|<\/p>)/i', $content, $keywordMatch);
         $focusKeyword = $keywordMatch[1] ?? $data['topic'] ?? $data['business_name'];
         
-        // Nettoyer le contenu
+        // Nettoyer le contenu (supprimer les div meta et image-suggestions)
         $cleanContent = preg_replace('/<div class="meta">.*?<\/div>/s', '', $content);
         $cleanContent = preg_replace('/<div class="image-suggestions">.*?<\/div>/s', '', $cleanContent);
         

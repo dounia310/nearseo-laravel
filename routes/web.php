@@ -2,8 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\File;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\AIController;
@@ -13,23 +11,34 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\CommunityController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\TrendController;
+use App\Http\Controllers\BusinessTrendController;
+use App\Http\Controllers\HelpController;
 use App\Models\User;
 use App\Models\Article;
-use App\Http\Controllers\HelpController;
-use App\Services\GeminiService;
 
 // =============================================
 // LANDING PAGE (publique)
 // =============================================
 Route::get('/', function () {
-    return view('landing.index');
+    // ✅ Récupérer les articles pour la landing page
+    $articles = Article::where('status', 'published')
+        ->orderBy('created_at', 'desc')
+        ->limit(6)
+        ->get();
+    
+    return view('landing.index', compact('articles'));
 })->name('landing');
 
 // =============================================
 // BLOG PUBLIC (accessible sans connexion)
 // =============================================
-Route::get('/blog/{slug}', [BlogController::class, 'userBlog'])->name('blog.user');
-Route::get('/blog/{slug}/{articleSlug}', [BlogController::class, 'userArticle'])->name('blog.user.article');
+Route::get('/blog', [ArticleController::class, 'blog'])->name('blog.index');
+Route::get('/blog/{slug}', [ArticleController::class, 'showBlog'])->name('blog.show');
+
+// Blog utilisateur (pour les pages personnalisées)
+Route::get('/blog/user/{slug}', [BlogController::class, 'userBlog'])->name('blog.user');
+Route::get('/blog/user/{slug}/{articleSlug}', [BlogController::class, 'userArticle'])->name('blog.user.article');
 
 // =============================================
 // ROUTES AUTHENTIFIEES (utilisateur connecté)
@@ -104,6 +113,11 @@ Route::middleware(['auth'])->group(function () {
     // =============================================
     Route::resource('articles', ArticleController::class);
 
+    // Routes supplémentaires pour les articles
+    Route::post('/articles/{article}/upload-image', [ArticleController::class, 'uploadImage'])->name('articles.upload-image');
+    Route::post('/articles/{article}/remove-image', [ArticleController::class, 'removeImage'])->name('articles.remove-image');
+    Route::post('/articles/{article}/upload-editor-image', [ArticleController::class, 'uploadEditorImage'])->name('articles.upload-editor-image');
+
     // =============================================
     // GÉNÉRATEUR IA
     // =============================================
@@ -115,6 +129,17 @@ Route::middleware(['auth'])->group(function () {
         Route::get('history', [AIController::class, 'history'])->name('history');
         Route::get('preview', [AIController::class, 'preview'])->name('preview');
     });
+
+    // =============================================
+    // TENDANCES (TRENDS)
+    // =============================================
+    Route::get('/trends', [TrendController::class, 'index'])->name('trends.index');
+    Route::get('/api/trends/suggestions', [TrendController::class, 'getSuggestions'])->name('api.trends.suggestions');
+    Route::post('/trends/update-business', [BusinessTrendController::class, 'updateBusinessType'])->name('trends.update-business');
+
+    // Suggestions par secteur (Business Trends)
+    Route::get('/trends/business', [BusinessTrendController::class, 'index'])->name('trends.business');
+    Route::get('/api/trends/business/suggestions', [BusinessTrendController::class, 'getSuggestions'])->name('api.trends.business');
 
     // =============================================
     // GÉOLOCALISATION
@@ -136,30 +161,47 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // =============================================
-    // PROFIL UTILISATEUR
+    // PROFIL UTILISATEUR (Édition)
     // =============================================
     Route::prefix('profile')->name('profile.')->group(function () {
-        Route::get('/', [ProfileController::class, 'edit'])->name('edit');
-        Route::patch('/', [ProfileController::class, 'update'])->name('update');
-        Route::post('avatar', [ProfileController::class, 'updateAvatar'])->name('avatar');
-        Route::get('stats', [ProfileController::class, 'stats'])->name('stats');
-        Route::delete('/', [ProfileController::class, 'destroy'])->name('destroy');
+        Route::get('/edit', [ProfileController::class, 'edit'])->name('edit');
+        Route::patch('/edit', [ProfileController::class, 'update'])->name('update');
+        Route::post('/avatar', [ProfileController::class, 'updateAvatar'])->name('avatar');
+        Route::get('/stats', [ProfileController::class, 'stats'])->name('stats');
+        Route::delete('/destroy', [ProfileController::class, 'destroy'])->name('destroy');
+        
+        // ✅ Route pour changer le mot de passe
+        Route::post('/password', [ProfileController::class, 'updatePassword'])->name('password');
     });
+
+    // Redirection: /profile vers le profil public de l'utilisateur
+    Route::get('/profile', function () {
+        $user = Auth::user();
+        $slug = $user->slug ?? $user->name;
+        return redirect()->route('profile.public', ['username' => $slug]);
+    })->name('profile.redirect');
+
+    // =============================================
+    // PROFIL PUBLIC (accessible par tous)
+    // =============================================
+    Route::get('/profile/{username}', [BlogController::class, 'showProfile'])->name('profile.public');
 
     // =============================================
     // AIDE
     // =============================================
-    Route::get('/help', function () {
-        return view('dashboard.help');
-    })->name('help');
+    Route::get('/help', [HelpController::class, 'index'])->name('help');
 
     // =============================================
-    // PARAMÈTRES
+    // PARAMÈTRES - Routes unifiées
     // =============================================
-    Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
-    Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
-    Route::post('/settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password');
-    Route::post('/settings/theme', [SettingsController::class, 'updateTheme'])->name('settings.theme');
+    Route::prefix('settings')->name('settings.')->group(function () {
+        Route::get('/', [SettingsController::class, 'index'])->name('index');
+        Route::match(['POST', 'PUT'], '/', [SettingsController::class, 'update'])->name('update');
+        Route::post('/password', [SettingsController::class, 'updatePassword'])->name('password');
+        Route::post('/theme', [SettingsController::class, 'updateTheme'])->name('theme.update');
+        Route::post('/language', [SettingsController::class, 'updateLanguage'])->name('language.update');
+        Route::match(['POST', 'PUT'], '/preferences', [SettingsController::class, 'updatePreferences'])->name('preferences.update');
+    });
 
     // =============================================
     // COMMUNAUTÉ (dashboard)
@@ -168,7 +210,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // =============================================
-// ROUTES ADMIN (UNE SEULE FOIS)
+// ROUTES ADMIN
 // =============================================
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     // Gestion des utilisateurs
@@ -178,17 +220,15 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/users/{user}/role', [AdminController::class, 'toggleRole'])->name('users.toggle-role');
     Route::get('/users/export', [AdminController::class, 'exportUsers'])->name('users.export');
     Route::post('/users', [AdminController::class, 'storeUser'])->name('users.store');
-    
+
     // Analytics & Configuration
     Route::get('/analytics', [AdminController::class, 'analytics'])->name('analytics');
     Route::get('/config', [AdminController::class, 'config'])->name('config');
     Route::get('/statistics', [AdminController::class, 'statistics'])->name('statistics');
     Route::post('/settings/update', [AdminController::class, 'updateSettings'])->name('settings.update');
     
-    // Redirection
-    Route::get('/settings', function () {
-        return redirect()->route('settings.index');
-    })->name('settings');
+    // ✅ Route manquante pour les paramètres globaux
+    Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
 });
 
 // =============================================

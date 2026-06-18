@@ -26,21 +26,31 @@ class AdminController extends Controller
     }
 
     /**
-     * Afficher les détails d'un utilisateur (API)
+     * Afficher les détails d'un utilisateur (JSON)
      */
     public function userDetails(User $user)
     {
-        return response()->json([
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'role' => $user->role,
-            'articles_count' => $user->articles()->count(),
-            'total_views' => $user->articles()->sum('views'),
-            'avg_seo_score' => round($user->articles()->avg('seo_score') ?? 0),
-            'created_at' => $user->created_at,
-            'last_activity' => $user->updated_at->diffForHumans()
-        ]);
+        // Si la requête demande du JSON
+        if (request()->wantsJson() || request()->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'role' => $user->role,
+                    'created_at' => $user->created_at,
+                    'updated_at' => $user->updated_at,
+                    'articles_count' => $user->articles()->count(),
+                    'articles' => $user->articles()->select('id', 'title', 'status', 'views', 'created_at')->get(),
+                    'last_login' => $user->last_login_at ?? null,
+                    'is_active' => $user->is_active ?? true,
+                ]
+            ]);
+        }
+
+        // Sinon, retourner la vue (si vous voulez garder la vue)
+        return view('admin.users.details', compact('user'));
     }
 
     /**
@@ -77,7 +87,6 @@ class AdminController extends Controller
 
         return response()->json(['success' => true]);
     }
-
 
     /**
      * Créer un nouvel utilisateur

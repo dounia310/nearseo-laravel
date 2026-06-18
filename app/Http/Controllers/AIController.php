@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 
 use App\Services\GeminiService;
 use App\Services\SeoAnalyzerService;
+use App\Services\BusinessTrendService;
 use App\Models\Article;
+use App\Models\AIGeneration;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -14,18 +16,41 @@ use Illuminate\Support\Facades\Log;
 class AIController extends Controller
 {
     protected GeminiService $gemini;
-    
-    public function __construct(GeminiService $gemini)
+    protected BusinessTrendService $trendService;
+
+    public function __construct(GeminiService $gemini, BusinessTrendService $trendService)
     {
         $this->gemini = $gemini;
+        $this->trendService = $trendService;
     }
     
     /**
-     * Page de génération d'article IA
+     * Page de génération d'article IA avec suggestions
      */
-    public function create()
+    public function create(Request $request)
     {
-        return view('dashboard.ai.create');
+        // Récupérer les paramètres depuis l'URL
+        $topic = $request->input('topic');
+        $keywords = $request->input('keywords');
+        $businessType = $request->input('business_type');
+        
+        // Récupérer les suggestions adaptées au secteur
+        $suggestions = $this->trendService->getSuggestionsForBusiness($businessType);
+        
+        // Récupérer le secteur de l'utilisateur
+        $userBusinessType = auth()->user()->business_type ?? 'general';
+        
+        // Récupérer les tendances du moment
+        $trends = $this->trendService->getCurrentTrends();
+        
+        return view('dashboard.ai.create', compact(
+            'topic', 
+            'keywords', 
+            'suggestions',
+            'userBusinessType',
+            'businessType',
+            'trends'
+        ));
     }
     
     /**
@@ -89,19 +114,32 @@ class AIController extends Controller
             ], 500);
         }
         
+        // Extraire les mots-clés si présents
+        $keywords = $request->keywords ?? $this->extractKeywords($result['content']);
+        
         // Sauvegarder en base de données
         $article = Article::create([
             'user_id' => auth()->id(),
             'title' => $result['title'],
             'slug' => Str::slug($result['title']),
             'content' => $result['content'],
-            'focus_keyword' => $result['focus_keyword'] ?? $data['business_name'],
+            'focus_keyword' => strip_tags($result['focus_keyword'] ?? $data['business_name']),
             'excerpt' => $result['meta_description'] ?? substr(strip_tags($result['content']), 0, 200),
             'meta_description' => $result['meta_description'] ?? null,
             'status' => 'draft',
             'seo_score' => $this->calculateBasicSeoScore($result['content']),
             'views' => 0,
             'address' => $request->address,
+            'keywords' => $keywords,
+        ]);
+        
+        // Sauvegarder l'historique de génération
+        AIGeneration::create([
+            'user_id' => auth()->id(),
+            'article_id' => $article->id,
+            'prompt' => $request->subject,
+            'generated_content' => $result['content'],
+            'seo_score' => $article->seo_score,
         ]);
         
         Log::info('Article saved successfully', ['article_id' => $article->id]);
@@ -114,6 +152,21 @@ class AIController extends Controller
             'title' => $result['title'],
             'message' => 'Article généré ! Complétez les informations dans l\'éditeur.'
         ]);
+    }
+    
+    /**
+     * Extraire les mots-clés du contenu
+     */
+    private function extractKeywords(string $content): string
+    {
+        // Extraire les mots les plus fréquents
+        $words = str_word_count(strip_tags($content), 1);
+        $wordCount = array_count_values(array_map('strtolower', $words));
+        arsort($wordCount);
+        
+        // Prendre les 5 premiers mots-clés
+        $keywords = array_slice(array_keys($wordCount), 0, 5);
+        return implode(',', $keywords);
     }
     
     /**
@@ -133,7 +186,7 @@ class AIController extends Controller
             'title' => $generated['title'],
             'slug' => Str::slug($generated['title']),
             'content' => $generated['content'],
-            'focus_keyword' => $generated['focus_keyword'] ?? '',
+            'focus_keyword' => strip_tags($generated['focus_keyword'] ?? ''),
             'excerpt' => $generated['meta_description'] ?? substr(strip_tags($generated['content']), 0, 200),
             'meta_description' => $generated['meta_description'] ?? null,
             'status' => 'draft',
@@ -215,7 +268,7 @@ class AIController extends Controller
      */
     public function history()
     {
-        $generations = \App\Models\AIGeneration::where('user_id', auth()->id())
+        $generations = AIGeneration::where('user_id', auth()->id())
             ->orderBy('created_at', 'desc')
             ->paginate(20);
         
@@ -244,8 +297,8 @@ class AIController extends Controller
             $connection = $this->gemini->checkConnection();
             if ($connection['success']) {
                 $analysis = $this->gemini->analyzeSeo($request->content, $request->keyword);
-                $result['advanced_recommendations'] = $analysis['recommendations'];
-                $result['advanced_score'] = $analysis['score'];
+                $result['advanced_recommendations'] = $analysis['recommendations'] ?? [];
+                $result['advanced_score'] = $analysis['score'] ?? $result['score'];
             }
             
             return response()->json($result);
@@ -294,7 +347,56 @@ class AIController extends Controller
         
         if (preg_match('/<h[2-3]/i', $content)) $score += 10;
         if (preg_match('/<img/i', $content)) $score += 10;
+        if (preg_match('/<a\s+href/i', $content)) $score += 5;
         
         return min($score, 100);
+    }
+
+    /**
+     * Obtenir les suggestions de sujets pour l'IA
+     */
+    public function getSuggestions(Request $request)
+    {
+        $businessType = $request->input('business_type');
+        $suggestions = $this->trendService->getApiSuggestions($businessType);
+        
+        return response()->json($suggestions);
+    }
+
+    /**
+     * Mettre à jour le secteur d'activité
+     */
+    public function updateBusinessType(Request $request)
+    {
+        $validated = $request->validate([
+            'business_type' => 'required|string|in:restaurant,hotel,coiffure,beaute,fleuriste,voyage,immobilier,auto,sante,fashion,general',
+            'business_name' => 'nullable|string|max:255',
+        ]);
+        
+        $user = auth()->user();
+        $user->business_type = $validated['business_type'];
+        if (isset($validated['business_name'])) {
+            $user->business_name = $validated['business_name'];
+        }
+        $user->save();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Secteur d\'activité mis à jour',
+            'business_type' => $user->business_type
+        ]);
+    }
+
+    /**
+     * Obtenir les tendances actuelles
+     */
+    public function getTrends()
+    {
+        $trends = $this->trendService->getCurrentTrends();
+        
+        return response()->json([
+            'success' => true,
+            'data' => $trends
+        ]);
     }
 }
