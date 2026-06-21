@@ -6,10 +6,11 @@ namespace App\Http\Controllers;
 use App\Services\GeminiService;
 use App\Services\SeoAnalyzerService;
 use App\Services\BusinessTrendService;
+use App\Services\SeoValidatorService;
 use App\Models\Article;
 use App\Models\AIGeneration;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 
@@ -17,13 +18,16 @@ class AIController extends Controller
 {
     protected GeminiService $gemini;
     protected BusinessTrendService $trendService;
+    protected SeoValidatorService $seoValidator;
 
-    public function __construct(GeminiService $gemini, BusinessTrendService $trendService)
+    public function __construct(GeminiService $gemini, BusinessTrendService $trendService, SeoValidatorService $seoValidator)
     {
         $this->gemini = $gemini;
         $this->trendService = $trendService;
+        $this->seoValidator = $seoValidator;
     }
-    
+
+
     /**
      * Page de génération d'article IA avec suggestions
      */
@@ -33,26 +37,26 @@ class AIController extends Controller
         $topic = $request->input('topic');
         $keywords = $request->input('keywords');
         $businessType = $request->input('business_type');
-        
+
         // Récupérer les suggestions adaptées au secteur
         $suggestions = $this->trendService->getSuggestionsForBusiness($businessType);
-        
+
         // Récupérer le secteur de l'utilisateur
         $userBusinessType = auth()->user()->business_type ?? 'general';
-        
+
         // Récupérer les tendances du moment
         $trends = $this->trendService->getCurrentTrends();
-        
+
         return view('dashboard.ai.create', compact(
-            'topic', 
-            'keywords', 
+            'topic',
+            'keywords',
             'suggestions',
             'userBusinessType',
             'businessType',
             'trends'
         ));
     }
-    
+
     /**
      * Vérifier la connexion à l'API Gemini
      */
@@ -61,51 +65,87 @@ class AIController extends Controller
         $result = $this->gemini->checkConnection();
         return response()->json($result);
     }
-    
+
     /**
      * Générer un article premium avec Gemini
      */
     public function generate(Request $request)
     {
         Log::info('AI Generate request received', $request->all());
-        
+
         $request->validate([
             'business_name' => 'required|string',
             'subject' => 'required|string',
-            'address' => 'required|string',
+            'address' => 'nullable|string',
             'website' => 'nullable|url',
             'hours' => 'nullable|string',
             'goals' => 'nullable|array',
             'language' => 'nullable|string',
             'tone' => 'nullable|string',
+            // Support legacy payload: format
             'length' => 'nullable|string|in:short,medium,long',
+            'format' => 'nullable|string|in:short,medium,long',
             'mode' => 'nullable|string|in:local,online',
             'geo_quartier' => 'nullable|string',
             'geo_ville' => 'nullable|string',
             'geo_pays' => 'nullable|string',
             'keywords' => 'nullable|string'
         ]);
-        
+
+        $mode = $request->input('mode', 'local');
+        if ($mode === 'local') {
+            $request->validate([
+                'address' => 'required|string',
+            ]);
+        }
+
+
         $data = [
-            'mode' => $request->mode ?? 'local',
+            'mode' => $mode,
             'business_name' => $request->business_name,
             'topic' => $request->subject,
-            'address' => $request->address,
+            'address' => $request->address ?? '',
             'website' => $request->website ?? '',
             'hours' => $request->hours ?? '',
             'goals' => $request->goals ?? [],
             'language' => $request->language ?? 'Français',
             'tone' => $request->tone ?? 'Professionnel & Chaleureux',
-            'format' => $request->length ?? 'medium',
+            // Prefer `length` then fallback to `format` (frontend uses format)
+            'format' => $request->length ?? $request->format ?? 'medium',
             'geo_quartier' => $request->geo_quartier ?? '',
             'geo_ville' => $request->geo_ville ?? '',
             'geo_pays' => $request->geo_pays ?? 'Maroc',
             'keywords' => $request->keywords ?? ''
         ];
-        
+
+
         // Générer l'article via Gemini
         $result = $this->gemini->generateArticle($data);
-        
+
+        // Valider/corriger automatiquement le contenu SEO
+        try {
+            if (($result['success'] ?? false) === true) {
+                $validated = $this->seoValidator->validateAndFix([
+                    'title' => $result['title'] ?? '',
+                    'content' => $result['content'] ?? '',
+                    'meta_description' => $result['meta_description'] ?? '',
+                    'focus_keyword' => $result['focus_keyword'] ?? ($data['business_name'] ?? ''),
+                ]);
+
+                $result['title'] = $validated['title'];
+                $result['content'] = $validated['content'];
+                $result['meta_description'] = $validated['meta_description'];
+                $result['focus_keyword'] = $validated['focus_keyword'];
+                $result['corrections_appliquees'] = $validated['corrections_appliquees'];
+
+                // recalcul score basique sur le contenu corrigé
+                $result['seo_score'] = $this->calculateBasicSeoScore($result['content'] ?? '');
+            }
+        } catch (\Exception $e) {
+            Log::error('SeoValidatorService failed: ' . $e->getMessage());
+        }
+
+
         if (!$result['success']) {
             return response()->json([
                 'success' => false,
@@ -113,26 +153,28 @@ class AIController extends Controller
                 'code' => $result['code'] ?? 500
             ], 500);
         }
-        
+
         // Extraire les mots-clés si présents
         $keywords = $request->keywords ?? $this->extractKeywords($result['content']);
-        
+
         // Sauvegarder en base de données
+        $focusKeyword = strip_tags($result['focus_keyword'] ?? $data['business_name']);
         $article = Article::create([
             'user_id' => auth()->id(),
             'title' => $result['title'],
             'slug' => Str::slug($result['title']),
             'content' => $result['content'],
-            'focus_keyword' => strip_tags($result['focus_keyword'] ?? $data['business_name']),
+            'focus_keyword' => $focusKeyword,
             'excerpt' => $result['meta_description'] ?? substr(strip_tags($result['content']), 0, 200),
             'meta_description' => $result['meta_description'] ?? null,
             'status' => 'draft',
-            'seo_score' => $this->calculateBasicSeoScore($result['content']),
+            'seo_score' => (int)($result['seo_score'] ?? $this->calculateBasicSeoScore($result['content'])),
             'views' => 0,
             'address' => $request->address,
             'keywords' => $keywords,
         ]);
-        
+
+
         // Sauvegarder l'historique de génération
         AIGeneration::create([
             'user_id' => auth()->id(),
@@ -141,9 +183,9 @@ class AIController extends Controller
             'generated_content' => $result['content'],
             'seo_score' => $article->seo_score,
         ]);
-        
+
         Log::info('Article saved successfully', ['article_id' => $article->id]);
-        
+
         // Retourner l'ID pour redirection vers l'éditeur
         return response()->json([
             'success' => true,
@@ -153,7 +195,7 @@ class AIController extends Controller
             'message' => 'Article généré ! Complétez les informations dans l\'éditeur.'
         ]);
     }
-    
+
     /**
      * Extraire les mots-clés du contenu
      */
@@ -163,23 +205,23 @@ class AIController extends Controller
         $words = str_word_count(strip_tags($content), 1);
         $wordCount = array_count_values(array_map('strtolower', $words));
         arsort($wordCount);
-        
+
         // Prendre les 5 premiers mots-clés
         $keywords = array_slice(array_keys($wordCount), 0, 5);
         return implode(',', $keywords);
     }
-    
+
     /**
      * Aperçu de l'article généré (redirige vers l'éditeur)
      */
     public function preview()
     {
         $generated = session('ai_generated');
-        
+
         if (!$generated) {
             return redirect()->route('ai.create')->with('error', 'Aucun article généré');
         }
-        
+
         // Créer un article temporaire avec les données générées
         $article = Article::create([
             'user_id' => auth()->id(),
@@ -193,12 +235,12 @@ class AIController extends Controller
             'seo_score' => $generated['word_count'] ?? 0,
             'views' => 0,
         ]);
-        
+
         session()->forget('ai_generated');
-        
+
         return redirect()->route('articles.edit', $article->id)->with('success', 'Article généré ! Complétez les informations.');
     }
-    
+
     /**
      * Reformuler un contenu pour les réseaux sociaux
      */
@@ -210,27 +252,27 @@ class AIController extends Controller
         ]);
 
         $prompt = "Reformule ce contenu pour {$request->platform} :\n\n" . $request->content;
-        
+
         $result = $this->gemini->generateArticle([
             'business_name' => 'Reformulation',
             'topic' => $prompt,
             'address' => '',
             'format' => 'short'
         ]);
-        
+
         if ($result['success']) {
             return response()->json([
                 'success' => true,
                 'content' => $result['content']
             ]);
         }
-        
+
         return response()->json([
             'success' => false,
             'content' => substr($request->content, 0, 200) . '...'
         ]);
     }
-    
+
     /**
      * Optimiser un contenu pour un mot-clé
      */
@@ -240,29 +282,29 @@ class AIController extends Controller
             'content' => 'required|string',
             'keyword' => 'required|string|max:100'
         ]);
-        
+
         $prompt = "Optimise ce contenu pour le mot-clé '{$request->keyword}'. Garde le sens mais améliore le SEO.\n\nContenu original :\n" . $request->content;
-        
+
         $result = $this->gemini->generateArticle([
             'business_name' => 'Optimisation',
             'topic' => $prompt,
             'address' => '',
             'format' => 'medium'
         ]);
-        
+
         if ($result['success']) {
             return response()->json([
                 'success' => true,
                 'content' => $result['content']
             ]);
         }
-        
+
         return response()->json([
             'success' => true,
             'content' => $request->content
         ]);
     }
-    
+
     /**
      * Historique des générations
      */
@@ -271,10 +313,10 @@ class AIController extends Controller
         $generations = AIGeneration::where('user_id', auth()->id())
             ->orderBy('created_at', 'desc')
             ->paginate(20);
-        
+
         return view('dashboard.ai.history', compact('generations'));
     }
-    
+
     /**
      * Analyse SEO d'un article
      */
@@ -292,7 +334,7 @@ class AIController extends Controller
                 title: $request->title,
                 keyword: $request->keyword
             );
-            
+
             // Enrichir avec Gemini pour des recommandations avancées
             $connection = $this->gemini->checkConnection();
             if ($connection['success']) {
@@ -300,9 +342,8 @@ class AIController extends Controller
                 $result['advanced_recommendations'] = $analysis['recommendations'] ?? [];
                 $result['advanced_score'] = $analysis['score'] ?? $result['score'];
             }
-            
+
             return response()->json($result);
-            
         } catch (\Exception $e) {
             Log::error('SEO Analysis error: ' . $e->getMessage());
             return response()->json([
@@ -315,7 +356,7 @@ class AIController extends Controller
             ], 200);
         }
     }
-    
+
     /**
      * Suggérer des mots-clés SEO
      */
@@ -325,15 +366,15 @@ class AIController extends Controller
             'topic' => 'required|string',
             'location' => 'nullable|string'
         ]);
-        
+
         $keywords = $this->gemini->suggestKeywords($request->topic, $request->location);
-        
+
         return response()->json([
             'success' => true,
             'keywords' => $keywords
         ]);
     }
-    
+
     /**
      * Calculer un score SEO basique
      */
@@ -341,14 +382,14 @@ class AIController extends Controller
     {
         $wordCount = str_word_count(strip_tags($content));
         $score = 50;
-        
+
         if ($wordCount >= 1000) $score += 25;
         elseif ($wordCount >= 500) $score += 15;
-        
+
         if (preg_match('/<h[2-3]/i', $content)) $score += 10;
         if (preg_match('/<img/i', $content)) $score += 10;
         if (preg_match('/<a\s+href/i', $content)) $score += 5;
-        
+
         return min($score, 100);
     }
 
@@ -359,7 +400,7 @@ class AIController extends Controller
     {
         $businessType = $request->input('business_type');
         $suggestions = $this->trendService->getApiSuggestions($businessType);
-        
+
         return response()->json($suggestions);
     }
 
@@ -372,14 +413,14 @@ class AIController extends Controller
             'business_type' => 'required|string|in:restaurant,hotel,coiffure,beaute,fleuriste,voyage,immobilier,auto,sante,fashion,general',
             'business_name' => 'nullable|string|max:255',
         ]);
-        
+
         $user = auth()->user();
         $user->business_type = $validated['business_type'];
         if (isset($validated['business_name'])) {
             $user->business_name = $validated['business_name'];
         }
         $user->save();
-        
+
         return response()->json([
             'success' => true,
             'message' => 'Secteur d\'activité mis à jour',
@@ -393,7 +434,7 @@ class AIController extends Controller
     public function getTrends()
     {
         $trends = $this->trendService->getCurrentTrends();
-        
+
         return response()->json([
             'success' => true,
             'data' => $trends

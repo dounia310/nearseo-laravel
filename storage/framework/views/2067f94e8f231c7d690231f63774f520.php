@@ -1,11 +1,11 @@
-{{-- resources/views/blog/show.blade.php --}}
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $article->title }} | NearSEO</title>
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
+    <title><?php echo e($article->title); ?> | NearSEO</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
@@ -287,7 +287,7 @@
         <!-- En-tête du blog -->
         <div class="mb-8">
             <h1 class="blog-title">
-                <a href="{{ route('blog.index') }}">NearSEO Blog</a>
+                <a href="<?php echo e(route('blog.index')); ?>">NearSEO Blog</a>
             </h1>
             <p class="blog-description">Articles, guides et conseils pour votre visibilité locale</p>
         </div>
@@ -297,26 +297,27 @@
             <div class="lg:w-[65%]">
                 <!-- Article -->
                 <div class="bg-white rounded-xl p-6 border border-gray-100">
-                    <h1 class="post-title">{{ $article->title }}</h1>
+                    <h1 class="post-title"><?php echo e($article->title); ?></h1>
                     
                     <div class="post-meta">
-                        {{ $article->created_at->format('F d, Y') }}
-                        @if($article->read_time)
+                        <?php echo e($article->created_at->format('F d, Y')); ?>
+
+                        <?php if($article->read_time): ?>
                         <span class="mx-2">·</span>
-                        {{ $article->read_time }} min de lecture
-                        @endif
+                        <?php echo e($article->read_time); ?> min de lecture
+                        <?php endif; ?>
                     </div>
 
-                    @if($article->image)
+                    <?php if($article->image): ?>
                     <div class="mb-6 overflow-hidden rounded-xl">
-                        <img src="{{ asset('storage/' . $article->image) }}" 
-                             alt="{{ $article->title }}" 
+                        <img src="<?php echo e(asset('storage/' . $article->image)); ?>" 
+                             alt="<?php echo e($article->title); ?>" 
                              class="w-full h-auto object-cover">
                     </div>
-                    @endif
+                    <?php endif; ?>
 
                     <div class="post-body">
-    @php
+    <?php
         $content = $article->content;
         
         // Nettoyage sans supprimer les "n" des mots
@@ -362,23 +363,24 @@
         // Nettoyer les espaces
         $content = preg_replace('/\s+/', ' ', $content);
         $content = trim($content);
-    @endphp
-    {!! $content !!}
+    ?>
+    <?php echo $content; ?>
+
 </div>
 
                     <div class="post-footer">
-                        @if($article->tags)
+                        <?php if($article->tags): ?>
                         <div class="post-tags">
-                            @foreach(explode(',', $article->tags) as $tag)
-                            <a href="#" class="tag">{{ trim($tag) }}</a>
-                            @endforeach
+                            <?php $__currentLoopData = explode(',', $article->tags); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tag): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <a href="#" class="tag"><?php echo e(trim($tag)); ?></a>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
-                        @endif
+                        <?php endif; ?>
 
                         <div class="flex items-center gap-4 text-sm text-gray-500">
                             <span class="flex items-center gap-1">
                                 <span class="material-symbols-outlined text-sm">visibility</span>
-                                {{ $article->views ?? 0 }} vues
+                                <?php echo e($article->views ?? 0); ?> vues
                             </span>
                             <span class="flex items-center gap-1">
                                 <span class="material-symbols-outlined text-sm">comment</span>
@@ -390,18 +392,18 @@
 
                 <!-- Navigation -->
                 <div class="flex justify-between gap-4 mt-6">
-                    @if($previousArticle ?? false)
-                    <a href="{{ route('blog.show', $previousArticle->slug) }}" 
+                    <?php if($previousArticle ?? false): ?>
+                    <a href="<?php echo e(route('blog.show', $previousArticle->slug)); ?>" 
                        class="text-sm text-gray-600 hover:text-primary transition-colors">
                         ← Article précédent
                     </a>
-                    @endif
-                    @if($nextArticle ?? false)
-                    <a href="{{ route('blog.show', $nextArticle->slug) }}" 
+                    <?php endif; ?>
+                    <?php if($nextArticle ?? false): ?>
+                    <a href="<?php echo e(route('blog.show', $nextArticle->slug)); ?>" 
                        class="text-sm text-gray-600 hover:text-primary transition-colors ml-auto">
                         Article suivant →
                     </a>
-                    @endif
+                    <?php endif; ?>
                 </div>
 
                 <!-- Commentaires -->
@@ -436,47 +438,34 @@
                 <!-- Articles récents -->
                 <div class="bg-white p-4 rounded-xl border border-gray-100">
                     <h3 class="sidebar-title">Articles</h3>
-                    @foreach($recentArticles ?? [] as $recent)
-                    <a href="{{ route('blog.show', $recent->slug) }}" class="sidebar-item">
-                        {{ $recent->title }}
-                        <span class="count">{{ $recent->created_at->format('M d, Y') }}</span>
+                    <?php $__currentLoopData = $recentArticles ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $recent): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <a href="<?php echo e(route('blog.show', $recent->slug)); ?>" class="sidebar-item">
+                        <?php echo e($recent->title); ?>
+
+                        <span class="count"><?php echo e($recent->created_at->format('M d, Y')); ?></span>
                     </a>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </div>
 
                 <!-- Archives -->
-                @if(isset($archives) && $archives->count() > 0)
+                <?php if(isset($archives) && $archives->count() > 0): ?>
                 <div class="bg-white p-4 rounded-xl border border-gray-100">
                     <h3 class="sidebar-title">Archiver</h3>
-                    @foreach($archives as $archive)
+                    <?php $__currentLoopData = $archives; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $archive): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <a href="#" class="sidebar-item">
-                        {{ $archive->year }} - {{ date('F', mktime(0, 0, 0, $archive->month, 1)) }}
-                        <span class="count">({{ $archive->count }})</span>
-                    </a>
-                    @endforeach
-                </div>
-                @endif
+                        <?php echo e($archive->year); ?> - <?php echo e(date('F', mktime(0, 0, 0, $archive->month, 1))); ?>
 
-                <!-- Tags -->
-                @if(isset($allTags) && $allTags->count() > 0)
-                <div class="bg-white p-4 rounded-xl border border-gray-100">
-                    <h3 class="sidebar-title">Libellés</h3>
-                    <div class="flex flex-wrap gap-1">
-                        @foreach($allTags as $tag => $count)
-                        <a href="#" class="tag">
-                            {{ $tag }} ({{ $count }})
-                        </a>
-                        @endforeach
-                    </div>
-                </div>
-                @endif
-
-                <!-- Footer blog -->
-                <div class="text-xs text-gray-400 text-center pt-4 border-t border-gray-100">
-                    Fourni par NearSEO
-                </div>
-            </aside>
+                        <span class=y-sm text-on-surface-variant hover:text-primary transition" href="#">Partenaires</a>
+                    <a class="font-body-sm text-on-surface-variant hover:text-primary transition" href="#">Sales</a>
+                </nav>
+            </div>
         </div>
-    </div>
-</body>
-</html>
+        <div class="pt-8 border-t border-outline-variant/20 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p class="font-body-sm text-on-surface-variant text-center">© <?php echo e(date('Y')); ?> NEARSEO. Votre agent SEO local au Maroc.</p>
+            <div class="flex gap-6">
+                <a class="text-on-surface-variant hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined">language</span></a>
+                <a class="text-on-surface-variant hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined">share</span></a>
+                <a class="text-on-surface-variant hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined">policy</span></a>
+            </div>
+        </div>
+    </div><?php /**PATH C:\Users\pc\nearseo-laravel\resources\views/blog/show.blade.php ENDPATH**/ ?>

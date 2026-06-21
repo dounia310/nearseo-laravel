@@ -130,7 +130,6 @@
 <main class="w-full max-w-[480px] bg-white border border-outline-variant rounded-xl soft-shadow overflow-hidden">
     <!-- Header / Brand Section -->
     <div class="px-card-padding pt-10 pb-6 flex flex-col items-center text-center">
-        <img alt="NEARSEO Logo" class="h-10 mb-8 object-contain" src="https://lh3.googleusercontent.com/aida/AP1WRLu_EKuaJe9oBaxM7rn6hG6D3S59a96XdvCbHlyIXUW_7P7D3XsoueFyViWT7WQ8k-42FwZ7rl77B1MIpzF2L8F79WsyPIzd9jtxzPgLibhQcM4NluzE7xXHapKSn1mZJfPkYwVKsWaIgVKI9qxh5jZD3ESTe_Hv6HVW3vuFEJrQMvbBBASWHA71QkQTXXVJ1-0oKXstfwix0kjHym4790nXfqkl_BiN6D1xJWb2dHCqQGvAwzp24KBe71qj"/>
         <h1 class="font-h1 text-h1 text-on-background mb-stack-gap-sm">Créez votre compte</h1>
         <p class="font-body text-body text-on-surface-variant max-w-[320px]">
             Boostez votre visibilité locale avec l'IA.

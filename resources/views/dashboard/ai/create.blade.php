@@ -42,6 +42,7 @@
                     <!-- Nom du commerce -->
                     <div class="space-y-2">
                         <label class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1">
+                            <span class="material-symbols-outlined text-sm text-gray-400">storefront</span>
                             Nom du commerce / entreprise <span class="text-red-500">*</span>
                         </label>
                         <div class="relative">
@@ -56,6 +57,7 @@
                     <!-- Sujet -->
                     <div class="space-y-2">
                         <label class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1" id="subjectLabel">
+                            <span class="material-symbols-outlined text-sm text-gray-400">edit_note</span>
                             Sujet de l'article <span class="text-red-500">*</span>
                         </label>
                         <textarea id="subject" rows="3" 
@@ -63,143 +65,173 @@
                                   placeholder="Ex: Pourquoi choisir notre boulangerie artisanale..."></textarea>
                     </div>
 
-                    <!-- Adresse -->
+                    <!-- Catégorie -->
                     <div class="space-y-2">
                         <label class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1">
-                            Adresse <span class="text-red-500">*</span>
+                            <span class="material-symbols-outlined text-sm text-gray-400" style="font-variation-settings: 'FILL' 1;">category</span>
+                            Catégorie
                         </label>
-                        <div class="relative">
-                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">location_on</span>
-                            <input id="address" type="text" 
-                                   class="w-full pl-10 pr-4 py-3 border rounded-xl required-field focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                                   placeholder="Ex: 123 Avenue Mohammed VI, Guéliz, Marrakech">
-                        </div>
-                        <p class="text-xs text-red-500 hidden" id="addressError">L'adresse est obligatoire</p>
-                    </div>
-
-                    <!-- Site web (optionnel) - CACHÉ PAR DÉFAUT -->
-                    <div id="websiteField" class="hidden space-y-2">
-                        <label class="text-xs font-bold text-gray-500 uppercase">Site web (optionnel)</label>
-                        <div class="relative">
-                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">public</span>
-                            <input id="website" type="url" class="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="https://www.maboutique.ma">
-                        </div>
-                    </div>
-                    <button type="button" onclick="toggleWebsiteField()" class="text-primary text-sm flex items-center gap-1 mt-1 hover:underline">
-                        <span class="material-symbols-outlined text-sm">add</span>
-                         Ajouter un site web existant
-                    </button>
-
-                    <!-- Zone géographique d'intervention -->
-                    <div id="geoZoneFields" class="space-y-2">
-                        <label class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1">
-                            Zone géographique d'intervention <span class="text-red-500">*</span>
-                        </label>
-                        <div class="grid grid-cols-3 gap-3">
-                            <div class="relative">
-                                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">radio_button_checked</span>
-                                <input type="text" id="geoQuartier" class="w-full pl-9 pr-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="Quartier">
-                            </div>
-                            <div class="relative">
-                                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">location_city</span>
-                                <input type="text" id="geoVille" class="w-full pl-9 pr-3 py-2 border rounded-lg text-sm required-field focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="Ville *">
-                            </div>
-                            <div class="relative">
-                                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">public</span>
-                                <select id="geoPays" class="w-full pl-9 pr-3 py-2 border rounded-lg text-sm bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
-                                    <option value="Maroc">Maroc</option>
-                                    <option value="France">France</option>
-                                    <option value="Belgique">Belgique</option>
-                                    <option value="Suisse">Suisse</option>
-                                    <option value="Canada">Canada</option>
-                                    <option value="Sénégal">Sénégal</option>
-                                    <option value="Côte d'Ivoire">Côte d'Ivoire</option>
-                                    <option value="Espagne">Espagne</option>
-                                    <option value="Italie">Italie</option>
-                                    <option value="Allemagne">Allemagne</option>
-                                </select>
-                            </div>
-                        </div>
-                        <p class="text-xs text-red-500 hidden" id="geoVilleError">La ville est obligatoire</p>
-                        <p class="text-xs text-gray-400 mt-1 flex items-center gap-1">
-                            <span class="material-symbols-outlined text-sm text-gray-400">public</span>
-                            La carte se met à jour automatiquement lorsque vous changez le pays, la ville ou le quartier
-                        </p>
-                    </div>
-
-                    <!-- Local Fields -->
-                    <div id="localFields" class="grid grid-cols-2 gap-4">
-                        <div class="space-y-2">
-                            <label class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1">
-                                <span class="material-symbols-outlined text-sm text-gray-400">google</span>
-                                Fiche Google (GBP)
-                            </label>
-                            <select id="gbpOption" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
-                                <option value="optimize">Optimiser pour GBP</option>
-                                <option value="ignore">Ignorer</option>
+                        <div class="grid grid-cols-1 gap-2">
+                            <select id="category" 
+                                    onchange="toggleCategoryInput(this.value)"
+                                    class="w-full rounded-lg border border-gray-300 px-3 py-2 bg-white text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                    style="appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22><path fill=%22%23999%22 d=%22M7 10l5 5 5-5z%22/></svg>'); background-repeat: no-repeat; background-position: right 12px center; background-size: 20px;">
+                                <option value="">Sélectionner une catégorie</option>
+                                <option value="Tourisme">✈️ Tourisme</option>
+                                <option value="E-commerce">🛒 E-commerce</option>
+                                <option value="Gastronomie">🍽️ Gastronomie</option>
+                                <option value="Immobilier">🏠 Immobilier</option>
+                                <option value="Santé">🏥 Santé</option>
+                                <option value="Mode">👗 Mode</option>
+                                <option value="Tech">💻 Tech</option>
+                                <option value="Artisanat">🔨 Artisanat</option>
+                                <option value="Sport">⚽ Sport</option>
+                                <option value="Culture">🎨 Culture</option>
+                                <option value="Éducation">📚 Éducation</option>
+                                <option value="Automobile">🚗 Automobile</option>
+                                <option value="other">➕ Autre (saisir)</option>
                             </select>
+                            
+                            <div id="customCategoryContainer" class="hidden">
+                                <div class="relative">
+                                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">edit</span>
+                                    <input type="text" 
+                                           id="customCategory" 
+                                           placeholder="Saisissez votre catégorie..."
+                                           class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
+                                </div>
+                                <p class="text-xs text-gray-400 mt-1 flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-sm text-gray-400">lightbulb</span>
+                                    Exemples: Événementiel, Conseil, Formation, Bien-être, Design
+                                </p>
+                            </div>
                         </div>
-                        <div class="space-y-2"></div>
                     </div>
 
-                    <!-- Online Fields -->
+                    <!-- ============================================= -->
+                    <!-- CHAMPS POUR COMMERCE LOCAL UNIQUEMENT -->
+                    <!-- ============================================= -->
+                    <div id="localFieldsContainer">
+                        <!-- Adresse -->
+                        <div class="space-y-2" id="addressField">
+                            <label class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1">
+                                <span class="material-symbols-outlined text-sm text-gray-400">location_on</span>
+                                Adresse <span class="text-red-500" id="addressRequired">*</span>
+                            </label>
+                            <div class="relative">
+                                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">location_on</span>
+                                <input id="address" type="text" 
+                                       class="w-full pl-10 pr-4 py-3 border rounded-xl required-field focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                       placeholder="Ex: 123 Avenue Mohammed VI, Guéliz, Marrakech">
+                            </div>
+                            <p class="text-xs text-red-500 hidden" id="addressError">L'adresse est obligatoire</p>
+                        </div>
+
+                        <!-- Site web (optionnel) -->
+                        <div id="websiteField" class="space-y-2">
+                            <label class="text-xs font-bold text-gray-500 uppercase">Site web (optionnel)</label>
+                            <div class="relative">
+                                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">public</span>
+                                <input id="website" type="url" class="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="https://www.maboutique.ma">
+                            </div>
+                        </div>
+        
+
+                        <!-- Zone géographique d'intervention -->
+                        <div id="geoZoneFields" class="space-y-2">
+                            <label class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1">
+                                <span class="material-symbols-outlined text-sm text-gray-400">map</span>
+                                Zone géographique d'intervention <span class="text-red-500">*</span>
+                            </label>
+                            <div class="grid grid-cols-3 gap-3">
+                                <div class="relative">
+                                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">radio_button_checked</span>
+                                    <input type="text" id="geoQuartier" class="w-full pl-9 pr-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="Quartier">
+                                </div>
+                                <div class="relative">
+                                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">location_city</span>
+                                    <input type="text" id="geoVille" class="w-full pl-9 pr-3 py-2 border rounded-lg text-sm required-field focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="Ville *">
+                                </div>
+                                <div class="relative">
+                                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">public</span>
+                                    <select id="geoPays" class="w-full pl-9 pr-3 py-2 border rounded-lg text-sm bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
+                                        <option value="Maroc">Maroc</option>
+                                        <option value="France">France</option>
+                                        <option value="Belgique">Belgique</option>
+                                        <option value="Suisse">Suisse</option>
+                                        <option value="Canada">Canada</option>
+                                        <option value="Sénégal">Sénégal</option>
+                                        <option value="Côte d'Ivoire">Côte d'Ivoire</option>
+                                        <option value="Espagne">Espagne</option>
+                                        <option value="Italie">Italie</option>
+                                        <option value="Allemagne">Allemagne</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <p class="text-xs text-red-500 hidden" id="geoVilleError">La ville est obligatoire</p>
+                        </div>
+
+                        <!-- Objectifs -->
+                        <div id="goalsFields" class="space-y-2">
+                            <label class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1">
+                                <span class="material-symbols-outlined text-sm text-gray-400">target</span>
+                                Objectif(s) de l'article
+                            </label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <label class="flex items-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-gray-50 transition-all">
+                                    <input type="checkbox" value="attirer_boutique" class="goal-checkbox accent-primary"> 
+                                    <span class="material-symbols-outlined text-sm text-gray-600">store</span>
+                                    <span class="text-sm">Attirer en boutique</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-gray-50 transition-all">
+                                    <input type="checkbox" value="appels" class="goal-checkbox accent-primary"> 
+                                    <span class="material-symbols-outlined text-sm text-gray-600">call</span>
+                                    <span class="text-sm">Générer des appels</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-gray-50 transition-all">
+                                    <input type="checkbox" value="promotion" class="goal-checkbox accent-primary"> 
+                                    <span class="material-symbols-outlined text-sm text-gray-600">sell</span>
+                                    <span class="text-sm">Promouvoir une offre</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-gray-50 transition-all">
+                                    <input type="checkbox" value="reservations" class="goal-checkbox accent-primary"> 
+                                    <span class="material-symbols-outlined text-sm text-gray-600">event</span>
+                                    <span class="text-sm">Prise de rendez-vous</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-gray-50 transition-all col-span-2">
+                                    <input type="checkbox" value="livraison" class="goal-checkbox accent-primary"> 
+                                    <span class="material-symbols-outlined text-sm text-gray-600">local_shipping</span>
+                                    <span class="text-sm">Livraison à domicile</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- FIN CHAMPS COMMERCE LOCAL -->
+
+                    <!-- ============================================= -->
+                    <!-- CHAMPS POUR ENTREPRISE EN LIGNE UNIQUEMENT -->
+                    <!-- ============================================= -->
                     <div id="onlineFields" class="hidden space-y-4">
                         <div class="space-y-2">
                             <label class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1">
+                                <span class="material-symbols-outlined text-sm text-gray-400">public</span>
                                 Site Web <span class="text-red-500">*</span>
                             </label>
                             <div class="relative">
                                 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">public</span>
                                 <input id="websiteOnline" type="url" class="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="https://www.monsite.ma">
                             </div>
+                            <p class="text-xs text-red-500 hidden" id="websiteOnlineError">Le site web est obligatoire</p>
                         </div>
                         <div class="space-y-2">
                             <label class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1">
                                 <span class="material-symbols-outlined text-sm text-gray-400">sell</span>
                                 Mots-clés stratégiques
                             </label>
-                            <input id="keywords" type="text" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="Ex: artisanat, tourisme">
+                            <input id="keywords" type="text" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="Ex: artisanat, tourisme, e-commerce">
                         </div>
                     </div>
-
-                    <!-- Horaires -->
-                    <div id="localDetailsFields" class="space-y-2">
-                        <label class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1">
-                            <span class="material-symbols-outlined text-sm text-gray-400">schedule</span>
-                            Horaires d'ouverture
-                        </label>
-                        <input id="hours" type="text" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="Lun-Sam : 09h00 - 20h00">
-                    </div>
-
-                    <!-- Objectifs -->
-                    <div id="goalsFields" class="space-y-2">
-                        <label class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1">
-                            <span class="material-symbols-outlined text-sm text-gray-400">target</span>
-                            Objectif(s) de l'article
-                        </label>
-                        <div class="grid grid-cols-2 gap-2">
-                            <label class="flex items-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-gray-50 transition-all">
-                                <input type="checkbox" value="attirer_boutique" class="goal-checkbox accent-primary"> 
-                                <span class="text-sm">🏪 Attirer en boutique</span>
-                            </label>
-                            <label class="flex items-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-gray-50 transition-all">
-                                <input type="checkbox" value="appels" class="goal-checkbox accent-primary"> 
-                                <span class="text-sm">📞 Générer des appels</span>
-                            </label>
-                            <label class="flex items-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-gray-50 transition-all">
-                                <input type="checkbox" value="promotion" class="goal-checkbox accent-primary"> 
-                                <span class="text-sm">🎯 Promouvoir une offre</span>
-                            </label>
-                            <label class="flex items-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-gray-50 transition-all">
-                                <input type="checkbox" value="reservations" class="goal-checkbox accent-primary"> 
-                                <span class="text-sm">📅 Prise de rendez-vous</span>
-                            </label>
-                            <label class="flex items-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-gray-50 transition-all col-span-2">
-                                <input type="checkbox" value="livraison" class="goal-checkbox accent-primary"> 
-                                <span class="text-sm">🚚 Livraison à domicile</span>
-                            </label>
-                        </div>
-                    </div>
+                    <!-- FIN CHAMPS ENTREPRISE EN LIGNE -->
 
                     <!-- Langue & Ton -->
                     <div class="grid grid-cols-2 gap-4">
@@ -274,8 +306,8 @@
             <div class="bg-white rounded-xl border shadow-sm p-4">
                 <div class="flex items-center justify-between mb-3">
                     <h3 class="font-bold text-gray-900 flex items-center gap-2 text-sm">
-                        <span class="material-symbols-outlined text-primary">trending_up</span>
-                         Tendances & Événements
+                        <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">trending_up</span>
+                        Tendances & Événements
                     </h3>
                     <span class="text-xs text-gray-400">Mise à jour quotidienne</span>
                 </div>
@@ -287,6 +319,7 @@
                     <div onclick="selectTopic('{{ addslashes($trend['keyword']) }}', '')" 
                          class="min-w-[180px] max-w-[200px] p-3 bg-blue-50 rounded-lg hover:bg-blue-100 cursor-pointer transition-all group flex-shrink-0 border border-blue-100">
                         <div class="flex items-start gap-1.5">
+                            <span class="material-symbols-outlined text-sm text-blue-600" style="font-variation-settings: 'FILL' 1;">trending_up</span>
                             <div class="flex-1 min-w-0">
                                 <p class="text-xs font-medium text-gray-900 group-hover:text-primary transition-colors line-clamp-2">
                                     {{ $trend['keyword'] }}
@@ -308,7 +341,7 @@
                     <div onclick="selectTopic('{{ addslashes($event) }}', '')" 
                          class="min-w-[160px] max-w-[180px] p-3 bg-orange-50 rounded-lg hover:bg-orange-100 cursor-pointer transition-all group flex-shrink-0 border border-orange-100">
                         <div class="flex items-start gap-1.5">
-                            <span class="text-sm">📅</span>
+                            <span class="material-symbols-outlined text-sm text-orange-600">calendar_month</span>
                             <div class="flex-1 min-w-0">
                                 <p class="text-xs font-medium text-gray-900 group-hover:text-primary transition-colors line-clamp-2">
                                     {{ $event }}
@@ -324,7 +357,7 @@
                     <div onclick="selectTopic('{{ addslashes($news['title']) }}', '')" 
                          class="min-w-[180px] max-w-[200px] p-3 bg-red-50 rounded-lg hover:bg-red-100 cursor-pointer transition-all group flex-shrink-0 border border-red-100">
                         <div class="flex items-start gap-1.5">
-                            <span class="text-sm">📰</span>
+                            <span class="material-symbols-outlined text-sm text-red-600">newspaper</span>
                             <div class="flex-1 min-w-0">
                                 <p class="text-xs font-medium text-gray-900 group-hover:text-primary transition-colors line-clamp-2">
                                     {{ $news['title'] }}
@@ -354,7 +387,7 @@
             <!-- Carte + Aperçu -->
             <div class="bg-white rounded-xl border shadow-sm flex flex-col">
                 <!-- MAP SECTION avec barre de recherche -->
-                <div class="relative w-full" style="height: 320px;">
+                <div class="relative w-full" style="height: 320px;" id="mapContainer">
                     <div class="absolute top-4 left-4 right-4 z-20">
                         <div class="relative max-w-md">
                             <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">search</span>
@@ -487,7 +520,6 @@
     .mode-btn:hover {
         transform: scale(1.02);
     }
-    /* Scrollbar personnalisée */
     .overflow-x-auto::-webkit-scrollbar {
         height: 4px;
     }
@@ -638,14 +670,13 @@
         } catch (error) { document.getElementById('mapStatus').innerHTML = '❌ Erreur de recherche'; }
     }
     
-    // Attacher l'événement de recherche
     document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('mapSearchInput')?.addEventListener('keypress', searchMapLocation);
     });
     
     function toggleWebsiteField() {
         let field = document.getElementById('websiteField');
-        let btn = event?.target?.closest('button') || document.querySelector('button[onclick="toggleWebsiteField()"]');
+        let btn = document.querySelector('button[onclick="toggleWebsiteField()"]');
         if (field.classList.contains('hidden')) {
             field.classList.remove('hidden');
             if (btn) btn.innerHTML = '<span class="material-symbols-outlined text-sm">remove</span> Supprimer mon site web';
@@ -676,69 +707,97 @@
             document.getElementById('businessNameError').classList.add('hidden');
         }
         
-        if (!address) {
-            document.getElementById('address').classList.add('border-red-500');
-            document.getElementById('addressError').classList.remove('hidden');
-            isValid = false;
+        if (currentMode === 'local') {
+            if (!address) {
+                document.getElementById('address').classList.add('border-red-500');
+                document.getElementById('addressError').classList.remove('hidden');
+                isValid = false;
+            } else {
+                document.getElementById('address').classList.remove('border-red-500');
+                document.getElementById('addressError').classList.add('hidden');
+            }
+            
+            if (!geoVille) {
+                document.getElementById('geoVille').classList.add('border-red-500');
+                document.getElementById('geoVilleError').classList.remove('hidden');
+                isValid = false;
+            } else {
+                document.getElementById('geoVille').classList.remove('border-red-500');
+                document.getElementById('geoVilleError').classList.add('hidden');
+            }
         } else {
             document.getElementById('address').classList.remove('border-red-500');
             document.getElementById('addressError').classList.add('hidden');
         }
         
-        if (currentMode === 'local' && !geoVille) {
-            document.getElementById('geoVille').classList.add('border-red-500');
-            document.getElementById('geoVilleError').classList.remove('hidden');
-            isValid = false;
-        } else if (document.getElementById('geoVille')) {
-            document.getElementById('geoVille').classList.remove('border-red-500');
-            document.getElementById('geoVilleError').classList.add('hidden');
-        }
         return isValid;
     }
     
+    // =============================================
+    // SWITCH MODE
+    // =============================================
+    
     function switchMode(mode) {
         currentMode = mode;
+        
         let localBtn = document.querySelector('[data-mode="local"]');
         let onlineBtn = document.querySelector('[data-mode="online"]');
-        let localFields = document.getElementById('localFields');
+        let localFieldsContainer = document.getElementById('localFieldsContainer');
         let onlineFields = document.getElementById('onlineFields');
-        let localDetailsFields = document.getElementById('localDetailsFields');
-        let goalsFields = document.getElementById('goalsFields');
+        let addressField = document.getElementById('addressField');
+        let addressRequired = document.getElementById('addressRequired');
+        let addressError = document.getElementById('addressError');
         let geoZoneFields = document.getElementById('geoZoneFields');
+        let goalsFields = document.getElementById('goalsFields');
+        let mapContainer = document.getElementById('mapContainer');
         let subjectLabel = document.getElementById('subjectLabel');
         let tipTitle = document.getElementById('tipTitle');
         let tipText = document.getElementById('tipText');
         let previewBadge = document.getElementById('previewBadge');
         
         if (mode === 'local') {
+            // --- MODE LOCAL ---
             localBtn.classList.add('bg-white', 'text-primary', 'shadow-sm', 'ring-1', 'ring-black/5');
             localBtn.classList.remove('text-gray-600');
             onlineBtn.classList.remove('bg-white', 'text-primary', 'shadow-sm', 'ring-1', 'ring-black/5');
             onlineBtn.classList.add('text-gray-600');
-            localFields.classList.remove('hidden');
+            
+            localFieldsContainer.classList.remove('hidden');
             onlineFields.classList.add('hidden');
-            localDetailsFields.classList.remove('hidden');
+            addressField.classList.remove('hidden');
+            addressRequired.classList.remove('hidden');
+            addressError.classList.add('hidden');
+            geoZoneFields.classList.remove('hidden');
             goalsFields.classList.remove('hidden');
-            if (geoZoneFields) geoZoneFields.classList.remove('hidden');
+            mapContainer.classList.remove('hidden');
+            
             subjectLabel.innerText = "Sujet de l'article local";
             tipTitle.innerText = "Conseil Local";
             tipText.innerHTML = "L'agent NEARSEO intègre automatiquement votre zone géographique (quartier/ville/pays) dans l'article pour un ciblage SEO ultra-précis.";
             previewBadge.innerText = "Mode Local Actif";
+            
             updateMapFromGeoZone();
+            
         } else {
+            // --- MODE ENTREPRISE EN LIGNE ---
             onlineBtn.classList.add('bg-white', 'text-primary', 'shadow-sm', 'ring-1', 'ring-black/5');
             onlineBtn.classList.remove('text-gray-600');
             localBtn.classList.remove('bg-white', 'text-primary', 'shadow-sm', 'ring-1', 'ring-black/5');
             localBtn.classList.add('text-gray-600');
+            
+            localFieldsContainer.classList.add('hidden');
             onlineFields.classList.remove('hidden');
-            localFields.classList.add('hidden');
-            localDetailsFields.classList.add('hidden');
+            addressField.classList.add('hidden');
+            geoZoneFields.classList.add('hidden');
             goalsFields.classList.add('hidden');
-            if (geoZoneFields) geoZoneFields.classList.add('hidden');
+            mapContainer.classList.add('hidden');
+            
             subjectLabel.innerText = "Sujet de l'article";
             tipTitle.innerText = "Conseil Entreprise";
             tipText.innerHTML = "L'agent NEARSEO va générer un article optimisé pour votre site web avec des backlinks pertinents.";
             previewBadge.innerText = "Mode Global Actif";
+            
+            document.getElementById('address').value = '';
         }
     }
     
@@ -772,7 +831,7 @@
     }
     
     // =============================================
-    // SÉLECTION D'UN SUJET (Tendances)
+    // SÉLECTION D'UN SUJET
     // =============================================
 
     function selectTopic(topic, keywords) {
@@ -782,7 +841,6 @@
         }
         document.getElementById('subject').focus();
         
-        // Mettre en évidence le champ
         document.getElementById('subject').style.borderColor = '#8c4a2f';
         document.getElementById('subject').style.backgroundColor = '#f0f7ff';
         setTimeout(() => {
@@ -790,29 +848,12 @@
             document.getElementById('subject').style.backgroundColor = '';
         }, 2000);
         
-        // Scroll vers le champ sujet
         document.getElementById('subject').scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-
-    function copyText(text) {
-        if (navigator.clipboard) {
-            navigator.clipboard.writeText(text).then(() => {
-                showToast('✅ Copié dans le presse-papier !');
-            });
-        } else {
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textarea);
-            showToast('✅ Copié dans le presse-papier !');
-        }
     }
 
     function showToast(message) {
         const toast = document.createElement('div');
-        toast.textContent = message;
+        toast.innerHTML = message;
         toast.style.cssText = `
             position: fixed; bottom: 20px; right: 20px;
             background: #1a1a2e; color: white;
@@ -820,13 +861,41 @@
             z-index: 9999; font-size: 14px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             animation: slideUp 0.3s ease-out;
+            max-width: 400px;
         `;
         document.body.appendChild(toast);
         setTimeout(() => {
             toast.style.opacity = '0';
             toast.style.transition = 'opacity 0.3s';
             setTimeout(() => toast.remove(), 300);
-        }, 3000);
+        }, 4000);
+    }
+
+    // =============================================
+    // CATÉGORIE PERSONNALISÉE
+    // =============================================
+
+    function toggleCategoryInput(value) {
+        const customContainer = document.getElementById('customCategoryContainer');
+        const customInput = document.getElementById('customCategory');
+        
+        if (value === 'other') {
+            customContainer.classList.remove('hidden');
+            customInput.focus();
+        } else {
+            customContainer.classList.add('hidden');
+            customInput.value = '';
+        }
+    }
+
+    function getCategoryValue() {
+        const select = document.getElementById('category');
+        const customInput = document.getElementById('customCategory');
+        
+        if (select.value === 'other' && customInput.value.trim()) {
+            return customInput.value.trim();
+        }
+        return select.value || null;
     }
 
     // =============================================
@@ -834,186 +903,174 @@
     // =============================================
     
     async function generateArticle() {
-    // ✅ Validation frontend renforcée
-    const businessName = document.getElementById('businessName').value.trim();
-    const subject = document.getElementById('subject').value.trim();
-    const address = document.getElementById('address').value.trim();
-    const geoVille = document.getElementById('geoVille')?.value.trim();
-    
-    let errors = [];
-    if (!businessName) errors.push('Le nom du commerce est obligatoire');
-    if (!subject) errors.push('Le sujet de l\'article est obligatoire');
-    if (!address) errors.push('L\'adresse est obligatoire');
-    if (currentMode === 'local' && !geoVille) errors.push('La ville est obligatoire en mode local');
-    
-    if (errors.length > 0) {
-        showToast('❌ ' + errors.join('<br>'));
-        return;
-    }
-    
-    const btn = document.getElementById('generateBtn');
-    const originalHtml = btn.innerHTML;
-    btn.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span> Génération en cours...';
-    btn.disabled = true;
-    
-    document.getElementById('emptyState').classList.add('hidden');
-    document.getElementById('articleContent').classList.remove('hidden');
-    document.getElementById('articleContent').innerHTML = `
-        <div class="space-y-4 animate-pulse">
-            <div class="h-8 bg-gray-200 rounded w-3/4"></div>
-            <div class="h-4 bg-gray-200 rounded w-full"></div>
-            <div class="h-4 bg-gray-200 rounded w-5/6"></div>
-            <div class="h-4 bg-gray-200 rounded w-4/5"></div>
-            <div class="h-32 bg-gray-200 rounded w-full"></div>
-        </div>
-    `;
-    
-    const payload = {
-        mode: currentMode,
-        business_name: businessName,
-        subject: subject,
-        address: address,
-        language: document.getElementById('language').value,
-        tone: document.getElementById('tone').value,
-        format: ['short', 'medium', 'long'][document.getElementById('lengthSlider').value - 1]
-    };
-    
-    if (currentMode === 'local') {
-        payload.website = document.getElementById('website').value || '';
-        payload.hours = document.getElementById('hours').value || '';
-        payload.goals = Array.from(document.querySelectorAll('.goal-checkbox:checked')).map(cb => cb.value);
-        payload.geo_quartier = document.getElementById('geoQuartier')?.value || '';
-        payload.geo_ville = document.getElementById('geoVille')?.value || '';
-        payload.geo_pays = document.getElementById('geoPays')?.value || 'Maroc';
-    } else {
-        payload.website = document.getElementById('websiteOnline').value || '';
-        payload.keywords = document.getElementById('keywords').value || '';
-    }
-    
-    console.log('🔍 Payload envoyé:', payload);
-    
-    try {
-        const response = await fetch('{{ route("ai.generate") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            },
-            body: JSON.stringify(payload)
-        });
+        // ✅ Validation
+        const businessName = document.getElementById('businessName').value.trim();
+        const subject = document.getElementById('subject').value.trim();
         
-        // ✅ Lire la réponse brute pour débogage
-        const responseText = await response.text();
-        let data;
-        try {
-            data = JSON.parse(responseText);
-        } catch (e) {
-            console.error('❌ Réponse non-JSON:', responseText);
-            document.getElementById('articleContent').innerHTML = `
-                <div class="text-center py-12">
-                    <span class="material-symbols-outlined text-5xl text-red-500">error</span>
-                    <p class="text-red-600 mt-4 font-semibold">❌ Erreur serveur</p>
-                    <pre class="mt-4 text-left text-xs bg-gray-100 p-4 rounded-lg overflow-auto max-h-60">${responseText.substring(0, 500)}</pre>
-                    <button onclick="generateArticle()" class="mt-4 px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition">
-                        Réessayer
-                    </button>
-                </div>
-            `;
-            btn.innerHTML = originalHtml;
-            btn.disabled = false;
+        let errors = [];
+        if (!businessName) errors.push('Le nom du commerce est obligatoire');
+        if (!subject) errors.push('Le sujet de l\'article est obligatoire');
+        
+        if (currentMode === 'local') {
+            const address = document.getElementById('address').value.trim();
+            const geoVille = document.getElementById('geoVille')?.value.trim();
+            if (!address) errors.push('L\'adresse est obligatoire en mode local');
+            if (!geoVille) errors.push('La ville est obligatoire en mode local');
+        }
+        
+        if (currentMode === 'online') {
+            const website = document.getElementById('websiteOnline').value.trim();
+            if (!website) errors.push('Le site web est obligatoire en mode entreprise en ligne');
+        }
+        
+        if (errors.length > 0) {
+            showToast('❌ ' + errors.join('<br>'));
             return;
         }
         
-        console.log('📦 Réponse:', data);
+        const btn = document.getElementById('generateBtn');
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span> Génération en cours...';
+        btn.disabled = true;
         
-        // ✅ Gestion des erreurs détaillée
-        if (!response.ok) {
-            let errorMessage = data.message || 'Erreur inconnue';
-            let errorDetails = '';
-            
-            if (data.errors) {
-                errorDetails = Object.entries(data.errors)
-                    .map(([field, messages]) => `• ${field}: ${messages.join(', ')}`)
-                    .join('<br>');
-            }
-            
-            if (data.error) {
-                errorDetails += `<br>💡 ${data.error}`;
-            }
-            
-            if (data.code === 'gemini_unavailable') {
-                errorMessage = '⚠️ API Gemini indisponible';
-                errorDetails = 'Veuillez réessayer dans quelques instants ou contacter le support.';
-            }
-            
-            document.getElementById('articleContent').innerHTML = `
-                <div class="text-center py-12">
-                    <span class="material-symbols-outlined text-5xl text-red-500">error</span>
-                    <p class="text-red-600 mt-4 font-semibold">❌ ${errorMessage}</p>
-                    ${errorDetails ? `<div class="text-sm text-gray-600 mt-2">${errorDetails}</div>` : ''}
-                    ${data.fallback ? `<p class="text-sm text-yellow-600 mt-2">🔄 Mode dégradé activé</p>` : ''}
-                    <button onclick="generateArticle()" class="mt-4 px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition">
-                        Réessayer
-                    </button>
-                </div>
-            `;
-            btn.innerHTML = originalHtml;
-            btn.disabled = false;
-            return;
-        }
-        
-        // ✅ Succès
-        if (data.success) {
-            if (data.is_fallback) {
-                showToast('⚠️ Article généré en mode dégradé (API indisponible)');
-            } else {
-                showToast('✅ Article généré avec succès !');
-            }
-            
-            // ✅ Mettre à jour les variables globales
-            generatedContent = data.content || '';
-            currentSeoScore = data.seo_score || 0;
-            
-            // ✅ Redirection ou affichage
-            if (data.redirect_url) {
-                setTimeout(() => {
-                    window.location.href = data.redirect_url;
-                }, 1500);
-            } else {
-                document.getElementById('articleContent').innerHTML = data.content || 'Contenu vide';
-                if (data.seo_score) {
-                    updateSeoScore(data.seo_score);
-                }
-                enableActions();
-            }
-        } else {
-            document.getElementById('articleContent').innerHTML = `
-                <div class="text-center py-12">
-                    <span class="material-symbols-outlined text-5xl text-red-500">error</span>
-                    <p class="text-red-600 mt-4 font-semibold">❌ ${data.message || 'Génération échouée'}</p>
-                    <button onclick="generateArticle()" class="mt-4 px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition">
-                        Réessayer
-                    </button>
-                </div>
-            `;
-        }
-    } catch (error) {
-        console.error('❌ Erreur réseau:', error);
+        document.getElementById('emptyState').classList.add('hidden');
+        document.getElementById('articleContent').classList.remove('hidden');
         document.getElementById('articleContent').innerHTML = `
-            <div class="text-center py-12">
-                <span class="material-symbols-outlined text-5xl text-red-500">wifi_off</span>
-                <p class="text-red-600 mt-4 font-semibold">❌ Erreur de connexion</p>
-                <p class="text-sm text-gray-500 mt-2">${error.message || 'Veuillez vérifier votre connexion internet'}</p>
-                <button onclick="generateArticle()" class="mt-4 px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition">
-                    Réessayer
-                </button>
+            <div class="space-y-4 animate-pulse">
+                <div class="h-8 bg-gray-200 rounded w-3/4"></div>
+                <div class="h-4 bg-gray-200 rounded w-full"></div>
+                <div class="h-4 bg-gray-200 rounded w-5/6"></div>
+                <div class="h-4 bg-gray-200 rounded w-4/5"></div>
+                <div class="h-32 bg-gray-200 rounded w-full"></div>
             </div>
         `;
-    } finally {
-        btn.innerHTML = originalHtml;
-        btn.disabled = false;
+        
+        const payload = {
+            mode: currentMode,
+            business_name: businessName,
+            subject: subject,
+            category: getCategoryValue(),
+            language: document.getElementById('language').value,
+            tone: document.getElementById('tone').value,
+            format: ['short', 'medium', 'long'][document.getElementById('lengthSlider').value - 1]
+        };
+        
+        if (currentMode === 'local') {
+            payload.address = document.getElementById('address').value.trim();
+            payload.website = document.getElementById('website').value || '';
+            payload.goals = Array.from(document.querySelectorAll('.goal-checkbox:checked')).map(cb => cb.value);
+            payload.geo_quartier = document.getElementById('geoQuartier')?.value || '';
+            payload.geo_ville = document.getElementById('geoVille')?.value || '';
+            payload.geo_pays = document.getElementById('geoPays')?.value || 'Maroc';
+        } else {
+            payload.website = document.getElementById('websiteOnline').value.trim();
+            payload.keywords = document.getElementById('keywords').value || '';
+        }
+        
+        console.log('🔍 Payload envoyé:', payload);
+        
+        try {
+            const response = await fetch('{{ route("ai.generate") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify(payload)
+            });
+            
+            const responseText = await response.text();
+            let data;
+            try {
+                data = JSON.parse(responseText);
+            } catch (e) {
+                console.error('❌ Réponse non-JSON:', responseText);
+                document.getElementById('articleContent').innerHTML = `
+                    <div class="text-center py-12">
+                        <span class="material-symbols-outlined text-5xl text-red-500">error</span>
+                        <p class="text-red-600 mt-4 font-semibold">❌ Erreur serveur</p>
+                        <pre class="mt-4 text-left text-xs bg-gray-100 p-4 rounded-lg overflow-auto max-h-60">${responseText.substring(0, 500)}</pre>
+                        <button onclick="generateArticle()" class="mt-4 px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition">
+                            Réessayer
+                        </button>
+                    </div>
+                `;
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+                return;
+            }
+            
+            console.log('📦 Réponse:', data);
+            
+            if (!response.ok) {
+                let errorMessage = data.message || 'Erreur inconnue';
+                let errorDetails = '';
+                
+                if (data.errors) {
+                    errorDetails = Object.entries(data.errors)
+                        .map(([field, messages]) => `• ${field}: ${messages.join(', ')}`)
+                        .join('<br>');
+                }
+                
+                document.getElementById('articleContent').innerHTML = `
+                    <div class="text-center py-12">
+                        <span class="material-symbols-outlined text-5xl text-red-500">error</span>
+                        <p class="text-red-600 mt-4 font-semibold">❌ ${errorMessage}</p>
+                        ${errorDetails ? `<div class="text-sm text-gray-600 mt-2">${errorDetails}</div>` : ''}
+                        <button onclick="generateArticle()" class="mt-4 px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition">
+                            Réessayer
+                        </button>
+                    </div>
+                `;
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+                return;
+            }
+            
+            if (data.success) {
+                showToast('✅ Article généré avec succès !');
+                generatedContent = data.content || '';
+                currentSeoScore = data.seo_score || 0;
+                
+                if (data.redirect_url) {
+                    setTimeout(() => {
+                        window.location.href = data.redirect_url;
+                    }, 1500);
+                } else {
+                    document.getElementById('articleContent').innerHTML = data.content || 'Contenu vide';
+                    if (data.seo_score) {
+                        updateSeoScore(data.seo_score);
+                    }
+                    enableActions();
+                }
+            } else {
+                document.getElementById('articleContent').innerHTML = `
+                    <div class="text-center py-12">
+                        <span class="material-symbols-outlined text-5xl text-red-500">error</span>
+                        <p class="text-red-600 mt-4 font-semibold">❌ ${data.message || 'Génération échouée'}</p>
+                        <button onclick="generateArticle()" class="mt-4 px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition">
+                            Réessayer
+                        </button>
+                    </div>
+                `;
+            }
+        } catch (error) {
+            console.error('❌ Erreur réseau:', error);
+            document.getElementById('articleContent').innerHTML = `
+                <div class="text-center py-12">
+                    <span class="material-symbols-outlined text-5xl text-red-500">wifi_off</span>
+                    <p class="text-red-600 mt-4 font-semibold">❌ Erreur de connexion</p>
+                    <p class="text-sm text-gray-500 mt-2">${error.message || 'Veuillez vérifier votre connexion internet'}</p>
+                    <button onclick="generateArticle()" class="mt-4 px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition">
+                        Réessayer
+                    </button>
+                </div>
+            `;
+        } finally {
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+        }
     }
-}
     
     function rewriteArticle() { 
         alert('🔄 Fonctionnalité à venir : Reformulation de l\'article avec l\'agent NEARSEO'); 
@@ -1023,6 +1080,7 @@
         if (!generatedContent) return;
         let title = prompt('Titre de l\'article :', document.getElementById('subject').value);
         if (!title) return;
+        
         fetch('{{ route("articles.store") }}', {
             method: 'POST',
             headers: {
@@ -1034,32 +1092,45 @@
                 content: generatedContent,
                 seo_score: currentSeoScore,
                 status: 'published',
-                address: document.getElementById('address').value,
+                category: getCategoryValue(),
+                address: document.getElementById('address').value || '',
                 business_name: document.getElementById('businessName').value,
+                mode: currentMode,
                 geo_ville: document.getElementById('geoVille')?.value || '',
                 geo_pays: document.getElementById('geoPays')?.value || ''
             })
         }).then(response => {
             if (response.ok) {
-                alert('✅ Article publié avec succès !');
-                window.location.href = '{{ route("articles.index") }}';
-            } else alert('Erreur lors de la publication');
-        }).catch(error => alert('Erreur de connexion'));
+                showToast('✅ Article publié avec succès !');
+                setTimeout(() => {
+                    window.location.href = '{{ route("articles.index") }}';
+                }, 1000);
+            } else {
+                showToast('❌ Erreur lors de la publication');
+            }
+        }).catch(error => {
+            showToast('❌ Erreur de connexion');
+        });
     }
     
-    // Événements de validation en temps réel
+    // =============================================
+    // ÉVÉNEMENTS DE VALIDATION
+    // =============================================
+    
     document.getElementById('businessName')?.addEventListener('input', function() {
         if (this.value.trim()) {
             this.classList.remove('border-red-500');
             document.getElementById('businessNameError')?.classList.add('hidden');
         }
     });
+    
     document.getElementById('address')?.addEventListener('input', function() {
         if (this.value.trim()) {
             this.classList.remove('border-red-500');
             document.getElementById('addressError')?.classList.add('hidden');
         }
     });
+    
     document.getElementById('geoVille')?.addEventListener('input', function() {
         if (this.value.trim()) {
             this.classList.remove('border-red-500');
@@ -1067,12 +1138,30 @@
         }
     });
     
-    // Initialisation
+    document.getElementById('websiteOnline')?.addEventListener('input', function() {
+        if (this.value.trim()) {
+            this.classList.remove('border-red-500');
+            document.getElementById('websiteOnlineError')?.classList.add('hidden');
+        }
+    });
+    
+    // =============================================
+    // INITIALISATION
+    // =============================================
+    
     document.addEventListener('DOMContentLoaded', () => {
         initMap();
         setupGeoListeners();
         updateLength(2);
         switchMode('local');
+        
+        // 🎯 Vérifier si un sujet est passé dans l'URL (depuis la page tendances)
+        const urlParams = new URLSearchParams(window.location.search);
+        const topic = urlParams.get('topic');
+        const keywords = urlParams.get('keywords');
+        if (topic) {
+            selectTopic(topic, keywords);
+        }
     });
 </script>
 @endpush

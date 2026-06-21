@@ -11,7 +11,7 @@ use Illuminate\Support\Str;
 class Article extends Model
 {
     use HasFactory;
-    
+
     protected $fillable = [
         'user_id',
         'title',
@@ -26,6 +26,7 @@ class Article extends Model
         'seo_grade',
         'seo_details',
         'status',
+        'category',
         'published_at',
         'address',
         'latitude',
@@ -34,7 +35,7 @@ class Article extends Model
         'scheduled_for',
         'scheduled_status'
     ];
-    
+
     protected $casts = [
         'published_at' => 'datetime',
         'seo_score' => 'integer',
@@ -43,7 +44,7 @@ class Article extends Model
         'longitude' => 'decimal:8',
         'content_json' => 'array'
     ];
-    
+
     /**
      * Relation avec l'utilisateur
      */
@@ -51,7 +52,7 @@ class Article extends Model
     {
         return $this->belongsTo(User::class);
     }
-    
+
     /**
      * Scope pour les articles publiés
      */
@@ -59,7 +60,7 @@ class Article extends Model
     {
         return $query->where('status', 'published');
     }
-    
+
     /**
      * Scope pour les brouillons
      */
@@ -67,7 +68,7 @@ class Article extends Model
     {
         return $query->where('status', 'draft');
     }
-    
+
     /**
      * Accesseur pour le résumé
      */
@@ -75,7 +76,7 @@ class Article extends Model
     {
         return Str::limit(strip_tags($this->content), 150);
     }
-    
+
     /**
      * Mutateur pour générer automatiquement le slug
      */
@@ -84,7 +85,7 @@ class Article extends Model
         $this->attributes['title'] = $value;
         $this->attributes['slug'] = Str::slug($value);
     }
-    
+
     /**
      * Convertir le contenu HTML en JSON Editor.js
      */
@@ -93,78 +94,69 @@ class Article extends Model
         if ($this->attributes['content_json'] ?? null) {
             return json_decode($this->attributes['content_json'], true);
         }
-        
+
         return $this->convertHtmlToEditorJs($this->content);
     }
-    
+
     /**
      * Nettoyer et afficher le contenu HTML correctement
      */
-    /**
- * Nettoyer et afficher le contenu HTML correctement
- */
-/**
- * Nettoyer et afficher le contenu HTML correctement
- */
-/**
- * Nettoyer et afficher le contenu HTML correctement
- */
-        public function getDisplayContentAttribute(): string
-        {
-            $content = $this->content;
-            
-            // 1. Supprimer les guillemets au début et à la fin
-            $content = trim($content);
-            if (substr($content, 0, 1) === '"') {
-                $content = substr($content, 1);
-            }
-            if (substr($content, -1) === '"') {
-                $content = substr($content, 0, -1);
-            }
-            
-            // 2. Déséchapper les caractères
-            $content = stripslashes($content);
-            
-            // 3. Remplacer les \n par des sauts de ligne réels
-            $content = str_replace('\\n', "\n", $content);
-            $content = str_replace('\n', "\n", $content);
-            $content = str_replace('\\r', "\r", $content);
-            $content = str_replace('\r', "\r", $content);
-            
-            // 4. Supprimer les guillemets restants
-            $content = str_replace('\"', '"', $content);
-            $content = str_replace("\'", "'", $content);
-            
-            // 5. NE SUPPRIMER QUE LES "n" PROBLÉMATIQUES
-            // Supprimer les "n" qui sont entre les balises (ex: >n<)
-            $content = preg_replace('/>n+</', '><', $content);
-            
-            // Supprimer les "n" qui sont seuls avec des espaces
-            $content = preg_replace('/\s+n\s+/', ' ', $content);
-            
-            // Supprimer les "n" en début ou fin de ligne
-            $content = preg_replace('/^n\s+/', '', $content);
-            $content = preg_replace('/\s+n$/', '', $content);
-            
-            // NE PAS SUPPRIMER les "n" qui font partie des mots
-            // NE PAS utiliser: $content = preg_replace('/\bn\b/', '', $content);
-            // NE PAS utiliser: $content = preg_replace('/n{2,}/', '', $content);
-            
-            // 6. Corriger les apostrophes manquantes
-            $content = str_replace("'est", "n'est", $content);
-            $content = str_replace("'hésitez", "n'hésitez", $content);
-            $content = str_replace("'a", "n'a", $content);
-            $content = str_replace("'y", "n'y", $content);
-            $content = str_replace("'", "'", $content);
-            
-            // 7. Nettoyer les espaces multiples
-            $content = preg_replace('/\s+/', ' ', $content);
-            
-            // 8. Restaurer les espaces autour des balises
-            $content = preg_replace('/>\s+</', '><', $content);
-            
-            return $content;
+    public function getDisplayContentAttribute(): string
+    {
+        $content = $this->content;
+
+        // 1. Supprimer les guillemets au début et à la fin
+        $content = trim($content);
+        if (substr($content, 0, 1) === '"') {
+            $content = substr($content, 1);
         }
+        if (substr($content, -1) === '"') {
+            $content = substr($content, 0, -1);
+        }
+
+        // 2. Déséchapper les caractères
+        $content = stripslashes($content);
+
+        // 3. Remplacer les \n par des sauts de ligne réels
+        $content = str_replace('\\n', "\n", $content);
+        $content = str_replace('\n', "\n", $content);
+        $content = str_replace('\\r', "\r", $content);
+        $content = str_replace('\r', "\r", $content);
+
+        // 4. Supprimer les guillemets restants
+        $content = str_replace('\"', '"', $content);
+        $content = str_replace("\'", "'", $content);
+
+        // 5. NE SUPPRIMER QUE LES "n" PROBLÉMATIQUES
+        // Supprimer les "n" qui sont entre les balises (ex: >n<)
+        $content = preg_replace('/>n+</', '><', $content);
+
+        // Supprimer les "n" qui sont seuls avec des espaces
+        $content = preg_replace('/\s+n\s+/', ' ', $content);
+
+        // Supprimer les "n" en début ou fin de ligne
+        $content = preg_replace('/^n\s+/', '', $content);
+        $content = preg_replace('/\s+n$/', '', $content);
+
+        // NE PAS SUPPRIMER les "n" qui font partie des mots
+        // NE PAS utiliser: $content = preg_replace('/\bn\b/', '', $content);
+        // NE PAS utiliser: $content = preg_replace('/n{2,}/', '', $content);
+
+        // 6. Corriger les apostrophes manquantes
+        $content = str_replace("'est", "n'est", $content);
+        $content = str_replace("'hésitez", "n'hésitez", $content);
+        $content = str_replace("'a", "n'a", $content);
+        $content = str_replace("'y", "n'y", $content);
+        $content = str_replace("'", "'", $content);
+
+        // 7. Nettoyer les espaces multiples
+        $content = preg_replace('/\s+/', ' ', $content);
+
+        // 8. Restaurer les espaces autour des balises
+        $content = preg_replace('/>\s+</', '><', $content);
+
+        return $content;
+    }
     /**
      * Convertir HTML en format Editor.js
      */
@@ -175,7 +167,7 @@ class Article extends Model
         }
 
         $blocks = [];
-        
+
         // Extraire le titre H1
         preg_match('/<h1[^>]*>(.*?)<\/h1>/i', $html, $h1Matches);
         if (!empty($h1Matches[1])) {

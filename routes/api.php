@@ -10,6 +10,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingsController;
 use App\Models\User;
 use App\Models\Article;
+use App\Http\Controllers\Api\SeoController;
 
 // ⭐ Routes publiques
 Route::get('/', function () {
@@ -67,6 +68,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/', [SettingsController::class, 'update']);
         Route::post('password', [SettingsController::class, 'updatePassword']);
     });
+
+    // ⭐ SEO Analyse - Déplacé ici (dans le groupe auth)
+    Route::post('/seo/analyze', [App\Http\Controllers\Api\SeoController::class, 'analyze']);
 
     // ⭐ Routes admin (API)
     Route::middleware(['admin'])->prefix('admin')->name('api.admin.')->group(function () {

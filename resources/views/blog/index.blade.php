@@ -1,346 +1,400 @@
 {{-- resources/views/blog/index.blade.php --}}
 <!DOCTYPE html>
-<html lang="fr">
+<html class="scroll-smooth light" lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Blog - NearSEO</title>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Blog NEARSEO</title>
     
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container": "#e3efff",
+                        "background": "#f7f9ff",
+                        "surface-container-low": "#edf4ff",
+                        "on-tertiary-fixed": "#2e1500",
+                        "surface-container-high": "#d9eaff",
+                        "secondary-fixed": "#c9ecc9",
+                        "primary-fixed-dim": "#ffb599",
+                        "on-primary-container": "#fffbff",
+                        "surface-dim": "#c9dcf3",
+                        "secondary": "#47664b",
+                        "tertiary": "#8c4b00",
+                        "surface-container-highest": "#d1e4fb",
+                        "inverse-primary": "#ffb599",
+                        "on-primary-fixed-variant": "#71361c",
+                        "secondary-container": "#c9ecc9",
+                        "primary-container": "#a96245",
+                        "on-error-container": "#93000a",
+                        "surface": "#f7f9ff",
+                        "secondary-fixed-dim": "#adcfae",
+                        "on-tertiary-fixed-variant": "#6d3900",
+                        "on-secondary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "outline": "#86736c",
+                        "on-primary-fixed": "#370e00",
+                        "tertiary-fixed-dim": "#ffb77c",
+                        "surface-bright": "#f7f9ff",
+                        "on-secondary-fixed": "#03210c",
+                        "primary-fixed": "#ffdbce",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-container": "#fffbff",
+                        "surface-tint": "#8e4c31",
+                        "on-background": "#091d2e",
+                        "on-secondary-container": "#4d6c50",
+                        "on-secondary-fixed-variant": "#304d34",
+                        "inverse-surface": "#203243",
+                        "outline-variant": "#d9c2ba",
+                        "tertiary-container": "#b06000",
+                        "error-container": "#ffdad6",
+                        "primary": "#8c4a2f",
+                        "surface-container-lowest": "#ffffff",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed": "#ffdcc2",
+                        "on-surface": "#091d2e",
+                        "surface-variant": "#d1e4fb",
+                        "on-tertiary": "#ffffff",
+                        "on-surface-variant": "#53433d",
+                        "inverse-on-surface": "#e8f2ff"
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.125rem",
+                        lg: "0.25rem",
+                        xl: "0.5rem",
+                        full: "0.75rem"
+                    },
+                    spacing: {
+                        "container-max-width": "1280px",
+                        "stack-gap-md": "16px",
+                        "section-margin": "32px",
+                        "card-padding": "24px",
+                        "stack-gap-sm": "8px",
+                        "gutter": "16px"
+                    },
+                    fontFamily: {
+                        label: ["Inter"],
+                        h3: ["Inter"],
+                        "h1-mobile": ["Inter"],
+                        body: ["Inter"],
+                        "body-sm": ["Inter"],
+                        h2: ["Inter"],
+                        h1: ["Inter"]
+                    },
+                    fontSize: {
+                        label: ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        h3: ["18px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "h1-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        body: ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        h2: ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                        h1: ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+                    }
+                }
+            },
+        }
+    </script>
     
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #f8f9fa;
-            color: #1a1a2e;
-        }
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
             vertical-align: middle;
         }
-        .blog-title {
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: #1a1a2e;
-            letter-spacing: -0.02em;
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 32px;
         }
-        .blog-title a {
-            color: #1a1a2e;
-            text-decoration: none;
+        .article-card:hover .article-image {
+            transform: scale(1.02);
         }
-        .blog-title a:hover {
-            color: #8c4a2f;
+        .article-image {
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .blog-description {
-            color: #6b7280;
-            font-size: 0.95rem;
-            margin-top: 0.25rem;
+        .sidebar-glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
         }
-        .search-box {
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 0.5rem;
-            padding: 0.5rem 1rem;
-            width: 100%;
-            font-size: 0.9rem;
+        .line-clamp-3 {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
-        .search-box:focus {
-            outline: none;
-            border-color: #8c4a2f;
-            box-shadow: 0 0 0 3px rgba(140, 74, 47, 0.1);
-        }
-        .article-card {
-            background: white;
-            border-radius: 0.75rem;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            border: 1px solid #f0f0f0;
-            transition: all 0.2s;
-        }
-        .article-card:hover {
-            border-color: #e5e7eb;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        }
-        .article-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: #1a1a2e;
-            margin-bottom: 0.5rem;
-        }
-        .article-title a {
-            color: #1a1a2e;
-            text-decoration: none;
-        }
-        .article-title a:hover {
-            color: #8c4a2f;
-            text-decoration: underline;
-        }
-        .article-meta {
-            font-size: 0.85rem;
-            color: #6b7280;
-            margin-bottom: 0.5rem;
-        }
-        .article-excerpt {
-            font-size: 0.95rem;
-            color: #4b5563;
-            line-height: 1.6;
-        }
-        .article-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 0.75rem;
-        }
-        .tag {
-            font-size: 0.75rem;
-            color: #6b7280;
-            background: #f3f4f6;
-            padding: 0.25rem 0.75rem;
-            border-radius: 1rem;
-            text-decoration: none;
-        }
-        .tag:hover {
-            background: #8c4a2f;
-            color: white;
-        }
-        .sidebar-title {
-            font-size: 0.85rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #6b7280;
-            margin-bottom: 0.75rem;
-        }
-        .sidebar-item {
-            display: block;
-            padding: 0.5rem 0;
-            color: #1a1a2e;
-            text-decoration: none;
-            font-size: 0.9rem;
-            border-bottom: 1px solid #f3f4f6;
-        }
-        .sidebar-item:hover {
-            color: #8c4a2f;
-        }
-        .sidebar-item .count {
-            color: #9ca3af;
-            font-size: 0.8rem;
-            float: right;
-        }
-        .profile-card {
-            text-align: center;
-            padding: 1.5rem;
-            background: white;
-            border-radius: 0.75rem;
-            border: 1px solid #f0f0f0;
-        }
-        .profile-name {
-            font-weight: 700;
-            font-size: 1.1rem;
-            margin-top: 0.5rem;
-        }
-        .profile-desc {
-            font-size: 0.85rem;
-            color: #6b7280;
-            margin-top: 0.25rem;
-        }
-        .btn-subscribe {
-            background: #8c4a2f;
-            color: white;
-            padding: 0.5rem 2rem;
-            border-radius: 0.5rem;
-            border: none;
-            font-weight: 600;
-            font-size: 0.9rem;
-            cursor: pointer;
-            margin-top: 0.75rem;
-        }
-        .btn-subscribe:hover {
-            background: #6d3a25;
-        }
-        .pagination {
-            display: flex;
-            justify-content: center;
-            gap: 0.5rem;
-            margin-top: 2rem;
-        }
-        .pagination a, .pagination span {
-            padding: 0.5rem 0.75rem;
-            border-radius: 0.5rem;
-            color: #1a1a2e;
-            text-decoration: none;
-            font-size: 0.9rem;
-        }
-        .pagination a:hover {
-            background: #f3f4f6;
-        }
-        .pagination .active {
-            background: #8c4a2f;
-            color: white;
-        }
-        .pagination .disabled {
-            color: #d1d5db;
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
     </style>
 </head>
-<body>
-    <div class="max-w-6xl mx-auto px-4 py-8">
-        <!-- En-tête du blog -->
-        <div class="mb-8">
-            <h1 class="blog-title">
-                <a href="{{ route('blog.index') }}">NearSEO Blog</a>
-            </h1>
-            <p class="blog-description">Articles, guides et conseils pour votre visibilité locale</p>
-        </div>
+<body class="bg-background text-on-surface font-body selection:bg-primary-fixed selection:text-primary">
 
-        <div class="flex flex-col lg:flex-row gap-8">
-            <!-- Main Content -->
-            <div class="lg:w-[65%]">
-                <!-- Articles -->
-                @forelse($articles as $article)
-                <div class="article-card">
-                    @if($article->image)
-                    <div class="mb-3 overflow-hidden rounded-lg">
-                        <img src="{{ asset('storage/' . $article->image) }}" 
-                             alt="{{ $article->title }}" 
-                             class="w-full h-48 object-cover hover:scale-105 transition-transform duration-300">
+    <main class="max-w-container-max-width mx-auto px-gutter py-section-margin">
+        <div class="bento-grid">
+            <!-- Main Content Area (70%) -->
+            <div class="col-span-12 lg:col-span-8 flex flex-col gap-stack-gap-md">
+                <!-- Blog Header -->
+                <section class="mb-8 text-center lg:text-left">
+                    <div class="flex flex-col items-center lg:flex-row lg:items-start gap-6 mb-6">
+                        <div class="w-24 h-24 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center border-2 border-primary-fixed">
+                            <span class="material-symbols-outlined text-4xl text-primary">article</span>
+                        </div>
+                        <div>
+                            <h1 class="font-h1 text-h1 text-on-surface mb-2">Blog NEARSEO</h1>
+                            <p class="text-on-surface-variant text-body max-w-2xl">Articles, guides et conseils pour votre visibilité locale.</p>
+                            <div class="flex flex-wrap gap-4 mt-3 text-sm text-on-surface-variant">
+                                <span class="flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-sm">article</span>
+                                    {{ $articles->total() }} articles
+                                </span>
+                                <span class="flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-sm">people</span>
+                                    {{ $articles->pluck('user_id')->unique()->count() }} auteurs
+                                </span>
+                            </div>
+                        </div>
                     </div>
-                    @endif
-                    
-                    <h2 class="article-title">
-                        <a href="{{ route('blog.show', $article->slug) }}">
-                            {{ $article->title }}
-                        </a>
-                    </h2>
-                    
-                    <div class="article-meta">
-                        {{ $article->created_at->format('F d, Y') }}
-                        @if($article->read_time)
-                        <span class="mx-2">·</span>
-                        {{ $article->read_time }} min de lecture
-                        @endif
+                </section>
+
+                <!-- Article List -->
+                <div class="flex flex-col gap-8">
+                    @forelse($articles as $article)
+                    <article class="article-card flex flex-col md:flex-row gap-6 bg-surface-container-lowest p-card-padding rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-all">
+                        <div class="w-full md:w-1/3 h-48 rounded-lg overflow-hidden shrink-0">
+                            @if($article->image)
+                            <img class="article-image w-full h-full object-cover" src="{{ asset('storage/' . $article->image) }}" alt="{{ $article->title }}">
+                            @else
+                            <div class="article-image w-full h-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-4xl text-primary/40">article</span>
+                            </div>
+                            @endif
+                        </div>
+                        <div class="flex flex-col justify-between flex-grow">
+                            <div>
+                                <div class="flex items-center gap-3 mb-3">
+                                    <span class="text-body-sm text-on-surface-variant">{{ $article->created_at->format('d F, Y') }}</span>
+                                    <span class="text-body-sm text-on-surface-variant">·</span>
+                                    <span class="text-body-sm text-on-surface-variant">{{ $article->user->name ?? 'Anonyme' }}</span>
+                                    @if($article->focus_keyword)
+                                    <span class="px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full text-label font-label">{{ $article->focus_keyword }}</span>
+                                    @endif
+                                </div>
+                                <h2 class="font-h2 text-h2 text-on-surface mb-2 font-bold cursor-pointer hover:text-primary transition-colors">
+                                    <a href="{{ route('blog.user.article', ['slug' => $article->user->slug, 'articleSlug' => $article->slug]) }}">{{ $article->title }}</a>
+                                </h2>
+                                <p class="text-on-surface-variant text-body-sm line-clamp-3 mb-4">
+                                    {{ $article->excerpt ?? Str::limit(strip_tags($article->content), 150) }}
+                                </p>
+                            </div>
+                            <div class="flex items-center justify-between mt-auto pt-4 border-t border-outline-variant">
+                                <a href="{{ route('blog.user.article', ['slug' => $article->user->slug, 'articleSlug' => $article->slug]) }}" class="text-primary font-bold hover:underline flex items-center gap-2">
+                                    Lire la suite <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                                </a>
+                                <div class="flex gap-4 text-on-surface-variant text-body-sm">
+                                    <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[18px]">visibility</span> {{ number_format($article->views ?? 0) }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                    @empty
+                    <div class="text-center py-16 bg-surface-container-lowest rounded-xl border border-outline-variant">
+                        <span class="material-symbols-outlined text-5xl text-on-surface-variant/40 mb-3">feed</span>
+                        <h3 class="text-lg font-semibold text-on-surface mb-2">Aucun article publié</h3>
+                        <p class="text-on-surface-variant">Aucun article n'a encore été publié sur le blog.</p>
+                        @auth
+                        <a href="{{ route('ai.create') }}" class="inline-block mt-4 bg-primary text-on-primary px-5 py-2 rounded-lg text-sm hover:bg-primary/90 transition">✏️ Créer mon premier article</a>
+                        @endauth
                     </div>
-                    
-                    <p class="article-excerpt">
-                        {{ Str::limit(strip_tags($article->content), 160) }}
-                    </p>
-                    
-                    @if($article->tags)
-                    <div class="article-tags">
-                        @foreach(explode(',', $article->tags) as $tag)
-                        <a href="#" class="tag">{{ trim($tag) }}</a>
-                        @endforeach
-                    </div>
-                    @endif
-                    
-                    <div class="mt-3 text-sm text-gray-400">
-                        <span class="material-symbols-outlined text-sm">visibility</span>
-                        {{ $article->views ?? 0 }} vues
-                        <span class="mx-2">·</span>
-                        <span class="material-symbols-outlined text-sm">comment</span>
-                        0 commentaires
-                    </div>
+                    @endforelse
                 </div>
-                @empty
-                <div class="text-center py-12">
-                    <span class="material-symbols-outlined text-6xl text-gray-300">article</span>
-                    <h3 class="text-xl font-semibold text-gray-600 mt-4">Aucun article publié</h3>
-                    <p class="text-gray-400">Revenez plus tard pour découvrir de nouveaux articles.</p>
-                </div>
-                @endforelse
 
                 <!-- Pagination -->
                 @if($articles->hasPages())
-                <div class="pagination">
+                <nav class="flex items-center justify-center gap-2 mt-8 py-4">
                     {{ $articles->links() }}
-                </div>
+                </nav>
                 @endif
             </div>
 
-            <!-- Sidebar -->
-            <aside class="lg:w-[35%] space-y-6">
-                <!-- Profil -->
-                <div class="profile-card">
-                    <div class="w-20 h-20 rounded-full bg-gray-200 mx-auto flex items-center justify-center">
-                        <span class="material-symbols-outlined text-4xl text-gray-400">person</span>
+            <!-- Sidebar (30%) -->
+            <aside class="col-span-12 lg:col-span-4 flex flex-col gap-8">
+                <!-- Search Bar -->
+                <div class="relative group">
+                    <input id="searchInput" class="w-full pl-12 pr-4 py-3 rounded-xl border border-outline-variant bg-surface-container-lowest focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="Rechercher un article..." type="text"/>
+                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant group-focus-within:text-primary">search</span>
+                </div>
+
+                <!-- About Section -->
+                <section class="bg-surface-container-lowest p-card-padding rounded-xl border border-outline-variant shadow-sm">
+                    <h3 class="font-h3 text-h3 text-on-surface mb-6">À propos</h3>
+                    <div class="flex flex-col items-center text-center">
+                        <div class="w-24 h-24 rounded-full overflow-hidden mb-4 border-2 border-primary-fixed p-1 bg-primary/10 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-4xl text-primary">article</span>
+                        </div>
+                        <p class="font-bold text-on-surface mb-2 font-h2">NEARSEO Blog</p>
+                        <p class="text-on-surface-variant text-body-sm mb-6 leading-relaxed">
+                            Stratégies et conseils pour booster votre visibilité locale.
+                        </p>
+                        @auth
+                        <a href="{{ route('ai.create') }}" class="w-full py-2 bg-primary text-on-primary rounded-lg font-bold hover:bg-primary/90 transition-all text-center">
+                            ✏️ Écrire un article
+                        </a>
+                        @endauth
                     </div>
-                    <div class="profile-name">NearSEO</div>
-                    <div class="profile-desc">Stratégies et conseils pour booster votre visibilité locale</div>
-                    <button class="btn-subscribe">S'abonner</button>
-                </div>
+                </section>
 
-                <!-- Recherche -->
-                <div class="bg-white p-4 rounded-xl border border-gray-100">
-                    <h3 class="sidebar-title">Rechercher dans ce blog</h3>
-                    <input type="text" id="searchInput" class="search-box" placeholder="Rechercher un article...">
-                </div>
-
-                <!-- Articles -->
-                <div class="bg-white p-4 rounded-xl border border-gray-100">
-                    <h3 class="sidebar-title">Articles</h3>
-                    @foreach($recentArticles ?? [] as $recent)
-                    <a href="{{ route('blog.show', $recent->slug) }}" class="sidebar-item">
-                        {{ $recent->title }}
-                        <span class="count">{{ $recent->created_at->format('M d, Y') }}</span>
-                    </a>
-                    @endforeach
-                </div>
+                <!-- Recent Posts -->
+                @if(isset($recentArticles) && $recentArticles->count() > 0)
+                <section class="bg-surface-container-lowest p-card-padding rounded-xl border border-outline-variant shadow-sm">
+                    <h3 class="font-h3 text-h3 text-on-surface mb-4">Articles récents</h3>
+                    <ul class="flex flex-col gap-4">
+                        @foreach($recentArticles as $recent)
+                        <li class="group cursor-pointer">
+                            <p class="text-label text-primary uppercase font-bold mb-1">{{ $recent->created_at->format('d.m.Y') }}</p>
+                            <a href="{{ route('blog.user.article', ['slug' => $recent->user->slug, 'articleSlug' => $recent->slug]) }}" class="text-body font-bold text-on-surface group-hover:text-primary transition-colors line-clamp-2">{{ $recent->title }}</a>
+                        </li>
+                        @endforeach
+                    </ul>
+                </section>
+                @endif
 
                 <!-- Archives -->
                 @if(isset($archives) && $archives->count() > 0)
-                <div class="bg-white p-4 rounded-xl border border-gray-100">
-                    <h3 class="sidebar-title">Archiver</h3>
-                    @foreach($archives as $archive)
-                    <a href="#" class="sidebar-item">
-                        {{ $archive->year }} - {{ date('F', mktime(0, 0, 0, $archive->month, 1)) }}
-                        <span class="count">({{ $archive->count }})</span>
-                    </a>
-                    @endforeach
-                </div>
+                <section class="bg-surface-container-lowest p-card-padding rounded-xl border border-outline-variant shadow-sm">
+                    <h3 class="font-h3 text-h3 text-on-surface mb-4">Archives</h3>
+                    <ul class="flex flex-col gap-2">
+                        @foreach($archives as $archive)
+                        <li class="flex justify-between items-center text-body-sm text-on-surface-variant hover:text-primary cursor-pointer transition-colors">
+                            <span>{{ DateTime::createFromFormat('!m', $archive->month)->format('F') }} {{ $archive->year }}</span>
+                            <span class="text-label bg-surface-container px-2 py-0.5 rounded">{{ $archive->count }}</span>
+                        </li>
+                        @endforeach
+                    </ul>
+                </section>
                 @endif
 
-                <!-- Tags -->
+                <!-- Tag Cloud -->
                 @if(isset($allTags) && $allTags->count() > 0)
-                <div class="bg-white p-4 rounded-xl border border-gray-100">
-                    <h3 class="sidebar-title">Libellés</h3>
-                    <div class="flex flex-wrap gap-1">
+                <section class="bg-surface-container-lowest p-card-padding rounded-xl border border-outline-variant shadow-sm">
+                    <h3 class="font-h3 text-h3 text-on-surface mb-4">Libellés</h3>
+                    <div class="flex flex-wrap gap-2">
                         @foreach($allTags as $tag => $count)
-                        <a href="#" class="tag">
-                            {{ $tag }} ({{ $count }})
-                        </a>
+                        <span class="px-3 py-1 bg-surface-container text-on-surface-variant rounded-full text-label hover:bg-primary-fixed transition-colors cursor-pointer">{{ $tag }}</span>
                         @endforeach
                     </div>
-                </div>
+                </section>
                 @endif
 
-                <!-- Footer blog -->
-                <div class="text-xs text-gray-400 text-center pt-4 border-t border-gray-100">
-                    Fourni par NearSEO
-                </div>
+                <!-- Newsletter -->
+                <section class="bg-primary text-on-primary p-card-padding rounded-xl shadow-lg">
+                    <h3 class="font-h3 text-h3 text-white mb-2">Abonnez-vous</h3>
+                    <p class="text-on-primary text-body-sm mb-4 opacity-90">Recevez les derniers articles directement dans votre boîte mail.</p>
+                    <div class="flex flex-col gap-3">
+                        <input class="w-full px-4 py-2 rounded-lg text-on-surface text-body-sm outline-none" placeholder="votre@email.com" type="email"/>
+                        <button class="w-full py-2 bg-white text-primary font-bold rounded-lg hover:bg-primary-fixed transition-all">S'inscrire</button>
+                    </div>
+                </section>
             </aside>
         </div>
-    </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-surface-container-lowest w-full py-section-margin border-t border-outline-variant/30">
+        <div class="max-w-container-max-width mx-auto px-gutter">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-stack-gap-md mb-12">
+                <div class="flex flex-col gap-4">
+                    <div class="flex items-center gap-2">
+                        <img src="{{ asset('logo.png') }}" 
+                     alt="NEARSEO Logo" 
+                     class="h-12 w-auto"
+                     onerror="this.src='{{ asset('images/logo.png') }}'">
+                    </div>
+                    <p class="font-body-sm text-on-surface-variant max-w-[200px]">Votre agent SEO local au Maroc.</p>
+                </div>
+                <div class="flex flex-col gap-4">
+                    <h5 class="font-label text-primary uppercase">Produit</h5>
+                    <nav class="flex flex-col gap-2">
+                        <a class="font-body-sm text-on-surface-variant hover:text-primary transition" href="#features">Fonctionnalités</a>
+                        <a class="font-body-sm text-on-surface-variant hover:text-primary transition" href="#pricing">Tarifs</a>
+                        <a class="font-body-sm text-on-surface-variant hover:text-primary transition" href="#">Nouveautés</a>
+                    </nav>
+                </div>
+                <div class="flex flex-col gap-4">
+                    <h5 class="font-label text-primary uppercase">Ressources</h5>
+                    <nav class="flex flex-col gap-2">
+                        <a class="font-body-sm text-on-surface-variant hover:text-primary transition" href="{{ route('community') }}">Communauté</a>
+                        <a class="font-body-sm text-on-surface-variant hover:text-primary transition" href="#">Guides SEO</a>
+                        <a class="font-body-sm text-on-surface-variant hover:text-primary transition" href="#">Documentation</a>
+                    </nav>
+                </div>
+                <div class="flex flex-col gap-4">
+                    <h5 class="font-label text-primary uppercase">Contact</h5>
+                    <nav class="flex flex-col gap-2">
+                        <a class="font-body-sm text-on-surface-variant hover:text-primary transition" href="#">Support</a>
+                        <a class="font-body-sm text-on-surface-variant hover:text-primary transition" href="#">Partenaires</a>
+                        <a class="font-body-sm text-on-surface-variant hover:text-primary transition" href="#">Sales</a>
+                    </nav>
+                </div>
+            </div>
+            <div class="pt-8 border-t border-outline-variant/20 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="font-body-sm text-on-surface-variant text-center">© {{ date('Y') }} NEARSEO. Votre agent SEO local au Maroc.</p>
+                <div class="flex gap-6">
+                    <a class="text-on-surface-variant hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined">language</span></a>
+                    <a class="text-on-surface-variant hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined">share</span></a>
+                    <a class="text-on-surface-variant hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined">policy</span></a>
+                </div>
+            </div>
+        </div>
+    </footer>
 
     <script>
-        // Recherche en temps réel
-        document.getElementById('searchInput')?.addEventListener('input', function() {
-            const query = this.value.toLowerCase();
-            const articles = document.querySelectorAll('.article-card');
-            
-            articles.forEach(article => {
-                const title = article.querySelector('.article-title')?.textContent?.toLowerCase() || '';
-                const content = article.querySelector('.article-excerpt')?.textContent?.toLowerCase() || '';
-                
-                if (title.includes(query) || content.includes(query)) {
-                    article.style.display = '';
-                } else {
-                    article.style.display = 'none';
-                }
+        // Micro-interactions
+        document.querySelectorAll('.article-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-4px)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0)';
             });
         });
+
+        // Search bar interaction
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('focus', () => {
+                searchInput.parentElement.classList.add('scale-[1.02]');
+            });
+            searchInput.addEventListener('blur', () => {
+                searchInput.parentElement.classList.remove('scale-[1.02]');
+            });
+            
+            // Recherche en temps réel
+            searchInput.addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                const articles = document.querySelectorAll('.article-card');
+                
+                articles.forEach(article => {
+                    const title = article.querySelector('h2')?.innerText.toLowerCase() || '';
+                    const content = article.querySelector('.line-clamp-3')?.innerText.toLowerCase() || '';
+                    
+                    if (title.includes(searchTerm) || content.includes(searchTerm)) {
+                        article.style.display = '';
+                    } else {
+                        article.style.display = 'none';
+                    }
+                });
+            });
+        }
     </script>
 </body>
 </html>

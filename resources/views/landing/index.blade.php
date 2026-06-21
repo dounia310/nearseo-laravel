@@ -140,7 +140,6 @@
             <a class="text-on-surface-variant font-body text-body hover:text-primary transition-colors" href="#pricing">Tarifs</a>
             <a class="text-on-surface-variant font-body text-body hover:text-primary transition-colors" href="{{ route('community') }}">Communauté</a>
             <a class="text-on-surface-variant font-body text-body hover:text-primary transition-colors flex items-center gap-1" href="{{ route('help') }}">
-                <span class="material-symbols-outlined text-sm">help_outline</span>
                 Aide
             </a>
             <a href="{{ route('login') }}" class="text-on-surface-variant font-body text-body hover:text-primary transition-colors">Connexion</a>

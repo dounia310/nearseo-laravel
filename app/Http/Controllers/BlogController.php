@@ -11,6 +11,67 @@ use Illuminate\Support\Str;
 class BlogController extends Controller
 {
     /**
+     * Page d'accueil du blog - Tous les articles de tous les utilisateurs
+     * URL: /blog
+     */
+    public function index()
+    {
+        $articles = Article::where('status', 'published')
+            ->with('user')
+            ->orderBy('created_at', 'desc')
+            ->paginate(12);
+
+        $recentArticles = Article::where('status', 'published')
+            ->with('user')
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        // Tags populaires
+        $allTags = Article::where('status', 'published')
+            ->whereNotNull('tags')
+            ->pluck('tags')
+            ->map(fn($tag) => explode(',', $tag))
+            ->flatten()
+            ->map('trim')
+            ->filter()
+            ->countBy()
+            ->sortDesc()
+            ->take(20);
+
+        // Archives par mois
+        $archives = Article::where('status', 'published')
+            ->selectRaw('YEAR(created_at) as year, MONTH(created_at) as month, COUNT(*) as count')
+            ->groupBy('year', 'month')
+            ->orderBy('year', 'desc')
+            ->orderBy('month', 'desc')
+            ->get();
+
+        return view('blog.index', compact('articles', 'recentArticles', 'allTags', 'archives'));
+    }
+
+    /**
+     * Afficher un article - REDIRECTION VERS LE BLOG UTILISATEUR
+     * URL: /blog/{slug}
+     */
+    public function show($slug)
+    {
+        // Récupérer l'article
+        $article = Article::where('slug', $slug)
+            ->where('status', 'published')
+            ->firstOrFail();
+
+        // Récupérer l'utilisateur de l'article
+        $user = User::findOrFail($article->user_id);
+
+        // ✅ Rediriger vers la page utilisateur de l'article
+        return redirect()->route('blog.user.article', [
+            'username' => $user->slug,
+            'slug' => $article->slug
+        ]);
+    }
+
+    /**
      * Blog d'un utilisateur spécifique
      * URL: /blog/user/{slug}
      */

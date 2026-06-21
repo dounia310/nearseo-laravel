@@ -1,6 +1,14 @@
-- [ ] Ajouter un endpoint de test connexion Gemini (checkConnection) pour confirmer l’accès depuis le contexte web
-- [ ] Corriger GeminiService : enlever la clé hardcodée, utiliser config/services.php (GEMINI_API_KEY / GEMINI_MODEL)
-- [ ] Améliorer logging GeminiService/AIController (status code, message d’exception complet)
-- [ ] Corriger l’erreur site: aligner le fetch `/api/ai/generate` avec auth Sanctum (ou enlever la protection pour cet endpoint)
-- [ ] Vérifier via navigateur : appel /api/ai/test-connection et /api/ai/generate
-- [ ] Vérifier `storage/logs/laravel.log` et ajuster réseau/TLS si besoin
+# TODO - Email Verification & Password Reset
+
+- [x] Modifier VerifyEmailController pour rediriger vers la page de login (et gérer email déjà vérifié)
+
+- [ ] Modifier VerifyEmailController pour gérer lien expiré (redir vers login + message)
+- [ ] Modifier EmailVerificationPromptController si nécessaire pour cohérence
+- [ ] Modifier PasswordResetLinkController pour messages exacts FR :
+    - [ ] "Adresse email incorrecte"
+    - [ ] "Ce compte n'existe pas"
+
+- [ ] (Optionnel) Modifier NewPasswordController pour cohérence des erreurs
+- [ ] Ajouter traductions FR exactes si nécessaire (ou patcher directement les contrôleurs)
+- [ ] Vérifier que les routes et vues correspondent aux noms attendus
+- [ ] Lancer des tests manuels / commande artisan pour valider

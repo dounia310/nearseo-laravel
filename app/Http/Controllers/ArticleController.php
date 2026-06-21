@@ -53,6 +53,7 @@ class ArticleController extends Controller
             'meta_description' => 'nullable|string|max:255',
             'image' => 'nullable|image|max:2048',
             'status' => 'in:draft,published',
+            'category' => 'nullable|string|max:50',
             'scheduled_date' => 'nullable|date',
             'scheduled_time' => 'nullable|date_format:H:i'
         ]);
@@ -90,7 +91,7 @@ class ArticleController extends Controller
             'seo_score' => $this->calculateSeoScore($validated['content'], $validated['focus_keyword'] ?? '')
         ]);
 
-        $message = $scheduledFor 
+        $message = $scheduledFor
             ? 'Article programmé pour le ' . $scheduledFor->format('d/m/Y à H:i')
             : 'Article créé avec succès !';
 
@@ -108,7 +109,7 @@ class ArticleController extends Controller
         if ($article->status === 'published') {
             return redirect()->route('blog.show', $article->slug);
         }
-        
+
         // Si c'est un brouillon, afficher dans le dashboard
         $article->increment('views');
         return view('dashboard.articles.show', compact('article'));
@@ -212,7 +213,8 @@ class ArticleController extends Controller
             'content' => 'required',
             'focus_keyword' => 'nullable|max:100',
             'meta_description' => 'nullable|string|max:255',
-            'status' => 'in:draft,published'
+            'status' => 'in:draft,published',
+            'category' => 'nullable|string|max:50'
         ]);
 
         $wasPublished = ($validated['status'] === 'published' && $article->status !== 'published');
@@ -249,6 +251,7 @@ class ArticleController extends Controller
             'content_json' => $contentJson ?? $article->content_json,
             'focus_keyword' => strip_tags($validated['focus_keyword'] ?? ''),
             'meta_description' => $validated['meta_description'] ?? null,
+            'category' => $validated['category'] ?? null,
             'status' => $validated['status'],
             'seo_score' => $this->calculateSeoScore($validated['content'], $validated['focus_keyword'] ?? '')
         ]);
@@ -266,12 +269,21 @@ class ArticleController extends Controller
             ]);
         }
 
+        if ($request->expectsJson() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Article mis à jour !',
+                'article_id' => $article->id,
+                'status' => $article->status,
+                'seo_score' => $article->seo_score,
+            ]);
+        }
+
         return redirect()->route('articles.index')->with('success', 'Article mis à jour !');
     }
 
-    /**
-     * Supprimer un article
-     */
+
+    // Supprimer un article
     public function destroy(Article $article)
     {
         if (Gate::denies('delete', $article)) {
@@ -331,40 +343,40 @@ class ArticleController extends Controller
      * PAGE BLOG PUBLIC - Afficher un article individuel
      */
     public function showBlog($slug)
-{
-    $article = Article::where('slug', $slug)
-        ->where('status', 'published')
-        ->firstOrFail();
+    {
+        $article = Article::where('slug', $slug)
+            ->where('status', 'published')
+            ->firstOrFail();
 
-    $article->increment('views');
-    
-    // Nettoyer le contenu
-    $content = $article->content;
-    
-    // Supprimer les guillemets
-    $content = trim($content);
-    if (substr($content, 0, 1) === '"') {
-        $content = substr($content, 1);
-    }
-    if (substr($content, -1) === '"') {
-        $content = substr($content, 0, -1);
-    }
-    
-    // Déséchapper
-    $content = stripslashes($content);
-    
-    // Remplacer \n par des sauts de ligne réels PUIS les supprimer
-    $content = str_replace(['\\n', '\n'], '', $content);
-    $content = str_replace(['\\r', '\r'], '', $content);
-    
-    // Nettoyer les espaces multiples
-    $content = preg_replace('/\s+/', ' ', $content);
-    
-    // Restaurer les balises HTML
-    $article->content = $content;
+        $article->increment('views');
 
-    return view('blog.show', compact('article'));
-}
+        // Nettoyer le contenu
+        $content = $article->content;
+
+        // Supprimer les guillemets
+        $content = trim($content);
+        if (substr($content, 0, 1) === '"') {
+            $content = substr($content, 1);
+        }
+        if (substr($content, -1) === '"') {
+            $content = substr($content, 0, -1);
+        }
+
+        // Déséchapper
+        $content = stripslashes($content);
+
+        // Remplacer \n par des sauts de ligne réels PUIS les supprimer
+        $content = str_replace(['\\n', '\n'], '', $content);
+        $content = str_replace(['\\r', '\r'], '', $content);
+
+        // Nettoyer les espaces multiples
+        $content = preg_replace('/\s+/', ' ', $content);
+
+        // Restaurer les balises HTML
+        $article->content = $content;
+
+        return view('blog.show', compact('article'));
+    }
     // =============================================
     // MÉTHODES PRIVÉES
     // =============================================

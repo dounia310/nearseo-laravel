@@ -1,215 +1,240 @@
-{{-- resources/views/auth/forgot-password.blade.php --}}
-@extends('layouts.guest')
+<!DOCTYPE html>
+<html class="light" lang="fr">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Mot de passe oublié | NEARSEO</title>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed": "#03210c",
+                        "on-secondary": "#ffffff",
+                        "on-background": "#091d2e",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-container": "#b06000",
+                        "on-tertiary-fixed": "#2e1500",
+                        "on-tertiary-fixed-variant": "#6d3900",
+                        "on-tertiary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "surface-container": "#e3efff",
+                        "surface-container-high": "#d9eaff",
+                        "secondary-fixed": "#c9ecc9",
+                        "primary-fixed-dim": "#ffb599",
+                        "inverse-surface": "#203243",
+                        "error": "#ba1a1a",
+                        "primary": "#8c4a2f",
+                        "on-surface-variant": "#53433d",
+                        "on-error-container": "#93000a",
+                        "surface-container-highest": "#d1e4fb",
+                        "surface-dim": "#c9dcf3",
+                        "tertiary": "#8c4b00",
+                        "background": "#f7f9ff",
+                        "surface-variant": "#d1e4fb",
+                        "on-tertiary-container": "#fffbff",
+                        "secondary-container": "#c9ecc9",
+                        "on-primary-container": "#fffbff",
+                        "on-secondary-fixed-variant": "#304d34",
+                        "inverse-on-surface": "#e8f2ff",
+                        "on-error": "#ffffff",
+                        "surface-container-low": "#edf4ff",
+                        "surface": "#f7f9ff",
+                        "primary-container": "#a96245",
+                        "tertiary-fixed": "#ffdcc2",
+                        "surface-bright": "#f7f9ff",
+                        "primary-fixed": "#ffdbce",
+                        "on-primary": "#ffffff",
+                        "surface-tint": "#8e4c31",
+                        "on-primary-fixed-variant": "#71361c",
+                        "on-secondary-container": "#4d6c50",
+                        "tertiary-fixed-dim": "#ffb77c",
+                        "on-primary-fixed": "#370e00",
+                        "outline": "#86736c",
+                        "secondary": "#47664b",
+                        "secondary-fixed-dim": "#adcfae",
+                        "outline-variant": "#d9c2ba",
+                        "on-surface": "#091d2e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "card-padding": "24px",
+                        "container-max-width": "1280px",
+                        "stack-gap-md": "16px",
+                        "stack-gap-sm": "8px",
+                        "section-margin": "32px"
+                    },
+                    "fontFamily": {
+                        "h3": ["Inter"],
+                        "label": ["Inter"],
+                        "body": ["Inter"],
+                        "h2": ["Inter"],
+                        "h1-mobile": ["Inter"],
+                        "h1": ["Inter"],
+                        "body-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "h3": ["18px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "label": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "body": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "h2": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                        "h1-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "h1": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background-color: #F8F9FA;
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .login-card {
+            background-color: #ffffff;
+            border: 1px solid #E5E7EB;
+            box-shadow: 0px 4px 12px rgba(0,0,0,0.05);
+        }
+        .btn-primary {
+            background-color: #8c4a2f;
+            transition: opacity 0.2s ease;
+        }
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+        .ai-indicator-line {
+            border-left: 3px solid #47664b;
+        }
+        .input-focus:focus {
+            border-color: #8c4a2f;
+            box-shadow: inset 0 0 0 1px #8c4a2f;
+            outline: none;
+        }
+        .input-error {
+            border-color: #ba1a1a;
+        }
+        .input-error:focus {
+            border-color: #ba1a1a;
+            box-shadow: inset 0 0 0 1px #ba1a1a;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen text-on-surface">
 
-@section('title', 'Mot de passe oublié')
-
-@section('content')
-<div class="flex items-center justify-center min-h-screen p-gutter">
-    <!-- Main Container (Mobile focused 375px) -->
-    <main class="w-full max-w-[375px] mx-auto space-y-section-margin">
-        <!-- Logo/Header branding -->
-        <div class="flex flex-col items-center justify-center text-center space-y-stack-gap-md">
-            <!-- Icon Wrapper: Soft primary-colored circle -->
-            <div class="w-16 h-16 rounded-full bg-primary-fixed flex items-center justify-center text-primary shadow-sm">
-                <span class="material-symbols-outlined text-[32px]">lock_reset</span>
-            </div>
-            <div class="space-y-stack-gap-sm">
-                <h1 class="font-h1-mobile text-h1-mobile text-on-surface">Mot de passe oublié</h1>
-                <p class="font-body-sm text-body-sm text-on-surface-variant max-w-[280px] mx-auto">
-                    Entrez votre adresse email et nous vous enverrons un lien de réinitialisation.
-                </p>
-            </div>
-        </div>
-
-        <!-- Session Status (Success Alert) -->
-        @if (session('status'))
-        <div id="success-alert">
-            <div class="bg-secondary-fixed text-on-secondary-fixed-variant p-4 rounded-xl flex items-start gap-3 border border-secondary-fixed-dim animate-in fade-in slide-in-from-top-4 duration-500">
-                <span class="material-symbols-outlined text-[20px] mt-0.5" style="font-variation-settings: 'FILL' 1;">check_circle</span>
-                <p class="font-body-sm text-body-sm">
-                    {{ session('status') }}
-                </p>
-            </div>
-        </div>
-        @endif
-
-        <!-- Reset Password Form -->
-        <form class="space-y-stack-gap-md" id="reset-form" method="POST" action="{{ route('password.email') }}">
-            @csrf
-
-            <!-- Input Group -->
-            <div class="space-y-stack-gap-sm">
-                <label class="font-label text-label text-on-surface-variant ml-1" for="email">Adresse Email</label>
-                <div class="relative group">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-outline group-focus-within:text-primary transition-colors">
-                        <span class="material-symbols-outlined text-[20px]">email</span>
-                    </div>
-                    <input 
-                        class="block w-full pl-10 pr-4 py-3 bg-white border border-outline-variant rounded-xl font-body text-body text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 @error('email') border-red-500 @enderror" 
-                        id="email" 
-                        name="email" 
-                        type="email" 
-                        required 
-                        value="{{ old('email') }}"
-                        placeholder="exemple@nearseo.com"
-                        autofocus
-                    />
+<main class="flex-grow flex items-center justify-center px-gutter py-section-margin">
+    <!-- Forgot Password Container -->
+    <div class="w-full max-w-[440px]">
+        
+        <!-- Forgot Password Card -->
+        <div class="login-card rounded-lg p-card-padding">
+            <div class="text-center mb-section-margin">
+                <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="material-symbols-outlined text-4xl text-primary">lock_reset</span>
                 </div>
-                @error('email')
-                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                @enderror
+                <h1 class="font-h2 text-h2 text-on-surface mb-stack-gap-sm">Mot de passe oublié</h1>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">Entrez votre adresse email et nous vous enverrons un lien de réinitialisation</p>
             </div>
+            
+            @if (session('status'))
+                <div class="mb-4 p-3 bg-green-50 text-green-700 rounded-lg text-sm border border-green-200">
+                    <span class="material-symbols-outlined text-green-500 mr-1">check_circle</span>
+                    {{ session('status') }}
+                </div>
+            @endif
 
-            <!-- CTA Button -->
-            <button 
-                class="w-full flex items-center justify-center gap-2 bg-[#c97c5d] hover:bg-primary text-white font-h3 text-h3 py-4 rounded-xl shadow-md active:scale-[0.98] transition-all duration-200" 
-                type="submit"
-            >
-                <span class="material-symbols-outlined text-[20px]">send</span>
-                <span>Envoyer le lien</span>
-            </button>
-        </form>
-
-        <!-- Footer Link -->
-        <div class="pt-stack-gap-md text-center">
-            <a href="{{ route('login') }}" class="inline-flex items-center gap-1 font-body-sm text-body-sm text-primary font-bold hover:underline transition-all">
-                <span class="material-symbols-outlined text-[18px]">arrow_back</span>
-                Retour à la connexion
-            </a>
+            @if ($errors->any())
+                <div class="mb-4 p-3 bg-error-container text-on-error-container rounded-lg text-sm">
+                    @foreach ($errors->all() as $error)
+                        <p>{{ $error }}</p>
+                    @endforeach
+                </div>
+            @endif
+            
+            <form action="{{ route('password.email') }}" class="space-y-stack-gap-md" method="POST">
+                @csrf
+                
+                <!-- Email Field -->
+                <div class="space-y-1">
+                    <label class="font-label text-label text-on-surface-variant" for="email">ADRESSE EMAIL</label>
+                    <input class="w-full px-4 py-3 border border-outline-variant rounded bg-white text-body input-focus transition-all @error('email') input-error @enderror" 
+                           id="email" name="email" placeholder="exemple@nearseo.com" required type="email" 
+                           value="{{ old('email') }}"/>
+                    @error('email')
+                    <p class="text-error text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+                
+                <!-- Submit Button -->
+                <button class="w-full btn-primary text-white font-h3 text-h3 py-3 rounded-lg shadow-sm transition-all transform active:scale-[0.98] flex items-center justify-center gap-2" type="submit">
+                    <span class="material-symbols-outlined text-lg">send</span>
+                    Envoyer le lien
+                </button>
+            </form>
+            
+            <!-- Back to Login -->
+            <div class="mt-section-margin text-center">
+                <p class="font-body-sm text-body-sm text-on-surface-variant">
+                    <a href="{{ route('login') }}" class="text-primary font-bold hover:underline flex items-center justify-center gap-1">
+                        <span class="material-symbols-outlined text-sm">arrow_back</span>
+                        Retour à la connexion
+                    </a>
+                </p>
+            </div>
         </div>
-    </main>
+        
 
-    <!-- Background Decorative Elements -->
-    <div class="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
-        <div class="absolute -top-24 -right-24 w-64 h-64 bg-secondary-fixed opacity-20 blur-3xl rounded-full"></div>
-        <div class="absolute -bottom-32 -left-32 w-96 h-96 bg-primary-fixed opacity-20 blur-3xl rounded-full"></div>
-    </div>
-</div>
-
-@push('styles')
-<style>
-    body {
-        background-color: #F8F9FA;
-        font-family: 'Inter', sans-serif;
-    }
-    
-    .material-symbols-outlined {
-        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        display: inline-block;
-        line-height: 1;
-    }
-    
-    .glass-card {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        border: 1px solid #E5E7EB;
-    }
-
-    /* Spacing utilities from design */
-    .space-y-stack-gap-md > :not([hidden]) ~ :not([hidden]) {
-        margin-top: 16px;
-    }
-    .space-y-stack-gap-sm > :not([hidden]) ~ :not([hidden]) {
-        margin-top: 8px;
-    }
-    .space-y-section-margin > :not([hidden]) ~ :not([hidden]) {
-        margin-top: 32px;
-    }
-    .pt-stack-gap-md {
-        padding-top: 16px;
-    }
-    .p-gutter {
-        padding: 16px;
-    }
-
-    /* Animations */
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(-10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    .animate-in {
-        animation: fadeIn 0.5s ease-out forwards;
-    }
-    .fade-in {
-        opacity: 0;
-        animation-fill-mode: forwards;
-    }
-    .slide-in-from-top-4 {
-        transform: translateY(-10px);
-    }
-
-    /* Typography utilities from design */
-    .font-h1-mobile {
-        font-family: 'Inter', sans-serif;
-    }
-    .text-h1-mobile {
-        font-size: 28px;
-        line-height: 1.2;
-        font-weight: 700;
-    }
-    .font-body-sm {
-        font-family: 'Inter', sans-serif;
-    }
-    .text-body-sm {
-        font-size: 14px;
-        line-height: 1.5;
-        font-weight: 400;
-    }
-    .font-label {
-        font-family: 'Inter', sans-serif;
-    }
-    .text-label {
-        font-size: 12px;
-        line-height: 1;
-        letter-spacing: 0.05em;
-        font-weight: 600;
-    }
-    .font-body {
-        font-family: 'Inter', sans-serif;
-    }
-    .text-body {
-        font-size: 16px;
-        line-height: 1.6;
-        font-weight: 400;
-    }
-    .font-h3 {
-        font-family: 'Inter', sans-serif;
-    }
-    .text-h3 {
-        font-size: 18px;
-        line-height: 1.4;
-        font-weight: 600;
-    }
-</style>
-@endpush
-
-@push('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Micro-interaction for back button
-        const backLink = document.querySelector('a[href="{{ route("login") }}"]');
-        if (backLink) {
-            backLink.addEventListener('mouseenter', function() {
-                const icon = this.querySelector('.material-symbols-outlined');
-                if (icon) {
-                    icon.style.transform = 'translateX(-4px)';
-                    icon.style.transition = 'transform 0.2s ease';
-                }
-            });
-            backLink.addEventListener('mouseleave', function() {
-                const icon = this.querySelector('.material-symbols-outlined');
-                if (icon) {
-                    icon.style.transform = 'translateX(0)';
-                }
-            });
-        }
+    // Micro-interaction for the primary button
+    const sendBtn = document.querySelector('button[type="submit"]');
+    if (sendBtn) {
+        sendBtn.addEventListener('click', (e) => {
+            const form = document.querySelector('form');
+            if (!form.checkValidity()) return;
+            sendBtn.innerHTML = '<span class="material-symbols-outlined animate-spin mr-2">progress_activity</span> Envoi en cours...';
+            sendBtn.classList.add('opacity-80');
+        });
+    }
+
+    // Hover effects for the inputs
+    const inputs = document.querySelectorAll('input');
+    inputs.forEach(input => {
+        input.addEventListener('focus', () => {
+            const label = input.parentElement.parentElement.querySelector('label');
+            if (label) {
+                label.classList.replace('text-on-surface-variant', 'text-primary');
+            }
+        });
+        input.addEventListener('blur', () => {
+            const label = input.parentElement.parentElement.querySelector('label');
+            if (label) {
+                label.classList.replace('text-primary', 'text-on-surface-variant');
+            }
+        });
     });
 </script>
-@endpush
-@endsection
+
+</body>
+</html>

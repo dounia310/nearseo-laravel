@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Article;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class CommunityController extends Controller
 {
@@ -12,28 +11,33 @@ class CommunityController extends Controller
     {
         $query = Article::where('status', 'published')
             ->with('user');
-        
+
+        // Filtre par pays
+        if ($request->filled('country')) {
+            $query->where('geo_pays', $request->country);
+        }
+
         // Filtre par ville
         if ($request->filled('city')) {
-            $query->where('address', $request->city);
+            $query->where('city', $request->city);
         }
-        
-        $articles = $query->orderBy('created_at', 'desc')->paginate(9);
-        
-        // Ajouter un indicateur AI (score SEO > 80)
-        foreach ($articles as $article) {
-            $article->ai_generated = $article->seo_score >= 80;
-        }
-        
-        // Villes avec nombre d'articles
-        $cities = Article::where('status', 'published')
-            ->whereNotNull('address')
-            ->select('address', DB::raw('count(*) as articles_count'))
-            ->groupBy('address')
-            ->orderBy('articles_count', 'desc')
-            ->limit(10)
+
+        $articles = $query->orderBy('created_at', 'desc')->paginate(12);
+
+        // Liste des pays avec compteurs
+        $countries = Article::where('status', 'published')
+            ->whereNotNull('geo_pays')
+            ->selectRaw('geo_pays, COUNT(*) as total')
+            ->groupBy('geo_pays')
             ->get();
-        
-        return view('dashboard.community', compact('articles', 'cities'));
+
+        // Liste des villes avec compteurs
+        $cities = Article::where('status', 'published')
+            ->whereNotNull('city')
+            ->selectRaw('city, COUNT(*) as total')
+            ->groupBy('city')
+            ->get();
+
+        return view('community.index', compact('articles', 'countries', 'cities'));
     }
 }

@@ -30,16 +30,26 @@ class PasswordResetLinkController extends Controller
             'email' => ['required', 'email'],
         ]);
 
-        // We will send the password reset link to this user. Once we have attempted
-        // to send the link, we will examine the response then see the message we
-        // need to show to the user. Finally, we'll send out a proper response.
+
+
+        // We need explicit messages (as requested) for:
+
+        // - Adresse email incorrecte (format invalid)
+
+        // - Ce compte n'existe pas
+        //
+        // Note: the 'email' validation already ensures format correctness.
+
         $status = Password::sendResetLink(
             $request->only('email')
         );
 
-        return $status == Password::RESET_LINK_SENT
-                    ? back()->with('status', __($status))
-                    : back()->withInput($request->only('email'))
-                        ->withErrors(['email' => __($status)]);
+        if ($status === Password::RESET_LINK_SENT) {
+            return back()->with('status', __('Un lien de réinitialisation a été envoyé.'));
+        }
+
+        // Common cases for invalid/non-existing email.
+        return back()->withInput($request->only('email'))
+            ->withErrors(['email' => __('Ce compte n\'existe pas')]);
     }
 }

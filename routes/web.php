@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\AIController;
@@ -21,7 +22,6 @@ use App\Models\Article;
 // LANDING PAGE (publique)
 // =============================================
 Route::get('/', function () {
-    // ✅ Récupérer les articles pour la landing page
     $articles = Article::where('status', 'published')
         ->orderBy('created_at', 'desc')
         ->limit(6)
@@ -170,11 +170,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/stats', [ProfileController::class, 'stats'])->name('stats');
         Route::delete('/destroy', [ProfileController::class, 'destroy'])->name('destroy');
         
-        // ✅ Route pour changer le mot de passe
         Route::post('/password', [ProfileController::class, 'updatePassword'])->name('password');
     });
 
-    // Redirection: /profile vers le profil public de l'utilisateur
+    // Redirection: /profile vers le profil public
     Route::get('/profile', function () {
         $user = Auth::user();
         $slug = $user->slug ?? $user->name;
@@ -204,9 +203,19 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // =============================================
-    // COMMUNAUTÉ (dashboard)
+    // COMMUNAUTÉ
     // =============================================
+    Route::get('/community', [CommunityController::class, 'index'])->name('community.index');
     Route::get('/community', [CommunityController::class, 'index'])->name('community');
+    
+    // =============================================
+    // NEWSLETTER (AJOUTÉ ICI, DANS LE GROUPE AUTH)
+    // =============================================
+    Route::post('/newsletter/subscribe', function (Request $request) {
+        $request->validate(['email' => 'required|email']);
+        // Logique d'inscription à la newsletter
+        return redirect()->back()->with('success', 'Inscription réussie !');
+    })->name('newsletter.subscribe');
 });
 
 // =============================================
@@ -227,7 +236,6 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/statistics', [AdminController::class, 'statistics'])->name('statistics');
     Route::post('/settings/update', [AdminController::class, 'updateSettings'])->name('settings.update');
     
-    // ✅ Route manquante pour les paramètres globaux
     Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
 });
 
