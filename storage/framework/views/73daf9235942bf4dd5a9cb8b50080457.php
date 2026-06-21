@@ -4,9 +4,17 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta name="description" content="Centre d'aide NEARSEO - Guides et ressources pour maîtriser votre SEO local"/>
+    <meta name="robots" content="noindex, follow"/>
     <title>Centre d'aide - NEARSEO</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="<?php echo e(asset('favicon.ico')); ?>">
+    <link rel="apple-touch-icon" href="<?php echo e(asset('logo.png')); ?>">
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
     
     <script>
@@ -117,6 +125,15 @@
         .hero-gradient {
             background: radial-gradient(circle at 50% 50%, rgba(201, 124, 93, 0.05) 0%, transparent 70%);
         }
+        .tonal-card {
+            background-color: #ffffff;
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+        .tonal-card:hover {
+            box-shadow: 0px 4px 12px rgba(0,0,0,0.05);
+            transform: translateY(-2px);
+        }
         /* Smooth scroll */
         html {
             scroll-behavior: smooth;
@@ -125,11 +142,11 @@
 </head>
 <body class="font-body text-body">
 
-<!-- TopAppBar -->
+<!-- TopAppBar (IDENTIQUE À COMMUNITY) -->
 <header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md border-b border-outline-variant/30">
     <div class="max-w-container-max-width mx-auto px-gutter flex justify-between items-center h-24">
         
-        <!-- Logo -->
+        <!-- Logo agrandi -->
         <div class="flex items-center">
             <img src="<?php echo e(asset('logo.png')); ?>" 
                  alt="NEARSEO Logo" 
@@ -139,50 +156,46 @@
         
         <!-- Navigation desktop -->
         <nav class="hidden md:flex items-center gap-8">
-            <a class="text-on-surface-variant font-body text-body hover:text-primary transition-colors" href="<?php echo e(route('dashboard')); ?>">Dashboard</a>
-            <a class="text-on-surface-variant font-body text-body hover:text-primary transition-colors" href="<?php echo e(route('articles.index')); ?>">Articles</a>
+            <a class="text-on-surface-variant font-body text-body hover:text-primary transition-colors" href="<?php echo e(route('landing')); ?>#features">Fonctionnalités</a>
+            <a class="text-on-surface-variant font-body text-body hover:text-primary transition-colors" href="<?php echo e(route('landing')); ?>#pricing">Tarifs</a>
             <a class="text-on-surface-variant font-body text-body hover:text-primary transition-colors" href="<?php echo e(route('community')); ?>">Communauté</a>
-            <a href="<?php echo e(route('settings.index')); ?>" class="text-on-surface-variant font-body text-body hover:text-primary transition-colors">Paramètres</a>
+            <a class="text-primary font-body text-body font-bold border-b-2 border-primary pb-1 flex items-center gap-1" href="<?php echo e(route('help')); ?>">
+                <span class="material-symbols-outlined text-sm">help_outline</span>
+                Aide
+            </a>
+            <a href="<?php echo e(route('login')); ?>" class="text-on-surface-variant font-body text-body hover:text-primary transition-colors">Connexion</a>
         </nav>
         
-        <!-- User Avatar -->
-        <div class="flex items-center gap-4">
-    <a href="<?php echo e(route('profile.public', ['username' => Auth::user()->slug ?? Auth::user()->name])); ?>" 
-       class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm hover:bg-primary/30 transition-colors"
-       title="Voir mon profil public">
-        <?php echo e(strtoupper(substr(Auth::user()->name ?? 'U', 0, 2))); ?>
-
-    </a>
-</div>
-        </div>
+        <!-- CTA Button -->
+        <a href="<?php echo e(route('register')); ?>" class="bg-primary hover:bg-primary-container text-on-primary px-6 py-2.5 rounded-full font-label transition-all active:scale-95 whitespace-nowrap">
+            Essai gratuit
+        </a>
     </div>
 </header>
 
 <main class="pt-24">
     <!-- Hero Section -->
     <section class="relative overflow-hidden py-section-margin hero-gradient">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="text-center max-w-4xl mx-auto">
-                <div class="inline-flex items-center gap-2 px-3 py-1 bg-secondary/10 text-secondary rounded-full mb-6">
-                    <span class="material-symbols-outlined text-[18px]">help_outline</span>
-                    <span class="font-label text-label">CENTRE D'AIDE</span>
-                </div>
-                <h1 class="font-h1 text-h1 md:text-[56px] leading-[1.1] text-on-background">
-                    Comment pouvons-nous vous <span class="text-primary">aider</span> ?
-                </h1>
-                <p class="font-body text-body text-on-surface-variant max-w-2xl mx-auto mt-4">
-                    Retrouvez ici tous les guides et ressources pour maîtriser NEARSEO et booster votre SEO local.
-                </p>
-                
-                <!-- Barre de recherche -->
-                <div class="mt-8 max-w-xl mx-auto">
-                    <div class="relative">
-                        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">search</span>
-                        <input type="text" 
-                               id="helpSearch" 
-                               placeholder="Rechercher dans l'aide..." 
-                               class="w-full pl-12 pr-4 py-4 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-gray-900 placeholder-gray-400 shadow-sm">
-                    </div>
+        <div class="max-w-7xl mx-auto px-6 flex flex-col items-center text-center gap-8">
+            <div class="inline-flex items-center gap-2 px-4 py-2 bg-secondary/10 text-secondary rounded-full">
+                <span class="material-symbols-outlined text-[18px]">help_outline</span>
+                <span class="font-label text-label">CENTRE D'AIDE</span>
+            </div>
+            <h1 class="font-h1 text-h1 md:text-[56px] leading-[1.1] text-on-background max-w-3xl">
+                Comment pouvons-nous vous <span class="text-primary">aider</span> ?
+            </h1>
+            <p class="font-body text-body text-on-surface-variant max-w-2xl">
+                Retrouvez ici tous les guides et ressources pour maîtriser NEARSEO et booster votre SEO local.
+            </p>
+            
+            <!-- Barre de recherche -->
+            <div class="mt-4 w-full max-w-xl">
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+                    <input type="text" 
+                           id="helpSearch" 
+                           placeholder="Rechercher dans l'aide..." 
+                           class="w-full pl-12 pr-4 py-4 bg-white border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-on-surface placeholder-on-surface-variant shadow-sm">
                 </div>
             </div>
         </div>
@@ -246,7 +259,7 @@
                 <h2 class="font-h1 text-h1 text-on-background">Guide des articles</h2>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-white p-6 rounded-xl border border-gray-100 hover:border-primary/30 transition">
+                <div class="bg-white p-6 rounded-xl border border-gray-100 hover:border-primary/30 transition tonal-card">
                     <div class="flex items-start gap-3">
                         <span class="material-symbols-outlined text-primary">add_circle</span>
                         <div>
@@ -255,7 +268,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="bg-white p-6 rounded-xl border border-gray-100 hover:border-primary/30 transition">
+                <div class="bg-white p-6 rounded-xl border border-gray-100 hover:border-primary/30 transition tonal-card">
                     <div class="flex items-start gap-3">
                         <span class="material-symbols-outlined text-primary">edit</span>
                         <div>
@@ -264,7 +277,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="bg-white p-6 rounded-xl border border-gray-100 hover:border-primary/30 transition">
+                <div class="bg-white p-6 rounded-xl border border-gray-100 hover:border-primary/30 transition tonal-card">
                     <div class="flex items-start gap-3">
                         <span class="material-symbols-outlined text-primary">publish</span>
                         <div>
@@ -273,7 +286,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="bg-white p-6 rounded-xl border border-gray-100 hover:border-primary/30 transition">
+                <div class="bg-white p-6 rounded-xl border border-gray-100 hover:border-primary/30 transition tonal-card">
                     <div class="flex items-start gap-3">
                         <span class="material-symbols-outlined text-primary">analytics</span>
                         <div>
@@ -293,7 +306,7 @@
                 <span class="material-symbols-outlined text-3xl text-secondary">auto_awesome</span>
                 <h2 class="font-h1 text-h1 text-on-background">Guide de l'IA</h2>
             </div>
-            <div class="bg-white rounded-2xl border border-gray-100 p-8">
+            <div class="bg-white rounded-2xl border border-gray-100 p-8 tonal-card">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="text-center p-6 rounded-xl bg-gray-50">
                         <span class="material-symbols-outlined text-4xl text-primary">auto_stories</span>
@@ -339,7 +352,7 @@
                 <span class="material-symbols-outlined text-3xl text-tertiary">location_on</span>
                 <h2 class="font-h1 text-h1 text-on-background">Guide de géolocalisation</h2>
             </div>
-            <div class="bg-white rounded-2xl border border-gray-100 p-8">
+            <div class="bg-white rounded-2xl border border-gray-100 p-8 tonal-card">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div>
                         <h4 class="font-h3 text-h3 text-on-surface">Pourquoi utiliser la géolocalisation ?</h4>
@@ -386,7 +399,7 @@
                 <p class="font-body text-body text-on-surface-variant">Les réponses aux questions les plus fréquentes</p>
             </div>
             <div class="space-y-4">
-                <div class="bg-white rounded-xl border border-gray-100 overflow-hidden">
+                <div class="bg-white rounded-xl border border-gray-100 overflow-hidden tonal-card">
                     <button onclick="toggleFaq(this)" class="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-gray-50 transition">
                         <span class="font-h3 text-h3 text-on-surface">Comment changer mon mot de passe ?</span>
                         <span class="material-symbols-outlined text-gray-400 transition-transform duration-200">expand_more</span>
@@ -396,7 +409,7 @@
                     </div>
                 </div>
 
-                <div class="bg-white rounded-xl border border-gray-100 overflow-hidden">
+                <div class="bg-white rounded-xl border border-gray-100 overflow-hidden tonal-card">
                     <button onclick="toggleFaq(this)" class="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-gray-50 transition">
                         <span class="font-h3 text-h3 text-on-surface">Comment optimiser mes articles pour le SEO ?</span>
                         <span class="material-symbols-outlined text-gray-400 transition-transform duration-200">expand_more</span>
@@ -406,7 +419,7 @@
                     </div>
                 </div>
 
-                <div class="bg-white rounded-xl border border-gray-100 overflow-hidden">
+                <div class="bg-white rounded-xl border border-gray-100 overflow-hidden tonal-card">
                     <button onclick="toggleFaq(this)" class="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-gray-50 transition">
                         <span class="font-h3 text-h3 text-on-surface">Comment utiliser l'IA pour générer du contenu ?</span>
                         <span class="material-symbols-outlined text-gray-400 transition-transform duration-200">expand_more</span>
@@ -416,7 +429,7 @@
                     </div>
                 </div>
 
-                <div class="bg-white rounded-xl border border-gray-100 overflow-hidden">
+                <div class="bg-white rounded-xl border border-gray-100 overflow-hidden tonal-card">
                     <button onclick="toggleFaq(this)" class="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-gray-50 transition">
                         <span class="font-h3 text-h3 text-on-surface">Comment supprimer mon compte ?</span>
                         <span class="material-symbols-outlined text-gray-400 transition-transform duration-200">expand_more</span>
@@ -429,25 +442,27 @@
         </div>
     </section>
 
-    <!-- CTA Final -->
-    <section class="py-section-margin bg-surface-container-low">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="bg-primary/5 p-12 md:p-24 rounded-[40px] text-center relative overflow-hidden">
-                <div class="absolute inset-0 opacity-10 pointer-events-none">
-                    <div class="absolute top-0 left-0 w-64 h-64 bg-white rounded-full -translate-x-1/2 -translate-y-1/2"></div>
-                    <div class="absolute bottom-0 right-0 w-96 h-96 bg-tertiary rounded-full translate-x-1/3 translate-y-1/3"></div>
-                </div>
-                <span class="material-symbols-outlined text-5xl text-primary relative z-10">support_agent</span>
-                <h2 class="font-h1 text-[40px] md:text-[48px] mb-4 relative z-10">Besoin d'aide supplémentaire ?</h2>
-                <p class="font-body text-h3 mb-8 max-w-2xl mx-auto relative z-10 text-gray-600">Notre équipe est là pour vous accompagner</p>
-                <div class="flex flex-col md:flex-row justify-center gap-4 relative z-10">
-                    <a href="mailto:support@nearseo.com" class="px-10 py-5 bg-primary text-white font-h2 rounded-2xl hover:bg-primary/90 transition-all shadow-xl inline-flex items-center gap-3">
-                        <span class="material-symbols-outlined">email</span>
+    <!-- Newsletter CTA Section (COMME DANS COMMUNITY) -->
+    <section class="max-w-7xl mx-auto px-6 mb-section-margin">
+        <div class="bg-primary/5 p-12 md:p-16 rounded-[40px] text-center relative overflow-hidden">
+            <div class="absolute inset-0 opacity-10 pointer-events-none">
+                <div class="absolute top-0 left-0 w-64 h-64 bg-white rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+                <div class="absolute bottom-0 right-0 w-96 h-96 bg-tertiary rounded-full translate-x-1/3 translate-y-1/3"></div>
+            </div>
+            <div class="relative z-10 max-w-2xl mx-auto flex flex-col gap-6">
+                <span class="material-symbols-outlined text-5xl text-primary">support_agent</span>
+                <h2 class="font-h1 text-[40px] md:text-[48px] text-on-background">Besoin d'aide supplémentaire ?</h2>
+                <p class="text-body text-on-surface-variant">
+                    Notre équipe est là pour vous accompagner. Contactez-nous et nous vous répondrons sous 24h.
+                </p>
+                <div class="flex flex-col md:flex-row gap-4 w-full max-w-xl mx-auto">
+                    <a href="mailto:support@nearseo.com" class="flex-1 bg-primary text-white px-8 py-4 rounded-full font-label hover:bg-primary/90 transition-all active:scale-95 shadow-lg flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-sm">email</span>
                         Contacter le support
                     </a>
-                    <a href="<?php echo e(route('dashboard')); ?>" class="px-10 py-5 border-2 border-primary text-primary font-h2 rounded-2xl hover:bg-primary/5 transition-all inline-flex items-center gap-3">
-                        <span class="material-symbols-outlined">dashboard</span>
-                        Retour au dashboard
+                    <a href="<?php echo e(route('dashboard')); ?>" class="flex-1 border-2 border-primary text-primary px-8 py-4 rounded-full font-label hover:bg-primary/5 transition-all active:scale-95 flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-sm">dashboard</span>
+                        Dashboard
                     </a>
                 </div>
             </div>
@@ -455,7 +470,7 @@
     </section>
 </main>
 
-<!-- Footer -->
+<!-- Footer (IDENTIQUE À COMMUNITY) -->
 <footer class="bg-surface-container-lowest w-full py-section-margin border-t border-outline-variant/30">
     <div class="max-w-container-max-width mx-auto px-gutter">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-stack-gap-md mb-12">
@@ -471,8 +486,8 @@
             <div class="flex flex-col gap-4">
                 <h5 class="font-label text-primary uppercase">Produit</h5>
                 <nav class="flex flex-col gap-2">
-                    <a class="font-body-sm text-on-surface-variant hover:text-primary transition" href="#features">Fonctionnalités</a>
-                    <a class="font-body-sm text-on-surface-variant hover:text-primary transition" href="#pricing">Tarifs</a>
+                    <a class="font-body-sm text-on-surface-variant hover:text-primary transition" href="<?php echo e(route('landing')); ?>#features">Fonctionnalités</a>
+                    <a class="font-body-sm text-on-surface-variant hover:text-primary transition" href="<?php echo e(route('landing')); ?>#pricing">Tarifs</a>
                     <a class="font-body-sm text-on-surface-variant hover:text-primary transition" href="#">Nouveautés</a>
                 </nav>
             </div>
@@ -538,10 +553,22 @@
         });
     });
 
+    // Hover animation for cards
+    document.querySelectorAll('.tonal-card').forEach(card => {
+        card.addEventListener('mouseenter', () => {
+            card.style.transform = 'translateY(-2px)';
+        });
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = 'translateY(0)';
+        });
+    });
+
     // Button micro-interactions
-    document.querySelectorAll('button').forEach(button => {
+    document.querySelectorAll('button, a').forEach(button => {
         button.addEventListener('mousedown', () => {
-            button.style.transform = 'scale(0.96)';
+            if (!button.closest('a') || button.closest('a').getAttribute('href')?.startsWith('#')) {
+                button.style.transform = 'scale(0.96)';
+            }
         });
         button.addEventListener('mouseup', () => {
             button.style.transform = '';
