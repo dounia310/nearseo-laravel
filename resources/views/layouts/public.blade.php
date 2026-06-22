@@ -137,8 +137,9 @@
 </head>
 <body class="font-body text-body">
 
-    <!-- HEADER PUBLIC -->
-    <x-public-header :active="$active ?? null" />
+<!-- HEADER PUBLIC -->
+    @php($active = $active ?? null)
+    <x-public-header :active="$active" />
 
     <!-- CONTENT -->
     <main class="pt-24">
