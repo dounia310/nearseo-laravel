@@ -203,13 +203,19 @@ class AdminController extends Controller
         ];
 
         // Articles par ville
+        // `address` contient souvent l'adresse complète, donc on regroupe sur le champ `city`.
+        // Fallback: si `city` est NULL, on ignore (ancien fallback sur address n'était pas souhaité).
         $articlesByCity = Article::where('status', 'published')
-            ->whereNotNull('address')
-            ->select('address', DB::raw('count(*) as count'))
-            ->groupBy('address')
+            ->whereNotNull('city')
+            ->where('city', '!=', '')
+            ->select('city', DB::raw('count(*) as count'))
+            ->groupBy('city')
             ->orderBy('count', 'desc')
             ->limit(10)
             ->get();
+
+
+
 
         // Utilisateurs par mois
         $usersByMonth = User::select(DB::raw('DATE_FORMAT(created_at, "%Y-%m") as month'), DB::raw('count(*) as count'))

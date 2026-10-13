@@ -84,8 +84,9 @@
                         <p class="text-xs text-gray-500 dark:text-gray-400">Recevoir des notifications par email</p>
                     </div>
                     <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" name="email_notifications" value="1" 
-                               <?php echo e(auth()->user()->preferences['email_notifications'] ?? true ? 'checked' : ''); ?>
+                        <input type="hidden" name="email_notifications" value="0">
+                        <input type="checkbox" name="email_notifications" value="1"
+                               <?php echo e((auth()->user()->preferences['email_notifications'] ?? true) ? 'checked' : ''); ?>
 
                                class="sr-only peer">
                         <div class="w-11 h-6 bg-gray-200 dark:bg-gray-600 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
@@ -98,6 +99,7 @@
                         <p class="text-xs text-gray-500 dark:text-gray-400">Recevoir des notifications dans le navigateur</p>
                     </div>
                     <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="hidden" name="push_notifications" value="0">
                         <input type="checkbox" name="push_notifications" value="1" 
                                <?php echo e(auth()->user()->preferences['push_notifications'] ?? true ? 'checked' : ''); ?>
 

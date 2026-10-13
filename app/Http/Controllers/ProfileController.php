@@ -45,20 +45,21 @@ class ProfileController extends Controller
 
     /**
      * Update the user's profile information.
+     * ✅ Étendu pour inclure les champs business
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
         $userId = Auth::id();
-        
-        // Utiliser update directement sans passer par l'objet User
-        User::where('id', $userId)->update([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'location' => $request->location,
-        ]);
 
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+        // ✅ Récupérer tous les champs validés
+        $validated = $request->validated();
+
+        // ✅ Mise à jour directe via le Query Builder
+        User::where('id', $userId)->update($validated);
+
+        return Redirect::route('profile.edit')
+            ->with('status', 'profile-updated')
+            ->with('success', '✅ Profil mis à jour avec succès !');
     }
 
     /**
@@ -79,12 +80,40 @@ class ProfileController extends Controller
 
         $path = $request->file('avatar')->store('avatars', 'public');
         
-        // Utiliser update directement
         User::where('id', $userId)->update([
             'avatar' => $path
         ]);
 
         return response()->json(['success' => true, 'avatar_url' => Storage::url($path)]);
+    }
+
+    /**
+     * Update the user's password.
+     * ✅ AJOUTÉ — Manquait dans le contrôleur
+     */
+    public function updatePassword(Request $request)
+    {
+        $validated = $request->validate([
+            'current_password' => ['required', 'current_password'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $userId = Auth::id();
+        
+        User::where('id', $userId)->update([
+            'password' => Hash::make($validated['password']),
+        ]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Mot de passe mis à jour avec succès !'
+            ]);
+        }
+
+        return Redirect::route('profile.edit')
+            ->with('status', 'password-updated')
+            ->with('success', '✅ Mot de passe mis à jour avec succès !');
     }
 
     /**
@@ -100,7 +129,6 @@ class ProfileController extends Controller
         
         Auth::logout();
         
-        // Utiliser destroy directement
         User::destroy($userId);
 
         $request->session()->invalidate();

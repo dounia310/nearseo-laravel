@@ -17,35 +17,62 @@ use App\Http\Controllers\BusinessTrendController;
 use App\Http\Controllers\HelpController;
 use App\Models\User;
 use App\Models\Article;
+use App\Http\Controllers\OnboardingController;
 
 // =============================================
-// LANDING PAGE (publique)
+// 🏠 LANDING PAGE (publique)
 // =============================================
 Route::get('/', function () {
     $articles = Article::where('status', 'published')
         ->orderBy('created_at', 'desc')
         ->limit(6)
         ->get();
-    
+
     return view('landing.index', compact('articles'));
 })->name('landing');
 
 // =============================================
-// BLOG PUBLIC (accessible sans connexion)
+// ✅ ROUTES PUBLIQUES (sans connexion)
 // =============================================
-Route::get('/blog', [ArticleController::class, 'blog'])->name('blog.index');
-Route::get('/blog/{slug}', [ArticleController::class, 'showBlog'])->name('blog.show');
 
-// Blog utilisateur (pour les pages personnalisées)
+// =============================================
+// 🏠 COMMUNAUTÉ
+// =============================================
+Route::get('/community', [CommunityController::class, 'index'])->name('community');
+Route::get('/community/user/{slug}', [CommunityController::class, 'user'])->name('community.user');
+Route::get('/community/article/{slug}', [CommunityController::class, 'article'])->name('community.article');
+
+// =============================================
+// 📝 BLOG UTILISATEUR
+// =============================================
 Route::get('/blog/user/{slug}', [BlogController::class, 'userBlog'])->name('blog.user');
 Route::get('/blog/user/{slug}/{articleSlug}', [BlogController::class, 'userArticle'])->name('blog.user.article');
+Route::get('/blog/{slug}', [ArticleController::class, 'showBlog'])->name('blog.show');
 
 // =============================================
-// ROUTES AUTHENTIFIEES (utilisateur connecté)
+// ❓ AIDE
+// =============================================
+Route::get('/help', [HelpController::class, 'index'])->name('help');
+
+// =============================================
+// 👤 PROFIL PUBLIC
+// =============================================
+Route::get('/profile/{username}', [BlogController::class, 'showProfile'])->name('profile.public');
+
+// =============================================
+// 🔒 ROUTES AUTHENTIFIEES (utilisateur connecté)
 // =============================================
 Route::middleware(['auth'])->group(function () {
-
-    // Logout
+    // ═══════════════════════════════════════════════
+    // ONBOARDING
+    // ═══════════════════════════════════════════════
+    Route::get('/onboarding/business', [OnboardingController::class, 'business'])->name('onboarding.business');
+    Route::post('/onboarding/business', [OnboardingController::class, 'saveBusiness'])->name('onboarding.business.save');
+    Route::get('/onboarding/preferences', [OnboardingController::class, 'preferences'])->name('onboarding.preferences');
+    Route::post('/onboarding/preferences', [OnboardingController::class, 'savePreferences'])->name('onboarding.preferences.save');
+    // =============================================
+    // 🔐 DÉCONNEXION
+    // =============================================
     Route::post('/logout', function () {
         Auth::logout();
         request()->session()->invalidate();
@@ -53,7 +80,9 @@ Route::middleware(['auth'])->group(function () {
         return redirect('/');
     })->name('logout');
 
-    // Dashboard
+    // =============================================
+    // 📊 DASHBOARD
+    // =============================================
     Route::get('/dashboard', function () {
         $user = Auth::user();
 
@@ -109,17 +138,16 @@ Route::middleware(['auth'])->group(function () {
     })->name('dashboard');
 
     // =============================================
-    // GESTION DES ARTICLES
+    // 📝 GESTION DES ARTICLES
     // =============================================
     Route::resource('articles', ArticleController::class);
-
-    // Routes supplémentaires pour les articles
+    Route::post('/articles/{article}/update', [ArticleController::class, 'update'])->name('articles.update.post');
     Route::post('/articles/{article}/upload-image', [ArticleController::class, 'uploadImage'])->name('articles.upload-image');
     Route::post('/articles/{article}/remove-image', [ArticleController::class, 'removeImage'])->name('articles.remove-image');
     Route::post('/articles/{article}/upload-editor-image', [ArticleController::class, 'uploadEditorImage'])->name('articles.upload-editor-image');
 
     // =============================================
-    // GÉNÉRATEUR IA
+    // 🤖 GÉNÉRATEUR IA
     // =============================================
     Route::prefix('ai')->name('ai.')->group(function () {
         Route::get('create', [AIController::class, 'create'])->name('create');
@@ -131,18 +159,16 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // =============================================
-    // TENDANCES (TRENDS)
+    // 📈 TENDANCES
     // =============================================
     Route::get('/trends', [TrendController::class, 'index'])->name('trends.index');
     Route::get('/api/trends/suggestions', [TrendController::class, 'getSuggestions'])->name('api.trends.suggestions');
     Route::post('/trends/update-business', [BusinessTrendController::class, 'updateBusinessType'])->name('trends.update-business');
-
-    // Suggestions par secteur (Business Trends)
     Route::get('/trends/business', [BusinessTrendController::class, 'index'])->name('trends.business');
     Route::get('/api/trends/business/suggestions', [BusinessTrendController::class, 'getSuggestions'])->name('api.trends.business');
 
     // =============================================
-    // GÉOLOCALISATION
+    // 🗺️ GÉOLOCALISATION
     // =============================================
     Route::prefix('geo')->name('geo.')->group(function () {
         Route::get('/', [GeoController::class, 'index'])->name('index');
@@ -152,28 +178,29 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // =============================================
-    // NOTIFICATIONS
+    // 🔔 NOTIFICATIONS (API JSON)
     // =============================================
     Route::prefix('notifications')->name('notifications.')->group(function () {
-        Route::get('/', [NotificationController::class, 'index'])->name('index');
-        Route::post('mark-read', [NotificationController::class, 'markAllAsRead'])->name('mark-all-read');
-        Route::post('{notification}/read', [NotificationController::class, 'markAsRead'])->name('mark-read');
+        Route::get('/data', [NotificationController::class, 'data'])->name('data');
+        Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('mark-all-read');
+        Route::post('/{notification}/read', [NotificationController::class, 'markAsRead'])->name('mark-read');
     });
 
     // =============================================
-    // PROFIL UTILISATEUR (Édition)
+    // 👤 PROFIL
     // =============================================
     Route::prefix('profile')->name('profile.')->group(function () {
         Route::get('/edit', [ProfileController::class, 'edit'])->name('edit');
-        Route::patch('/edit', [ProfileController::class, 'update'])->name('update');
+        Route::match(['PUT', 'PATCH'], '/edit', [ProfileController::class, 'update'])->name('update');
         Route::post('/avatar', [ProfileController::class, 'updateAvatar'])->name('avatar');
         Route::get('/stats', [ProfileController::class, 'stats'])->name('stats');
         Route::delete('/destroy', [ProfileController::class, 'destroy'])->name('destroy');
-        
         Route::post('/password', [ProfileController::class, 'updatePassword'])->name('password');
     });
 
-    // Redirection: /profile vers le profil public
+    // =============================================
+    // 🔄 Redirection /profile vers le profil public
+    // =============================================
     Route::get('/profile', function () {
         $user = Auth::user();
         $slug = $user->slug ?? $user->name;
@@ -181,17 +208,7 @@ Route::middleware(['auth'])->group(function () {
     })->name('profile.redirect');
 
     // =============================================
-    // PROFIL PUBLIC (accessible par tous)
-    // =============================================
-    Route::get('/profile/{username}', [BlogController::class, 'showProfile'])->name('profile.public');
-
-    // =============================================
-    // AIDE
-    // =============================================
-    Route::get('/help', [HelpController::class, 'index'])->name('help');
-
-    // =============================================
-    // PARAMÈTRES - Routes unifiées
+    // ⚙️ PARAMÈTRES
     // =============================================
     Route::prefix('settings')->name('settings.')->group(function () {
         Route::get('/', [SettingsController::class, 'index'])->name('index');
@@ -203,43 +220,50 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // =============================================
-    // COMMUNAUTÉ
-    // =============================================
-    Route::get('/community', [CommunityController::class, 'index'])->name('community.index');
-    Route::get('/community', [CommunityController::class, 'index'])->name('community');
-    
-    // =============================================
-    // NEWSLETTER (AJOUTÉ ICI, DANS LE GROUPE AUTH)
+    // 📧 NEWSLETTER
     // =============================================
     Route::post('/newsletter/subscribe', function (Request $request) {
         $request->validate(['email' => 'required|email']);
-        // Logique d'inscription à la newsletter
         return redirect()->back()->with('success', 'Inscription réussie !');
     })->name('newsletter.subscribe');
-});
+
+    // =============================================
+    // 🏠 COMMUNAUTÉ (actions protégées)
+    // =============================================
+    Route::prefix('community')->name('community.')->group(function () {
+        Route::post('/comment', [CommunityController::class, 'storeComment'])->name('comment.store');
+        Route::post('/like/{id}', [CommunityController::class, 'like'])->name('like');
+        Route::post('/share/{id}', [CommunityController::class, 'share'])->name('share');
+    });
+
+    // =============================================
+    // 📝 BLOG (actions protégées)
+    // =============================================
+    Route::prefix('blog')->name('blog.')->group(function () {
+        Route::post('/comment', [BlogController::class, 'storeComment'])->name('comment.store');
+        Route::post('/like/{id}', [BlogController::class, 'like'])->name('like');
+    });
+
+}); // ✅ FIN du groupe auth
 
 // =============================================
-// ROUTES ADMIN
+// 👑 ROUTES ADMIN
 // =============================================
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    // Gestion des utilisateurs
     Route::get('/users', [AdminController::class, 'users'])->name('users');
     Route::get('/users/{user}/details', [AdminController::class, 'userDetails'])->name('users.details');
     Route::delete('/users/{user}', [AdminController::class, 'deleteUser'])->name('users.destroy');
     Route::post('/users/{user}/role', [AdminController::class, 'toggleRole'])->name('users.toggle-role');
     Route::get('/users/export', [AdminController::class, 'exportUsers'])->name('users.export');
     Route::post('/users', [AdminController::class, 'storeUser'])->name('users.store');
-
-    // Analytics & Configuration
     Route::get('/analytics', [AdminController::class, 'analytics'])->name('analytics');
     Route::get('/config', [AdminController::class, 'config'])->name('config');
     Route::get('/statistics', [AdminController::class, 'statistics'])->name('statistics');
     Route::post('/settings/update', [AdminController::class, 'updateSettings'])->name('settings.update');
-    
     Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
 });
 
 // =============================================
-// AUTHENTIFICATION BREEZE
+// 🔐 AUTHENTIFICATION BREEZE
 // =============================================
 require __DIR__ . '/auth.php';

@@ -20,22 +20,34 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'phone',
-        'location',
-        'avatar',
-        'business_type', 
-        'business_name', 
-        'business_address',
-        'bio',
-        'slug',
-        'settings',
-        'last_article_published_at',
-        'weekly_reminder_sent_at'
-    ];
-
+    'name',
+    'email',
+    'password',
+    'phone',
+    'location',
+    'avatar',
+    // ✅ Business
+    'business_type',
+    'business_name',
+    'business_category',
+    'business_address',
+    'business_city',
+    'business_district',
+    'business_country',
+    'business_website',
+    'business_mode',
+    // ✅ Profil
+    'bio',
+    'slug',
+    'role',
+    'preferences',
+    'settings',
+    // ✅ Onboarding
+    'onboarding_completed',
+    // ✅ Rappels
+    'last_article_published_at',
+    'weekly_reminder_sent_at',
+];
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -52,14 +64,15 @@ class User extends Authenticatable
      * @var array<string, string>
      */
     protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-        'settings' => 'array',
-        'last_article_published_at' => 'datetime',
-        'weekly_reminder_sent_at' => 'datetime'
-    ];
-    
-    /**
+    'email_verified_at' => 'datetime',
+    'password' => 'hashed',
+    'preferences' => 'array',
+    'settings' => 'array',
+    'onboarding_completed' => 'boolean',
+    'last_article_published_at' => 'datetime',
+    'weekly_reminder_sent_at' => 'datetime'
+];
+/**
      * Bootstrap the model and its traits.
      */
     protected static function boot()
@@ -162,5 +175,45 @@ class User extends Authenticatable
     public function hasPublishedArticles()
     {
         return $this->publishedArticlesCount > 0;
+    }
+        /**
+     * =============================================
+     * MÉTHODES POUR L'ONBOARDING
+     * =============================================
+     */
+
+    /**
+     * Vérifie si l'utilisateur a complété son onboarding
+     */
+    public function hasCompletedOnboarding(): bool
+    {
+        return (bool) $this->onboarding_completed;
+    }
+
+    /**
+     * Récupère une préférence spécifique
+     */
+    public function getPreference(string $key, $default = null)
+    {
+        return $this->preferences[$key] ?? $default;
+    }
+
+    /**
+     * Définit une préférence
+     */
+    public function setPreference(string $key, $value): void
+    {
+        $prefs = $this->preferences ?? [];
+        $prefs[$key] = $value;
+        $this->preferences = $prefs;
+    }
+
+    /**
+     * Marque l'onboarding comme complété
+     */
+    public function completeOnboarding(): void
+    {
+        $this->onboarding_completed = true;
+        $this->save();
     }
 }

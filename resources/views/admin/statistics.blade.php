@@ -40,7 +40,8 @@
         <div class="space-y-2">
             @foreach($articlesByCity as $city)
             <div class="flex justify-between items-center p-2 hover:bg-gray-50 rounded">
-                <span>📍 {{ $city->address }}</span>
+                <span>📍 {{ $city->city }}</span>
+
                 <span class="font-semibold">{{ $city->count }} articles</span>
             </div>
             @endforeach

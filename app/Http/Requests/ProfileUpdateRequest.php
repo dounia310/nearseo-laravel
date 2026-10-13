@@ -17,6 +17,9 @@ class ProfileUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
+            // ═══════════════════════════════════════════════
+            // PROFIL PERSONNEL
+            // ═══════════════════════════════════════════════
             'name' => ['required', 'string', 'max:255'],
             'email' => [
                 'required',
@@ -26,6 +29,21 @@ class ProfileUpdateRequest extends FormRequest
                 'max:255',
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'location' => ['nullable', 'string', 'max:255'],
+            'bio' => ['nullable', 'string', 'max:500'],
+
+            // ═══════════════════════════════════════════════
+            // MON COMMERCE
+            // ═══════════════════════════════════════════════
+            'business_name' => ['nullable', 'string', 'max:255'],
+            'business_category' => ['nullable', 'string', 'max:100'],
+            'business_address' => ['nullable', 'string', 'max:255'],
+            'business_city' => ['nullable', 'string', 'max:100'],
+            'business_district' => ['nullable', 'string', 'max:100'],
+            'business_country' => ['nullable', 'string', 'max:100'],
+            'business_website' => ['nullable', 'url', 'max:255'],
+            'business_mode' => ['nullable', 'in:local,online'],
         ];
     }
 }

@@ -24,259 +24,145 @@
         
         <!-- Left Column: Configuration Form -->
         <div class="col-span-12 lg:col-span-5 space-y-6">
+            
+            {{-- ⭐ CARTE INFO COMMERCE (lecture seule) --}}
+            <div class="bg-gradient-to-br from-primary/5 to-secondary/5 p-5 rounded-xl border-2 border-primary/20">
+                <div class="flex items-start gap-3">
+                    <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <span class="material-symbols-outlined text-primary text-2xl" style="font-variation-settings: 'FILL' 1;">storefront</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="font-bold text-lg text-gray-900 truncate">
+                            {{ auth()->user()->business_name ?? 'Mon commerce' }}
+                        </h3>
+                        <div class="text-sm text-gray-600 space-y-0.5 mt-1">
+                            @if(auth()->user()->business_mode === 'local')
+                                {{-- Mode local : adresse complète --}}
+                                @if(auth()->user()->business_address)
+                                    <p class="flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-sm text-gray-400">location_on</span>
+                                        {{ auth()->user()->business_address }}
+                                    </p>
+                                @endif
+                                @if(auth()->user()->business_city)
+                                    <p class="flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-sm text-gray-400">location_city</span>
+                                        {{ auth()->user()->business_district ? auth()->user()->business_district . ', ' : '' }}{{ auth()->user()->business_city }}, {{ auth()->user()->business_country }}
+                                    </p>
+                                @endif
+                            @else
+                                {{-- Mode online : site web --}}
+                                @if(auth()->user()->business_website)
+                                    <p class="flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-sm text-gray-400">public</span>
+                                        {{ auth()->user()->business_website }}
+                                    </p>
+                                @endif
+                            @endif
+                            
+                            @if(auth()->user()->business_category)
+                                <p class="flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-sm text-gray-400" style="font-variation-settings: 'FILL' 1;">category</span>
+                                    {{ auth()->user()->business_category }}
+                                </p>
+                            @endif
+                        </div>
+                        
+                       <a href="{{ route('profile.edit') }}#business" 
+   class="inline-flex items-center gap-1 text-xs text-primary font-semibold mt-2 hover:underline">
+                            <span class="material-symbols-outlined text-sm">edit</span>
+                            Modifier mes informations
+                        </a>
+                    </div>
+                </div>
+            </div>
+
             <div class="bg-white p-6 rounded-xl border shadow-sm">
                 <div class="space-y-5">
                     
-                    <!-- Mode Selector -->
-                    <div class="p-1 bg-gray-100 rounded-xl flex gap-1 mb-2">
-                        <button type="button" class="mode-btn flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm transition-all bg-white text-primary shadow-sm ring-1 ring-black/5" data-mode="local" onclick="switchMode('local')">
-                            <span class="material-symbols-outlined text-lg text-primary" style="font-variation-settings: 'FILL' 1;">location_on</span>
-                            Commerce Local
-                        </button>
-                        <button type="button" class="mode-btn flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm transition-all text-gray-600" data-mode="online" onclick="switchMode('online')">
-                            <span class="material-symbols-outlined text-lg text-gray-500">language</span>
-                            Entreprise en ligne
-                        </button>
-                    </div>
-
-                    <!-- Nom du commerce -->
-                    <div class="space-y-2">
-                        <label class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1">
-                            <span class="material-symbols-outlined text-sm text-gray-400">storefront</span>
-                            Nom du commerce / entreprise <span class="text-red-500">*</span>
-                        </label>
-                        <div class="relative">
-                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">storefront</span>
-                            <input id="businessName" type="text" 
-                                   class="w-full pl-10 pr-4 py-3 border rounded-xl required-field focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                                   placeholder="Ex: La Maison du Pain, Coiffeur Elite">
-                        </div>
-                        <p class="text-xs text-red-500 hidden" id="businessNameError">Le nom du commerce est obligatoire</p>
-                    </div>
-
                     <!-- Sujet -->
                     <div class="space-y-2">
-                        <label class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1" id="subjectLabel">
+                        <label class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1">
                             <span class="material-symbols-outlined text-sm text-gray-400">edit_note</span>
                             Sujet de l'article <span class="text-red-500">*</span>
                         </label>
-                        <textarea id="subject" rows="3" 
+                        <textarea id="subject" rows="4" 
                                   class="w-full rounded-lg border border-gray-300 p-3 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none"
-                                  placeholder="Ex: Pourquoi choisir notre boulangerie artisanale..."></textarea>
+                                  placeholder="Ex: Pourquoi choisir notre boulangerie artisanale au cœur de Guéliz..."></textarea>
                     </div>
 
-                    <!-- Catégorie -->
-                    <div class="space-y-2">
-                        <label class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1">
-                            <span class="material-symbols-outlined text-sm text-gray-400" style="font-variation-settings: 'FILL' 1;">category</span>
-                            Catégorie
-                        </label>
-                        <div class="grid grid-cols-1 gap-2">
-                            <select id="category" 
-                                    onchange="toggleCategoryInput(this.value)"
-                                    class="w-full rounded-lg border border-gray-300 px-3 py-2 bg-white text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                                    style="appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22><path fill=%22%23999%22 d=%22M7 10l5 5 5-5z%22/></svg>'); background-repeat: no-repeat; background-position: right 12px center; background-size: 20px;">
-                                <option value="">Sélectionner une catégorie</option>
-                                <option value="Tourisme">✈️ Tourisme</option>
-                                <option value="E-commerce">🛒 E-commerce</option>
-                                <option value="Gastronomie">🍽️ Gastronomie</option>
-                                <option value="Immobilier">🏠 Immobilier</option>
-                                <option value="Santé">🏥 Santé</option>
-                                <option value="Mode">👗 Mode</option>
-                                <option value="Tech">💻 Tech</option>
-                                <option value="Artisanat">🔨 Artisanat</option>
-                                <option value="Sport">⚽ Sport</option>
-                                <option value="Culture">🎨 Culture</option>
-                                <option value="Éducation">📚 Éducation</option>
-                                <option value="Automobile">🚗 Automobile</option>
-                                <option value="other">➕ Autre (saisir)</option>
-                            </select>
+                    <!-- Options avancées (repliables) -->
+                    <details class="border rounded-lg">
+                        <summary class="cursor-pointer p-3 hover:bg-gray-50 text-sm font-semibold text-gray-700 flex items-center gap-2 rounded-lg">
+                            <span class="material-symbols-outlined text-gray-400">tune</span>
+                            Options avancées (facultatif)
+                        </summary>
+                        <div class="p-4 pt-0 space-y-4 border-t">
                             
-                            <div id="customCategoryContainer" class="hidden">
-                                <div class="relative">
-                                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">edit</span>
-                                    <input type="text" 
-                                           id="customCategory" 
-                                           placeholder="Saisissez votre catégorie..."
-                                           class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
-                                </div>
-                                <p class="text-xs text-gray-400 mt-1 flex items-center gap-1">
-                                    <span class="material-symbols-outlined text-sm text-gray-400">lightbulb</span>
-                                    Exemples: Événementiel, Conseil, Formation, Bien-être, Design
-                                </p>
+                            {{-- Langue --}}
+                            <div class="space-y-1">
+                                <label class="text-xs font-bold text-gray-500 uppercase">Langue</label>
+                                <select id="language" class="w-full rounded-lg border border-gray-300 px-3 py-2 bg-white text-sm">
+                                    @php $prefLang = auth()->user()->preferences['language'] ?? 'fr'; @endphp
+                                    <option value="fr" {{ $prefLang === 'fr' ? 'selected' : '' }}>🇫🇷 Français</option>
+                                    <option value="en" {{ $prefLang === 'en' ? 'selected' : '' }}>🇬🇧 English</option>
+                                    <option value="ar" {{ $prefLang === 'ar' ? 'selected' : '' }}>🇲🇦 العربية</option>
+                                </select>
                             </div>
-                        </div>
-                    </div>
 
-                    <!-- ============================================= -->
-                    <!-- CHAMPS POUR COMMERCE LOCAL UNIQUEMENT -->
-                    <!-- ============================================= -->
-                    <div id="localFieldsContainer">
-                        <!-- Adresse -->
-                        <div class="space-y-2" id="addressField">
-                            <label class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1">
-                                <span class="material-symbols-outlined text-sm text-gray-400">location_on</span>
-                                Adresse <span class="text-red-500" id="addressRequired">*</span>
-                            </label>
-                            <div class="relative">
-                                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">location_on</span>
-                                <input id="address" type="text" 
-                                       class="w-full pl-10 pr-4 py-3 border rounded-xl required-field focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                                       placeholder="Ex: 123 Avenue Mohammed VI, Guéliz, Marrakech">
+                            {{-- Ton --}}
+                            <div class="space-y-1">
+                                <label class="text-xs font-bold text-gray-500 uppercase">Ton</label>
+                                <select id="tone" class="w-full rounded-lg border border-gray-300 px-3 py-2 bg-white text-sm">
+                                    @php $prefTone = auth()->user()->preferences['preferred_tone'] ?? 'professional'; @endphp
+                                    <option value="professional" {{ $prefTone === 'professional' ? 'selected' : '' }}>💼 Professionnel & Chaleureux</option>
+                                    <option value="expert" {{ $prefTone === 'expert' ? 'selected' : '' }}>🎓 Expert / Autorité</option>
+                                    <option value="storytelling" {{ $prefTone === 'storytelling' ? 'selected' : '' }}>📖 Storytelling</option>
+                                </select>
                             </div>
-                            <p class="text-xs text-red-500 hidden" id="addressError">L'adresse est obligatoire</p>
-                        </div>
 
-                        <!-- Site web (optionnel) -->
-                        <div id="websiteField" class="space-y-2">
-                            <label class="text-xs font-bold text-gray-500 uppercase">Site web (optionnel)</label>
-                            <div class="relative">
-                                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">public</span>
-                                <input id="website" type="url" class="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="https://www.maboutique.ma">
+                            {{-- Format --}}
+                            <div class="space-y-1">
+                                <label class="text-xs font-bold text-gray-500 uppercase">Format</label>
+                                <select id="format" class="w-full rounded-lg border border-gray-300 px-3 py-2 bg-white text-sm">
+                                    @php $prefFormat = auth()->user()->preferences['preferred_format'] ?? 'medium'; @endphp
+                                    <option value="short" {{ $prefFormat === 'short' ? 'selected' : '' }}>Court (600 mots)</option>
+                                    <option value="medium" {{ $prefFormat === 'medium' ? 'selected' : '' }}>Moyen (1000 mots)</option>
+                                    <option value="long" {{ $prefFormat === 'long' ? 'selected' : '' }}>Long (1600 mots)</option>
+                                </select>
                             </div>
-                        </div>
-        
 
-                        <!-- Zone géographique d'intervention -->
-                        <div id="geoZoneFields" class="space-y-2">
-                            <label class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1">
-                                <span class="material-symbols-outlined text-sm text-gray-400">map</span>
-                                Zone géographique d'intervention <span class="text-red-500">*</span>
-                            </label>
-                            <div class="grid grid-cols-3 gap-3">
-                                <div class="relative">
-                                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">radio_button_checked</span>
-                                    <input type="text" id="geoQuartier" class="w-full pl-9 pr-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="Quartier">
-                                </div>
-                                <div class="relative">
-                                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">location_city</span>
-                                    <input type="text" id="geoVille" class="w-full pl-9 pr-3 py-2 border rounded-lg text-sm required-field focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="Ville *">
-                                </div>
-                                <div class="relative">
-                                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">public</span>
-                                    <select id="geoPays" class="w-full pl-9 pr-3 py-2 border rounded-lg text-sm bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
-                                        <option value="Maroc">Maroc</option>
-                                        <option value="France">France</option>
-                                        <option value="Belgique">Belgique</option>
-                                        <option value="Suisse">Suisse</option>
-                                        <option value="Canada">Canada</option>
-                                        <option value="Sénégal">Sénégal</option>
-                                        <option value="Côte d'Ivoire">Côte d'Ivoire</option>
-                                        <option value="Espagne">Espagne</option>
-                                        <option value="Italie">Italie</option>
-                                        <option value="Allemagne">Allemagne</option>
-                                    </select>
+                            {{-- Objectifs (mode local uniquement) --}}
+                            @if(auth()->user()->business_mode === 'local')
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-gray-500 uppercase">Objectifs</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    @php $prefGoals = auth()->user()->preferences['preferred_goals'] ?? []; @endphp
+                                    <label class="flex items-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-gray-50 text-sm">
+                                        <input type="checkbox" value="attirer_boutique" class="goal-checkbox accent-primary" 
+                                               {{ in_array('attirer_boutique', $prefGoals) ? 'checked' : '' }}>
+                                        🏪 Attirer
+                                    </label>
+                                    <label class="flex items-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-gray-50 text-sm">
+                                        <input type="checkbox" value="appels" class="goal-checkbox accent-primary"
+                                               {{ in_array('appels', $prefGoals) ? 'checked' : '' }}>
+                                        📞 Appels
+                                    </label>
+                                    <label class="flex items-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-gray-50 text-sm">
+                                        <input type="checkbox" value="promotion" class="goal-checkbox accent-primary"
+                                               {{ in_array('promotion', $prefGoals) ? 'checked' : '' }}>
+                                        🏷️ Promo
+                                    </label>
+                                    <label class="flex items-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-gray-50 text-sm">
+                                        <input type="checkbox" value="reservations" class="goal-checkbox accent-primary"
+                                               {{ in_array('reservations', $prefGoals) ? 'checked' : '' }}>
+                                        📅 RDV
+                                    </label>
                                 </div>
                             </div>
-                            <p class="text-xs text-red-500 hidden" id="geoVilleError">La ville est obligatoire</p>
+                            @endif
                         </div>
-
-                        <!-- Objectifs -->
-                        <div id="goalsFields" class="space-y-2">
-                            <label class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1">
-                                <span class="material-symbols-outlined text-sm text-gray-400">target</span>
-                                Objectif(s) de l'article
-                            </label>
-                            <div class="grid grid-cols-2 gap-2">
-                                <label class="flex items-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-gray-50 transition-all">
-                                    <input type="checkbox" value="attirer_boutique" class="goal-checkbox accent-primary"> 
-                                    <span class="material-symbols-outlined text-sm text-gray-600">store</span>
-                                    <span class="text-sm">Attirer en boutique</span>
-                                </label>
-                                <label class="flex items-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-gray-50 transition-all">
-                                    <input type="checkbox" value="appels" class="goal-checkbox accent-primary"> 
-                                    <span class="material-symbols-outlined text-sm text-gray-600">call</span>
-                                    <span class="text-sm">Générer des appels</span>
-                                </label>
-                                <label class="flex items-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-gray-50 transition-all">
-                                    <input type="checkbox" value="promotion" class="goal-checkbox accent-primary"> 
-                                    <span class="material-symbols-outlined text-sm text-gray-600">sell</span>
-                                    <span class="text-sm">Promouvoir une offre</span>
-                                </label>
-                                <label class="flex items-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-gray-50 transition-all">
-                                    <input type="checkbox" value="reservations" class="goal-checkbox accent-primary"> 
-                                    <span class="material-symbols-outlined text-sm text-gray-600">event</span>
-                                    <span class="text-sm">Prise de rendez-vous</span>
-                                </label>
-                                <label class="flex items-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-gray-50 transition-all col-span-2">
-                                    <input type="checkbox" value="livraison" class="goal-checkbox accent-primary"> 
-                                    <span class="material-symbols-outlined text-sm text-gray-600">local_shipping</span>
-                                    <span class="text-sm">Livraison à domicile</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- FIN CHAMPS COMMERCE LOCAL -->
-
-                    <!-- ============================================= -->
-                    <!-- CHAMPS POUR ENTREPRISE EN LIGNE UNIQUEMENT -->
-                    <!-- ============================================= -->
-                    <div id="onlineFields" class="hidden space-y-4">
-                        <div class="space-y-2">
-                            <label class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1">
-                                <span class="material-symbols-outlined text-sm text-gray-400">public</span>
-                                Site Web <span class="text-red-500">*</span>
-                            </label>
-                            <div class="relative">
-                                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">public</span>
-                                <input id="websiteOnline" type="url" class="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="https://www.monsite.ma">
-                            </div>
-                            <p class="text-xs text-red-500 hidden" id="websiteOnlineError">Le site web est obligatoire</p>
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1">
-                                <span class="material-symbols-outlined text-sm text-gray-400">sell</span>
-                                Mots-clés stratégiques
-                            </label>
-                            <input id="keywords" type="text" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="Ex: artisanat, tourisme, e-commerce">
-                        </div>
-                    </div>
-                    <!-- FIN CHAMPS ENTREPRISE EN LIGNE -->
-
-                    <!-- Langue & Ton -->
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="space-y-2">
-                            <label class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1">
-                                <span class="material-symbols-outlined text-sm text-gray-400">translate</span>
-                                Langue
-                            </label>
-                            <select id="language" class="w-full rounded-lg border border-gray-300 px-3 py-2 bg-white text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
-                                <option value="fr">🇫🇷 Français</option>
-                                <option value="en">🇬🇧 English</option>
-                                <option value="ar">🇲🇦 العربية</option>
-                            </select>
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1">
-                                <span class="material-symbols-outlined text-sm text-gray-400">record_voice_over</span>
-                                Ton
-                            </label>
-                            <select id="tone" class="w-full rounded-lg border border-gray-300 px-3 py-2 bg-white text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
-                                <option value="professional">💼 Professionnel & Chaleureux</option>
-                                <option value="expert">🎓 Expert / Autorité</option>
-                                <option value="storytelling">📖 Storytelling</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Length Slider -->
-                    <div class="space-y-4 py-2">
-                        <div class="flex justify-between items-center">
-                            <label class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1">
-                                <span class="material-symbols-outlined text-sm text-gray-400">format_size</span>
-                                Format SEO
-                            </label>
-                            <span class="text-primary font-bold text-sm" id="lengthValue">Moyen</span>
-                        </div>
-                        <input id="lengthSlider" type="range" min="1" max="3" value="2" step="1"
-                               class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary transition-all"
-                               oninput="updateLength(this.value)">
-                        <div class="flex justify-between text-[10px] font-bold text-gray-400 uppercase tracking-wider px-1">
-                            <span>Court (600 mots)</span>
-                            <span>Moyen (1000 mots)</span>
-                            <span>Long (1600 mots)</span>
-                        </div>
-                    </div>
+                    </details>
 
                     <!-- Generate Button -->
                     <button id="generateBtn" onclick="generateArticle()"
@@ -292,17 +178,23 @@
                 <div class="flex items-start gap-3">
                     <span class="material-symbols-outlined text-secondary">lightbulb</span>
                     <div>
-                        <h4 class="font-semibold text-secondary mb-1" id="tipTitle">Conseil Local</h4>
-                        <p class="text-sm text-gray-600" id="tipText">L'agent NEARSEO intègre automatiquement votre zone géographique (quartier/ville/pays) dans l'article pour un ciblage SEO ultra-précis.</p>
+                        <h4 class="font-semibold text-secondary mb-1">Conseil NEARSEO</h4>
+                        <p class="text-sm text-gray-600">
+                            @if(auth()->user()->business_mode === 'local')
+                                L'agent NEARSEO intègre automatiquement votre zone géographique ({{ auth()->user()->business_city ?? 'ville' }}) dans l'article pour un ciblage SEO ultra-précis.
+                            @else
+                                L'agent NEARSEO va générer un article optimisé pour votre site web avec un ton adapté à votre audience.
+                            @endif
+                        </p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Right Column: MAP + Preview + Suggestions -->
+        <!-- Right Column: Preview + Suggestions -->
         <div class="col-span-12 lg:col-span-7 space-y-6">
             
-            <!-- Suggestions de sujets - Tendances Google & Événements -->
+            <!-- Tendances & Événements -->
             <div class="bg-white rounded-xl border shadow-sm p-4">
                 <div class="flex items-center justify-between mb-3">
                     <h3 class="font-bold text-gray-900 flex items-center gap-2 text-sm">
@@ -314,57 +206,23 @@
                 
                 @if(isset($trends) && !empty($trends))
                 <div class="flex gap-3 overflow-x-auto pb-2" style="scrollbar-width: thin;">
-                    <!-- Google Trends -->
                     @foreach($trends['google'] ?? [] as $trend)
-                    <div onclick="selectTopic('{{ addslashes($trend['keyword']) }}', '')" 
+                    <div onclick="selectTopic('{{ addslashes($trend['keyword']) }}')" 
                          class="min-w-[180px] max-w-[200px] p-3 bg-blue-50 rounded-lg hover:bg-blue-100 cursor-pointer transition-all group flex-shrink-0 border border-blue-100">
-                        <div class="flex items-start gap-1.5">
-                            <span class="material-symbols-outlined text-sm text-blue-600" style="font-variation-settings: 'FILL' 1;">trending_up</span>
-                            <div class="flex-1 min-w-0">
-                                <p class="text-xs font-medium text-gray-900 group-hover:text-primary transition-colors line-clamp-2">
-                                    {{ $trend['keyword'] }}
-                                </p>
-                                <div class="flex items-center gap-1 mt-1">
-                                    <span class="text-[9px] text-gray-400">Volume</span>
-                                    <div class="flex-1 h-0.5 bg-gray-200 rounded-full overflow-hidden">
-                                        <div class="h-full bg-blue-500 rounded-full" style="width: {{ min(($trend['volume'] ?? 500) / 1200 * 100, 100) }}%"></div>
-                                    </div>
-                                    <span class="text-[9px] text-gray-500">{{ number_format($trend['volume'] ?? 0) }}</span>
-                                </div>
-                            </div>
-                        </div>
+                        <p class="text-xs font-medium text-gray-900 group-hover:text-primary transition-colors line-clamp-2">
+                            {{ $trend['keyword'] }}
+                        </p>
+                        <span class="text-[9px] text-blue-600 font-bold">📈 Tendance</span>
                     </div>
                     @endforeach
 
-                    <!-- Événements -->
                     @foreach($trends['seasonal'] ?? [] as $event)
-                    <div onclick="selectTopic('{{ addslashes($event) }}', '')" 
+                    <div onclick="selectTopic('{{ addslashes($event) }}')" 
                          class="min-w-[160px] max-w-[180px] p-3 bg-orange-50 rounded-lg hover:bg-orange-100 cursor-pointer transition-all group flex-shrink-0 border border-orange-100">
-                        <div class="flex items-start gap-1.5">
-                            <span class="material-symbols-outlined text-sm text-orange-600">calendar_month</span>
-                            <div class="flex-1 min-w-0">
-                                <p class="text-xs font-medium text-gray-900 group-hover:text-primary transition-colors line-clamp-2">
-                                    {{ $event }}
-                                </p>
-                                <span class="text-[9px] text-gray-400 mt-1 inline-block">🎯 Événement</span>
-                            </div>
-                        </div>
-                    </div>
-                    @endforeach
-
-                    <!-- Actualités -->
-                    @foreach($trends['news'] ?? [] as $news)
-                    <div onclick="selectTopic('{{ addslashes($news['title']) }}', '')" 
-                         class="min-w-[180px] max-w-[200px] p-3 bg-red-50 rounded-lg hover:bg-red-100 cursor-pointer transition-all group flex-shrink-0 border border-red-100">
-                        <div class="flex items-start gap-1.5">
-                            <span class="material-symbols-outlined text-sm text-red-600">newspaper</span>
-                            <div class="flex-1 min-w-0">
-                                <p class="text-xs font-medium text-gray-900 group-hover:text-primary transition-colors line-clamp-2">
-                                    {{ $news['title'] }}
-                                </p>
-                                <span class="text-[9px] text-gray-400 mt-1 inline-block">{{ $news['source'] ?? 'Actualité' }}</span>
-                            </div>
-                        </div>
+                        <p class="text-xs font-medium text-gray-900 group-hover:text-primary transition-colors line-clamp-2">
+                            {{ $event }}
+                        </p>
+                        <span class="text-[9px] text-orange-600 font-bold">🎯 Événement</span>
                     </div>
                     @endforeach
                 </div>
@@ -374,66 +232,26 @@
                     <p class="text-xs text-gray-400 mt-1">Aucune tendance disponible</p>
                 </div>
                 @endif
-                
-                <!-- Lien vers les tendances -->
-                <div class="mt-3 pt-2 border-t border-gray-100 flex items-center justify-end">
-                    <a href="{{ route('trends.index') }}" class="text-[10px] text-primary hover:underline flex items-center gap-1">
-                        Voir toutes les tendances
-                        <span class="material-symbols-outlined text-xs">arrow_forward</span>
-                    </a>
-                </div>
             </div>
             
-            <!-- Carte + Aperçu -->
+            <!-- Aperçu -->
             <div class="bg-white rounded-xl border shadow-sm flex flex-col">
-                <!-- MAP SECTION avec barre de recherche -->
-                <div class="relative w-full" style="height: 320px;" id="mapContainer">
-                    <div class="absolute top-4 left-4 right-4 z-20">
-                        <div class="relative max-w-md">
-                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">search</span>
-                            <input type="text" id="mapSearchInput" 
-                                   placeholder="Rechercher une adresse, une ville..." 
-                                   class="w-full pl-10 pr-4 py-2.5 bg-white rounded-lg shadow-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm transition-all">
-                            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">⌘K</span>
-                        </div>
-                    </div>
-                    
-                    <div id="map" class="w-full h-full rounded-t-xl overflow-hidden bg-gray-100"></div>
-                    
-                    <div class="absolute bottom-4 left-4 z-20 flex flex-col gap-2">
-                        <button onclick="zoomIn()" class="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-lg shadow-md flex items-center justify-center text-gray-600 hover:text-primary hover:bg-white transition-all">
-                            <span class="material-symbols-outlined">add</span>
-                        </button>
-                        <button onclick="zoomOut()" class="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-lg shadow-md flex items-center justify-center text-gray-600 hover:text-primary hover:bg-white transition-all">
-                            <span class="material-symbols-outlined">remove</span>
-                        </button>
-                        <button onclick="getUserLocation()" class="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-lg shadow-md flex items-center justify-center text-gray-600 hover:text-primary hover:bg-white transition-all mt-4">
-                            <span class="material-symbols-outlined">my_location</span>
-                        </button>
-                    </div>
-                    
-                    <div class="absolute bottom-4 right-4 z-20">
-                        <span class="text-xs bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md text-gray-600 flex items-center gap-1">
-                            <span class="material-symbols-outlined text-sm text-primary">location_on</span>
-                            <span id="mapStatus">🌍 Carte centrée</span>
-                        </span>
-                    </div>
-                </div>
-                
                 <!-- Preview Header -->
-                <div class="p-4 border-b border-t flex justify-between items-center bg-gray-50">
+                <div class="p-4 border-b flex justify-between items-center bg-gray-50 rounded-t-xl">
                     <div class="flex items-center gap-3">
                         <span class="material-symbols-outlined text-gray-500">visibility</span>
                         <h2 class="font-semibold text-lg">Aperçu de l'article</h2>
                     </div>
                     <div class="flex items-center gap-2 bg-green-100 text-green-700 px-3 py-1 rounded-full border border-green-200">
                         <span class="material-symbols-outlined text-base text-green-600" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
-                        <span class="text-[11px] font-bold uppercase tracking-wider" id="previewBadge">Mode Local Actif</span>
+                        <span class="text-[11px] font-bold uppercase tracking-wider">
+                            {{ auth()->user()->business_mode === 'local' ? 'Mode Local' : 'Mode Global' }}
+                        </span>
                     </div>
                 </div>
 
                 <!-- Empty State -->
-                <div id="emptyState" class="flex-1 flex flex-col items-center justify-center p-12 text-center" style="min-height: 300px;">
+                <div id="emptyState" class="flex-1 flex flex-col items-center justify-center p-12 text-center" style="min-height: 400px;">
                     <div class="w-24 h-24 bg-primary/5 rounded-full flex items-center justify-center mb-6 relative">
                         <span class="material-symbols-outlined text-5xl text-primary/30">article</span>
                         <div class="absolute -right-1 -bottom-1 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md border">
@@ -442,7 +260,7 @@
                     </div>
                     <h3 class="text-2xl font-bold text-gray-700 mb-2">Agent NEARSEO prêt</h3>
                     <p class="text-gray-500 max-w-sm text-base">
-                        Remplissez le formulaire à gauche et cliquez sur "Générer".<br>
+                        Écrivez votre sujet et cliquez sur "Générer".<br>
                         <span class="text-sm text-primary">Votre article apparaîtra ici</span>
                     </p>
                 </div>
@@ -469,10 +287,6 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-3">
-                        <button id="rewriteBtn" onclick="rewriteArticle()" disabled class="px-4 py-2 border rounded-lg text-sm font-semibold text-gray-400 cursor-not-allowed flex items-center gap-2">
-                            <span class="material-symbols-outlined text-lg text-gray-400">refresh</span> 
-                            Reformuler
-                        </button>
                         <button id="publishBtn" onclick="publishArticle()" disabled class="px-5 py-2 bg-gray-300 text-white rounded-lg text-sm font-bold cursor-not-allowed flex items-center gap-2">
                             <span class="material-symbols-outlined text-lg text-white">ios_share</span> 
                             Exporter
@@ -486,368 +300,30 @@
 @endsection
 
 @push('styles')
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
-    .marker-pulse::after {
-        content: '';
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        background: rgba(140, 74, 47, 0.4);
-        border-radius: 50%;
-        animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-        0% { transform: scale(1); opacity: 1; }
-        100% { transform: scale(3); opacity: 0; }
-    }
-    .prose {
-        max-width: none;
-    }
+    .prose { max-width: none; }
     .prose h1 { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
     .prose h2 { font-size: 1.5rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.75rem; }
     .prose h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; }
     .prose p { margin-bottom: 1rem; line-height: 1.6; }
     .prose ul, .prose ol { padding-left: 1.5rem; margin-bottom: 1rem; }
-    .faq-item { margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #e5e7eb; }
-    .faq-item p:first-child { font-weight: 600; }
-    .material-symbols-outlined {
-        vertical-align: middle;
-    }
-    .mode-btn {
-        transition: all 0.2s ease;
-    }
-    .mode-btn:hover {
-        transform: scale(1.02);
-    }
-    .overflow-x-auto::-webkit-scrollbar {
-        height: 4px;
-    }
-    .overflow-x-auto::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 10px;
-    }
-    .overflow-x-auto::-webkit-scrollbar-thumb {
-        background: #d1d5db;
-        border-radius: 10px;
-    }
-    .overflow-x-auto::-webkit-scrollbar-thumb:hover {
-        background: #9ca3af;
-    }
 </style>
 @endpush
 
 @push('scripts')
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    let map;
-    let currentMarker = null;
-    let currentMode = 'local';
     let generatedContent = '';
     let currentSeoScore = 0;
-    let updateTimeout = null;
 
-    // =============================================
-    // CARTE
-    // =============================================
-
-    function initMap() {
-        const defaultCenter = [31.7917, -7.0926];
-        map = L.map('map').setView(defaultCenter, 6);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> & CartoDB',
-            subdomains: 'abcd',
-            maxZoom: 19
-        }).addTo(map);
-        
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(position => {
-                map.setView([position.coords.latitude, position.coords.longitude], 10);
-                document.getElementById('mapStatus').innerHTML = '📍 Votre position';
-                addMarker(position.coords.latitude, position.coords.longitude);
-            }, error => {
-                document.getElementById('mapStatus').innerHTML = '🌍 Carte centrée sur le Maroc';
-            });
-        }
-        updateMapFromGeoZone();
-    }
-    
-    function addMarker(lat, lng) {
-        if (currentMarker) map.removeLayer(currentMarker);
-        const customIcon = L.divIcon({
-            html: '<div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center border-2 border-white shadow-lg"><span class="material-symbols-outlined text-white text-sm">location_on</span></div>',
-            iconSize: [32, 32],
-            popupAnchor: [0, -16],
-            className: 'custom-marker'
-        });
-        currentMarker = L.marker([lat, lng], { icon: customIcon, draggable: true }).addTo(map);
-        currentMarker.bindPopup(`<b>${document.getElementById('businessName').value || 'Votre commerce'}</b>`);
-        currentMarker.on('dragend', (e) => reverseGeocode(e.target.getLatLng().lat, e.target.getLatLng().lng));
-    }
-    
-    async function updateMapFromGeoZone() {
-        const quartier = document.getElementById('geoQuartier')?.value || '';
-        const ville = document.getElementById('geoVille')?.value || '';
-        const pays = document.getElementById('geoPays')?.value || '';
-        let query = [quartier, ville, pays].filter(Boolean).join(', ');
-        if (!query) return;
-        
-        document.getElementById('mapStatus').innerHTML = '🔍 Recherche...';
-        try {
-            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
-            const data = await response.json();
-            if (data?.length) {
-                map.setView([data[0].lat, data[0].lon], 13);
-                addMarker(data[0].lat, data[0].lon);
-                document.getElementById('mapStatus').innerHTML = `📍 ${ville || pays}`;
-            } else {
-                document.getElementById('mapStatus').innerHTML = '⚠️ Localisation non trouvée';
-            }
-        } catch (error) {
-            document.getElementById('mapStatus').innerHTML = '❌ Erreur de recherche';
-        }
-    }
-    
-    async function reverseGeocode(lat, lng) {
-        try {
-            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
-            const data = await response.json();
-            if (data?.address) {
-                const ville = data.address.city || data.address.town || data.address.village || '';
-                const quartier = data.address.suburb || data.address.neighbourhood || '';
-                const pays = data.address.country || '';
-                if (ville) document.getElementById('geoVille').value = ville;
-                if (quartier) document.getElementById('geoQuartier').value = quartier;
-                if (pays) {
-                    let opt = Array.from(document.getElementById('geoPays').options).find(o => o.value === pays);
-                    if (opt) document.getElementById('geoPays').value = pays;
-                }
-                document.getElementById('mapStatus').innerHTML = `📍 ${quartier ? quartier + ', ' : ''}${ville}`;
-            }
-        } catch (error) { console.error('Reverse geocoding error:', error); }
-    }
-    
-    function setupGeoListeners() {
-        ['geoQuartier', 'geoVille', 'geoPays'].forEach(id => {
-            let el = document.getElementById(id);
-            if (el) el.addEventListener('change', () => {
-                clearTimeout(updateTimeout);
-                updateTimeout = setTimeout(() => updateMapFromGeoZone(), 500);
-            });
-        });
-    }
-    
-    function zoomIn() { map?.zoomIn(); }
-    function zoomOut() { map?.zoomOut(); }
-    
-    function getUserLocation() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(position => {
-                map.setView([position.coords.latitude, position.coords.longitude], 14);
-                addMarker(position.coords.latitude, position.coords.longitude);
-                reverseGeocode(position.coords.latitude, position.coords.longitude);
-                document.getElementById('mapStatus').innerHTML = '📍 Votre position';
-            }, () => alert('Impossible d\'obtenir votre position'));
-        } else alert('Géolocalisation non supportée');
-    }
-    
-    async function searchMapLocation(event) {
-        if (event.key !== 'Enter') return;
-        const query = event.target.value;
-        if (!query) return;
-        document.getElementById('mapStatus').innerHTML = '🔍 Recherche...';
-        try {
-            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
-            const data = await response.json();
-            if (data?.length) {
-                map.setView([data[0].lat, data[0].lon], 14);
-                addMarker(data[0].lat, data[0].lon);
-                document.getElementById('mapStatus').innerHTML = `📍 ${data[0].display_name.substring(0, 40)}`;
-                let parts = data[0].display_name.split(',');
-                if (parts.length >= 2) document.getElementById('geoVille').value = parts[1].trim();
-                if (parts.length >= 3) document.getElementById('geoPays').value = parts[2].trim();
-            } else document.getElementById('mapStatus').innerHTML = '⚠️ Localisation non trouvée';
-        } catch (error) { document.getElementById('mapStatus').innerHTML = '❌ Erreur de recherche'; }
-    }
-    
-    document.addEventListener('DOMContentLoaded', function() {
-        document.getElementById('mapSearchInput')?.addEventListener('keypress', searchMapLocation);
-    });
-    
-    function toggleWebsiteField() {
-        let field = document.getElementById('websiteField');
-        let btn = document.querySelector('button[onclick="toggleWebsiteField()"]');
-        if (field.classList.contains('hidden')) {
-            field.classList.remove('hidden');
-            if (btn) btn.innerHTML = '<span class="material-symbols-outlined text-sm">remove</span> Supprimer mon site web';
-        } else {
-            field.classList.add('hidden');
-            document.getElementById('website').value = '';
-            if (btn) btn.innerHTML = '<span class="material-symbols-outlined text-sm">add</span> Ajouter un site web existant';
-        }
-    }
-    
-    function updateLength(val) {
-        let values = ["Court", "Moyen", "Long"];
-        document.getElementById('lengthValue').innerText = values[val-1];
-    }
-    
-    function validateForm() {
-        let isValid = true;
-        let businessName = document.getElementById('businessName').value.trim();
-        let address = document.getElementById('address').value.trim();
-        let geoVille = document.getElementById('geoVille')?.value.trim();
-        
-        if (!businessName) {
-            document.getElementById('businessName').classList.add('border-red-500');
-            document.getElementById('businessNameError').classList.remove('hidden');
-            isValid = false;
-        } else {
-            document.getElementById('businessName').classList.remove('border-red-500');
-            document.getElementById('businessNameError').classList.add('hidden');
-        }
-        
-        if (currentMode === 'local') {
-            if (!address) {
-                document.getElementById('address').classList.add('border-red-500');
-                document.getElementById('addressError').classList.remove('hidden');
-                isValid = false;
-            } else {
-                document.getElementById('address').classList.remove('border-red-500');
-                document.getElementById('addressError').classList.add('hidden');
-            }
-            
-            if (!geoVille) {
-                document.getElementById('geoVille').classList.add('border-red-500');
-                document.getElementById('geoVilleError').classList.remove('hidden');
-                isValid = false;
-            } else {
-                document.getElementById('geoVille').classList.remove('border-red-500');
-                document.getElementById('geoVilleError').classList.add('hidden');
-            }
-        } else {
-            document.getElementById('address').classList.remove('border-red-500');
-            document.getElementById('addressError').classList.add('hidden');
-        }
-        
-        return isValid;
-    }
-    
-    // =============================================
-    // SWITCH MODE
-    // =============================================
-    
-    function switchMode(mode) {
-        currentMode = mode;
-        
-        let localBtn = document.querySelector('[data-mode="local"]');
-        let onlineBtn = document.querySelector('[data-mode="online"]');
-        let localFieldsContainer = document.getElementById('localFieldsContainer');
-        let onlineFields = document.getElementById('onlineFields');
-        let addressField = document.getElementById('addressField');
-        let addressRequired = document.getElementById('addressRequired');
-        let addressError = document.getElementById('addressError');
-        let geoZoneFields = document.getElementById('geoZoneFields');
-        let goalsFields = document.getElementById('goalsFields');
-        let mapContainer = document.getElementById('mapContainer');
-        let subjectLabel = document.getElementById('subjectLabel');
-        let tipTitle = document.getElementById('tipTitle');
-        let tipText = document.getElementById('tipText');
-        let previewBadge = document.getElementById('previewBadge');
-        
-        if (mode === 'local') {
-            // --- MODE LOCAL ---
-            localBtn.classList.add('bg-white', 'text-primary', 'shadow-sm', 'ring-1', 'ring-black/5');
-            localBtn.classList.remove('text-gray-600');
-            onlineBtn.classList.remove('bg-white', 'text-primary', 'shadow-sm', 'ring-1', 'ring-black/5');
-            onlineBtn.classList.add('text-gray-600');
-            
-            localFieldsContainer.classList.remove('hidden');
-            onlineFields.classList.add('hidden');
-            addressField.classList.remove('hidden');
-            addressRequired.classList.remove('hidden');
-            addressError.classList.add('hidden');
-            geoZoneFields.classList.remove('hidden');
-            goalsFields.classList.remove('hidden');
-            mapContainer.classList.remove('hidden');
-            
-            subjectLabel.innerText = "Sujet de l'article local";
-            tipTitle.innerText = "Conseil Local";
-            tipText.innerHTML = "L'agent NEARSEO intègre automatiquement votre zone géographique (quartier/ville/pays) dans l'article pour un ciblage SEO ultra-précis.";
-            previewBadge.innerText = "Mode Local Actif";
-            
-            updateMapFromGeoZone();
-            
-        } else {
-            // --- MODE ENTREPRISE EN LIGNE ---
-            onlineBtn.classList.add('bg-white', 'text-primary', 'shadow-sm', 'ring-1', 'ring-black/5');
-            onlineBtn.classList.remove('text-gray-600');
-            localBtn.classList.remove('bg-white', 'text-primary', 'shadow-sm', 'ring-1', 'ring-black/5');
-            localBtn.classList.add('text-gray-600');
-            
-            localFieldsContainer.classList.add('hidden');
-            onlineFields.classList.remove('hidden');
-            addressField.classList.add('hidden');
-            geoZoneFields.classList.add('hidden');
-            goalsFields.classList.add('hidden');
-            mapContainer.classList.add('hidden');
-            
-            subjectLabel.innerText = "Sujet de l'article";
-            tipTitle.innerText = "Conseil Entreprise";
-            tipText.innerHTML = "L'agent NEARSEO va générer un article optimisé pour votre site web avec des backlinks pertinents.";
-            previewBadge.innerText = "Mode Global Actif";
-            
-            document.getElementById('address').value = '';
-        }
-    }
-    
-    function updateSeoScore(score) {
-        let circumference = 150;
-        let offset = circumference - (score / 100) * circumference;
-        let circle = document.getElementById('seoScoreCircle');
-        if (circle) circle.style.strokeDashoffset = offset;
-        document.getElementById('seoScore').innerText = score;
-        let statusEl = document.getElementById('seoStatus');
-        if (score >= 80) statusEl.innerHTML = '🏆 Excellent - Prêt à publier';
-        else if (score >= 60) statusEl.innerHTML = '👍 Bon - Quelques améliorations possibles';
-        else statusEl.innerHTML = '⚠️ À améliorer - Relisez le contenu';
-    }
-    
-    function enableActions() {
-        let rewriteBtn = document.getElementById('rewriteBtn');
-        let publishBtn = document.getElementById('publishBtn');
-        let actionBar = document.getElementById('actionBar');
-        if (rewriteBtn) {
-            rewriteBtn.disabled = false;
-            rewriteBtn.classList.remove('text-gray-400', 'cursor-not-allowed');
-            rewriteBtn.classList.add('text-primary', 'cursor-pointer', 'hover:bg-primary/5', 'border-primary/30');
-        }
-        if (publishBtn) {
-            publishBtn.disabled = false;
-            publishBtn.classList.remove('bg-gray-300', 'cursor-not-allowed');
-            publishBtn.classList.add('bg-secondary', 'cursor-pointer', 'hover:bg-secondary/90', 'shadow-md');
-        }
-        if (actionBar) actionBar.classList.remove('opacity-50');
-    }
-    
-    // =============================================
-    // SÉLECTION D'UN SUJET
-    // =============================================
-
-    function selectTopic(topic, keywords) {
+    function selectTopic(topic) {
         document.getElementById('subject').value = topic;
-        if (keywords) {
-            document.getElementById('keywords').value = keywords;
-        }
         document.getElementById('subject').focus();
-        
         document.getElementById('subject').style.borderColor = '#8c4a2f';
         document.getElementById('subject').style.backgroundColor = '#f0f7ff';
         setTimeout(() => {
             document.getElementById('subject').style.borderColor = '';
             document.getElementById('subject').style.backgroundColor = '';
         }, 2000);
-        
         document.getElementById('subject').scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
@@ -860,7 +336,6 @@
             padding: 12px 24px; border-radius: 12px;
             z-index: 9999; font-size: 14px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            animation: slideUp 0.3s ease-out;
             max-width: 400px;
         `;
         document.body.appendChild(toast);
@@ -871,60 +346,34 @@
         }, 4000);
     }
 
-    // =============================================
-    // CATÉGORIE PERSONNALISÉE
-    // =============================================
-
-    function toggleCategoryInput(value) {
-        const customContainer = document.getElementById('customCategoryContainer');
-        const customInput = document.getElementById('customCategory');
-        
-        if (value === 'other') {
-            customContainer.classList.remove('hidden');
-            customInput.focus();
-        } else {
-            customContainer.classList.add('hidden');
-            customInput.value = '';
-        }
+    function updateSeoScore(score) {
+        let circumference = 150;
+        let offset = circumference - (score / 100) * circumference;
+        let circle = document.getElementById('seoScoreCircle');
+        if (circle) circle.style.strokeDashoffset = offset;
+        document.getElementById('seoScore').innerText = score;
+        let statusEl = document.getElementById('seoStatus');
+        if (score >= 80) statusEl.innerHTML = '🏆 Excellent';
+        else if (score >= 60) statusEl.innerHTML = '👍 Bon';
+        else statusEl.innerHTML = '⚠️ À améliorer';
     }
 
-    function getCategoryValue() {
-        const select = document.getElementById('category');
-        const customInput = document.getElementById('customCategory');
-        
-        if (select.value === 'other' && customInput.value.trim()) {
-            return customInput.value.trim();
+    function enableActions() {
+        let publishBtn = document.getElementById('publishBtn');
+        let actionBar = document.getElementById('actionBar');
+        if (publishBtn) {
+            publishBtn.disabled = false;
+            publishBtn.classList.remove('bg-gray-300', 'cursor-not-allowed');
+            publishBtn.classList.add('bg-secondary', 'cursor-pointer', 'hover:bg-secondary/90', 'shadow-md');
         }
-        return select.value || null;
+        if (actionBar) actionBar.classList.remove('opacity-50');
     }
 
-    // =============================================
-    // GÉNÉRATION D'ARTICLE
-    // =============================================
-    
     async function generateArticle() {
-        // ✅ Validation
-        const businessName = document.getElementById('businessName').value.trim();
         const subject = document.getElementById('subject').value.trim();
         
-        let errors = [];
-        if (!businessName) errors.push('Le nom du commerce est obligatoire');
-        if (!subject) errors.push('Le sujet de l\'article est obligatoire');
-        
-        if (currentMode === 'local') {
-            const address = document.getElementById('address').value.trim();
-            const geoVille = document.getElementById('geoVille')?.value.trim();
-            if (!address) errors.push('L\'adresse est obligatoire en mode local');
-            if (!geoVille) errors.push('La ville est obligatoire en mode local');
-        }
-        
-        if (currentMode === 'online') {
-            const website = document.getElementById('websiteOnline').value.trim();
-            if (!website) errors.push('Le site web est obligatoire en mode entreprise en ligne');
-        }
-        
-        if (errors.length > 0) {
-            showToast('❌ ' + errors.join('<br>'));
+        if (!subject) {
+            showToast('❌ Veuillez saisir le sujet de l\'article');
             return;
         }
         
@@ -940,57 +389,52 @@
                 <div class="h-8 bg-gray-200 rounded w-3/4"></div>
                 <div class="h-4 bg-gray-200 rounded w-full"></div>
                 <div class="h-4 bg-gray-200 rounded w-5/6"></div>
-                <div class="h-4 bg-gray-200 rounded w-4/5"></div>
                 <div class="h-32 bg-gray-200 rounded w-full"></div>
             </div>
         `;
         
+        // ✅ Payload MINIMAL — les infos du commerce sont prises côté serveur
         const payload = {
-            mode: currentMode,
-            business_name: businessName,
             subject: subject,
-            category: getCategoryValue(),
             language: document.getElementById('language').value,
             tone: document.getElementById('tone').value,
-            format: ['short', 'medium', 'long'][document.getElementById('lengthSlider').value - 1]
+            format: document.getElementById('format').value,
+            goals: Array.from(document.querySelectorAll('.goal-checkbox:checked')).map(cb => cb.value),
         };
-        
-        if (currentMode === 'local') {
-            payload.address = document.getElementById('address').value.trim();
-            payload.website = document.getElementById('website').value || '';
-            payload.goals = Array.from(document.querySelectorAll('.goal-checkbox:checked')).map(cb => cb.value);
-            payload.geo_quartier = document.getElementById('geoQuartier')?.value || '';
-            payload.geo_ville = document.getElementById('geoVille')?.value || '';
-            payload.geo_pays = document.getElementById('geoPays')?.value || 'Maroc';
-        } else {
-            payload.website = document.getElementById('websiteOnline').value.trim();
-            payload.keywords = document.getElementById('keywords').value || '';
-        }
         
         console.log('🔍 Payload envoyé:', payload);
         
         try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 120000);
+            
             const response = await fetch('{{ route("ai.generate") }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
-                body: JSON.stringify(payload)
+                body: JSON.stringify(payload),
+                signal: controller.signal,
+                credentials: 'same-origin'
             });
             
+            clearTimeout(timeoutId);
+            
+            const contentType = response.headers.get('content-type') || '';
             const responseText = await response.text();
-            let data;
-            try {
-                data = JSON.parse(responseText);
-            } catch (e) {
-                console.error('❌ Réponse non-JSON:', responseText);
+            
+            console.log(`📡 Status: ${response.status}`);
+            
+            if (!contentType.includes('application/json')) {
                 document.getElementById('articleContent').innerHTML = `
                     <div class="text-center py-12">
                         <span class="material-symbols-outlined text-5xl text-red-500">error</span>
-                        <p class="text-red-600 mt-4 font-semibold">❌ Erreur serveur</p>
-                        <pre class="mt-4 text-left text-xs bg-gray-100 p-4 rounded-lg overflow-auto max-h-60">${responseText.substring(0, 500)}</pre>
-                        <button onclick="generateArticle()" class="mt-4 px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition">
+                        <p class="text-red-600 mt-4 font-semibold">❌ Erreur serveur (${response.status})</p>
+                        <pre class="mt-4 text-xs text-left bg-gray-100 p-4 rounded-lg">${responseText.substring(0, 500)}</pre>
+                        <button onclick="generateArticle()" class="mt-4 px-6 py-2 bg-primary text-white rounded-lg">
                             Réessayer
                         </button>
                     </div>
@@ -1000,32 +444,8 @@
                 return;
             }
             
-            console.log('📦 Réponse:', data);
-            
-            if (!response.ok) {
-                let errorMessage = data.message || 'Erreur inconnue';
-                let errorDetails = '';
-                
-                if (data.errors) {
-                    errorDetails = Object.entries(data.errors)
-                        .map(([field, messages]) => `• ${field}: ${messages.join(', ')}`)
-                        .join('<br>');
-                }
-                
-                document.getElementById('articleContent').innerHTML = `
-                    <div class="text-center py-12">
-                        <span class="material-symbols-outlined text-5xl text-red-500">error</span>
-                        <p class="text-red-600 mt-4 font-semibold">❌ ${errorMessage}</p>
-                        ${errorDetails ? `<div class="text-sm text-gray-600 mt-2">${errorDetails}</div>` : ''}
-                        <button onclick="generateArticle()" class="mt-4 px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition">
-                            Réessayer
-                        </button>
-                    </div>
-                `;
-                btn.innerHTML = originalHtml;
-                btn.disabled = false;
-                return;
-            }
+            const data = JSON.parse(responseText);
+            console.log('📦 Response:', data);
             
             if (data.success) {
                 showToast('✅ Article généré avec succès !');
@@ -1033,35 +453,34 @@
                 currentSeoScore = data.seo_score || 0;
                 
                 if (data.redirect_url) {
-                    setTimeout(() => {
-                        window.location.href = data.redirect_url;
-                    }, 1500);
-                } else {
-                    document.getElementById('articleContent').innerHTML = data.content || 'Contenu vide';
-                    if (data.seo_score) {
-                        updateSeoScore(data.seo_score);
-                    }
-                    enableActions();
+                    window.location.href = data.redirect_url;
+                    return;
                 }
+                
+                document.getElementById('articleContent').innerHTML = data.content || 'Contenu vide';
+                if (data.seo_score) updateSeoScore(data.seo_score);
+                if (data.word_count) {
+                    document.getElementById('seoStatus').innerHTML = `📝 ${data.word_count} mots • Score: ${data.seo_score}%`;
+                }
+                enableActions();
             } else {
                 document.getElementById('articleContent').innerHTML = `
                     <div class="text-center py-12">
                         <span class="material-symbols-outlined text-5xl text-red-500">error</span>
                         <p class="text-red-600 mt-4 font-semibold">❌ ${data.message || 'Génération échouée'}</p>
-                        <button onclick="generateArticle()" class="mt-4 px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition">
+                        <button onclick="generateArticle()" class="mt-4 px-6 py-2 bg-primary text-white rounded-lg">
                             Réessayer
                         </button>
                     </div>
                 `;
             }
         } catch (error) {
-            console.error('❌ Erreur réseau:', error);
+            console.error('❌ Error:', error);
             document.getElementById('articleContent').innerHTML = `
                 <div class="text-center py-12">
                     <span class="material-symbols-outlined text-5xl text-red-500">wifi_off</span>
-                    <p class="text-red-600 mt-4 font-semibold">❌ Erreur de connexion</p>
-                    <p class="text-sm text-gray-500 mt-2">${error.message || 'Veuillez vérifier votre connexion internet'}</p>
-                    <button onclick="generateArticle()" class="mt-4 px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition">
+                    <p class="text-red-600 mt-4 font-semibold">❌ ${error.message || 'Erreur de connexion'}</p>
+                    <button onclick="generateArticle()" class="mt-4 px-6 py-2 bg-primary text-white rounded-lg">
                         Réessayer
                     </button>
                 </div>
@@ -1070,10 +489,6 @@
             btn.innerHTML = originalHtml;
             btn.disabled = false;
         }
-    }
-    
-    function rewriteArticle() { 
-        alert('🔄 Fonctionnalité à venir : Reformulation de l\'article avec l\'agent NEARSEO'); 
     }
     
     function publishArticle() {
@@ -1091,77 +506,16 @@
                 title: title,
                 content: generatedContent,
                 seo_score: currentSeoScore,
-                status: 'published',
-                category: getCategoryValue(),
-                address: document.getElementById('address').value || '',
-                business_name: document.getElementById('businessName').value,
-                mode: currentMode,
-                geo_ville: document.getElementById('geoVille')?.value || '',
-                geo_pays: document.getElementById('geoPays')?.value || ''
+                status: 'published'
             })
         }).then(response => {
             if (response.ok) {
-                showToast('✅ Article publié avec succès !');
-                setTimeout(() => {
-                    window.location.href = '{{ route("articles.index") }}';
-                }, 1000);
+                showToast('✅ Article publié !');
+                setTimeout(() => window.location.href = '{{ route("articles.index") }}', 1000);
             } else {
-                showToast('❌ Erreur lors de la publication');
+                showToast('❌ Erreur');
             }
-        }).catch(error => {
-            showToast('❌ Erreur de connexion');
         });
     }
-    
-    // =============================================
-    // ÉVÉNEMENTS DE VALIDATION
-    // =============================================
-    
-    document.getElementById('businessName')?.addEventListener('input', function() {
-        if (this.value.trim()) {
-            this.classList.remove('border-red-500');
-            document.getElementById('businessNameError')?.classList.add('hidden');
-        }
-    });
-    
-    document.getElementById('address')?.addEventListener('input', function() {
-        if (this.value.trim()) {
-            this.classList.remove('border-red-500');
-            document.getElementById('addressError')?.classList.add('hidden');
-        }
-    });
-    
-    document.getElementById('geoVille')?.addEventListener('input', function() {
-        if (this.value.trim()) {
-            this.classList.remove('border-red-500');
-            document.getElementById('geoVilleError')?.classList.add('hidden');
-        }
-    });
-    
-    document.getElementById('websiteOnline')?.addEventListener('input', function() {
-        if (this.value.trim()) {
-            this.classList.remove('border-red-500');
-            document.getElementById('websiteOnlineError')?.classList.add('hidden');
-        }
-    });
-    
-    // =============================================
-    // INITIALISATION
-    // =============================================
-    
-    document.addEventListener('DOMContentLoaded', () => {
-        initMap();
-        setupGeoListeners();
-        updateLength(2);
-        switchMode('local');
-        
-        // 🎯 Vérifier si un sujet est passé dans l'URL (depuis la page tendances)
-        const urlParams = new URLSearchParams(window.location.search);
-        const topic = urlParams.get('topic');
-        const keywords = urlParams.get('keywords');
-        if (topic) {
-            selectTopic(topic, keywords);
-        }
-    });
 </script>
 @endpush

@@ -177,7 +177,7 @@
                 @csrf
                 
                 <!-- Token caché -->
-                <input type="hidden" name="token" value="{{ $token ?? '' }}">
+                <input type="hidden" name="token" value="{{ $request->route('token') }}">
                 
                 <!-- Email Field -->
                 <div class="space-y-1">

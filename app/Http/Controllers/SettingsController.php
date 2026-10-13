@@ -52,30 +52,64 @@ class SettingsController extends Controller
         $user = Auth::user();
         $preferences = $this->getNormalizedPreferences($user);
 
+        // ✅ VALIDATION ÉTENDUE (profil + commerce + préférences)
         $validated = $request->validate([
+            // Préférences générales
             'language' => 'nullable|in:fr,en,ar,es',
             'theme' => 'nullable|in:light,dark,system',
             'email_notifications' => 'nullable|boolean',
             'push_notifications' => 'nullable|boolean',
             'weekly_report' => 'nullable|boolean',
-            'security_alerts' => 'nullable|boolean'
+            'security_alerts' => 'nullable|boolean',
         ]);
 
-        // Filtrer les valeurs null
+        // Filtrer les valeurs null (préférences)
         $validated = array_filter($validated, function($value) {
             return !is_null($value);
         });
 
-        $preferences = array_merge($preferences, $validated);
-        $this->savePreferences($user, $preferences);
+        // ✅ Si le formulaire contient des champs de PROFIL, les traiter séparément
+        if ($request->has('name') || $request->has('email')) {
+            $profileValidated = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|unique:users,email,' . $user->id,
+                'phone' => 'nullable|string|max:20',
+                'location' => 'nullable|string|max:255',
+                'bio' => 'nullable|string|max:500',
+            ]);
 
-        // Si la langue change, la mettre en session
-        if (isset($validated['language'])) {
-            session(['locale' => $validated['language']]);
-            app()->setLocale($validated['language']);
+            $user->update($profileValidated);
         }
 
-        return redirect()->back()->with('success', 'Préférences mises à jour avec succès !');
+        // ✅ Si le formulaire contient des champs COMMERCE, les traiter
+        if ($request->has('business_name') || $request->has('business_mode')) {
+            $businessValidated = $request->validate([
+                'business_name' => 'nullable|string|max:255',
+                'business_category' => 'nullable|string|max:100',
+                'business_address' => 'nullable|string|max:255',
+                'business_city' => 'nullable|string|max:100',
+                'business_district' => 'nullable|string|max:100',
+                'business_country' => 'nullable|string|max:100',
+                'business_website' => 'nullable|url|max:255',
+                'business_mode' => 'nullable|in:local,online',
+            ]);
+
+            $user->update($businessValidated);
+        }
+
+        // Mettre à jour les préférences JSON
+        if (!empty($validated)) {
+            $preferences = array_merge($preferences, $validated);
+            $this->savePreferences($user, $preferences);
+
+            // Si la langue change, la mettre en session
+            if (isset($validated['language'])) {
+                session(['locale' => $validated['language']]);
+                app()->setLocale($validated['language']);
+            }
+        }
+
+        return redirect()->back()->with('success', '✅ Profil et préférences mis à jour avec succès !');
     }
 
     /**
@@ -162,7 +196,6 @@ class SettingsController extends Controller
         $user = Auth::user();
         $preferences = $this->getNormalizedPreferences($user);
 
-        // Mettre à jour les préférences
         if ($request->has('language')) {
             $preferences['language'] = $request->language;
         }
@@ -178,7 +211,6 @@ class SettingsController extends Controller
 
         $this->savePreferences($user, $preferences);
 
-        // Si la langue est modifiée
         if ($request->has('language')) {
             session(['locale' => $request->language]);
             app()->setLocale($request->language);
@@ -203,7 +235,6 @@ class SettingsController extends Controller
     {
         $preferences = $user->preferences;
 
-        // Si c'est null, retourner les valeurs par défaut
         if (is_null($preferences)) {
             return [
                 'language' => 'fr',
@@ -213,13 +244,11 @@ class SettingsController extends Controller
             ];
         }
 
-        // Si c'est une chaîne JSON, la décoder
         if (is_string($preferences)) {
             $decoded = json_decode($preferences, true);
             if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
                 return $this->mergeWithDefaults($decoded);
             }
-            // Si le JSON est invalide, retourner les valeurs par défaut
             return [
                 'language' => 'fr',
                 'theme' => 'light',
@@ -228,12 +257,10 @@ class SettingsController extends Controller
             ];
         }
 
-        // Si c'est un tableau, le fusionner avec les valeurs par défaut
         if (is_array($preferences)) {
             return $this->mergeWithDefaults($preferences);
         }
 
-        // Par défaut, retourner les valeurs par défaut
         return [
             'language' => 'fr',
             'theme' => 'light',
@@ -254,7 +281,6 @@ class SettingsController extends Controller
             'push_notifications' => true,
         ];
 
-        // S'assurer que toutes les clés par défaut existent
         foreach ($defaults as $key => $value) {
             if (!isset($preferences[$key])) {
                 $preferences[$key] = $value;
@@ -269,12 +295,10 @@ class SettingsController extends Controller
      */
     private function savePreferences($user, $preferences)
     {
-        // S'assurer que c'est un tableau
         if (!is_array($preferences)) {
             $preferences = [];
         }
 
-        // S'assurer que les valeurs sont correctement typées
         if (isset($preferences['email_notifications'])) {
             $preferences['email_notifications'] = (bool) $preferences['email_notifications'];
         }
@@ -282,7 +306,6 @@ class SettingsController extends Controller
             $preferences['push_notifications'] = (bool) $preferences['push_notifications'];
         }
 
-        // Sauvegarder en JSON
         $user->preferences = $preferences;
         $user->save();
     }

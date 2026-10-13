@@ -158,14 +158,23 @@
             <form action="{{ route('login') }}" class="space-y-stack-gap-md" method="POST">
                 @csrf
                 
-                <!-- Email Field -->
-                <div class="space-y-1">
-                    <label class="font-label text-label text-on-surface-variant" for="email">EMAIL</label>
-                    <input class="w-full px-4 py-3 border border-outline-variant rounded bg-white text-body input-focus transition-all @error('email') border-error @enderror" id="email" name="email" placeholder="nom@agence.com" required type="email" value="{{ old('email') }}"/>
-                    @error('email')
-                    <p class="text-error text-xs mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
+                        <!-- Champ : Email ou nom d'utilisateur -->
+<div>
+    <x-input-label for="login" :value="__('Email ou nom d\'utilisateur')" />
+
+    <x-text-input
+        id="login"
+        type="text"
+        name="login"
+        :value="old('login')"
+        required
+        autofocus
+        autocomplete="username"
+        class="block mt-1 w-full"
+    />
+
+    <x-input-error :messages="$errors->get('login')" class="mt-2" />
+</div>
                 
                 <!-- Password Field -->
                 <div class="space-y-1">

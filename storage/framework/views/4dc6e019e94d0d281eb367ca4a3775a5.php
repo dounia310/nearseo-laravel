@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="light" lang="fr">
+<html class="<?php echo e(session('theme', 'light') === 'dark' ? 'dark' : 'light'); ?>" lang="fr">
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
@@ -103,6 +103,9 @@
     </script>
     
     <style>
+        /* =============================================
+           STYLES DE BASE (ORIGINAUX)
+           ============================================= */
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
             vertical-align: middle;
@@ -111,224 +114,260 @@
             font-variation-settings: 'FILL' 1;
         }
         .active-tab {
-    border-bottom: 2px solid #8c4a2f;
-    color: #8c4a2f !important;
-}
+            border-bottom: 2px solid #8c4a2f;
+            color: #8c4a2f !important;
+        }
 
-.dark {
-    background-color: #1a1a2e;
-    color: #fffff;
-}
+        img[src*="logo"] {
+            background: transparent;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+        }
 
-.dark .bg-white {
-    background-color: #f3f5fa;
-    border-color: #e6e9ed;
-}
+        .link-favicon {
+            border-radius: 50%;
+            background-color: #ffffff;
+            padding: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .active-tab-indicator {
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: #8c4a2f;
+        }
 
-.dark .text-gray-500,
-.dark .text-gray-600 {
-    color: #fffff;
-}
-img[src*="logo"] {
-        background: transparent;
-        image-rendering: -webkit-optimize-contrast;
-        image-rendering: crisp-edges;
-    }
-    
-    /* Logo en version sombre pour dark mode */
-    .dark img[src*="logo"] {
-        filter: brightness(0) invert(1);
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-fade-in {
+            animation: fade-in 0.3s ease-out;
+        }
 
+        aside {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
 
-    /* Favicon circulaire avec fond blanc */
-.link-favicon {
-    border-radius: 50%;
-    background-color: #fffff;
-    padding: 4px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-.active-tab-indicator {
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background-color: #8c4a2f;
-}
+        nav {
+            overflow-y: auto;
+            flex: 1;
+            min-height: 0;
+        }
 
-.no-scrollbar::-webkit-scrollbar {
-    display: none;
-}
-@keyframes fade-in {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-.animate-fade-in {
-    animation: fade-in 0.3s ease-out;
-}
-/* Pour que le footer reste toujours en bas */
-aside {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-}
+        .shrink-0 {
+            flex-shrink: 0;
+        }
 
-nav {
-    overflow-y: auto;
-    flex: 1;
-    min-height: 0; /* مهم للـ flex pour le scroll */
-}
+        /* =============================================
+           ✅ MODE CLAIR - ORIGINAL (NE PAS MODIFIER)
+           ============================================= */
+        /* Pas de styles spécifiques pour le mode clair car il est géré par défaut */
 
-.shrink-0 {
-    flex-shrink: 0;
-}
-/* Mode sombre */
-        .dark {
+        /* =============================================
+           ✅ MODE SOMBRE - Couleurs du dashboard
+           ============================================= */
+        html.dark {
             color-scheme: dark;
+            background-color: #091d2e;
         }
         
-        .dark body {
-            background-color: #1a1a2e;
-            color: #e2e8f0;
+        html.dark body {
+            background-color: #091d2e;
+            color: #ffffff;
         }
         
-        .dark .bg-white {
-            background-color: #1e293b !important;
+        /* Cartes et contenants */
+        html.dark .bg-white,
+        html.dark .bg-surface,
+        html.dark .bg-surface-container-lowest,
+        html.dark .bg-gray-50,
+        html.dark .bg-gray-100 {
+            background-color: #1a2b3c !important;
         }
         
-        .dark .bg-gray-50 {
-            background-color: #0f172a !important;
+        html.dark .bg-gray-200 {
+            background-color: #2d3748 !important;
         }
         
-        .dark .bg-gray-100 {
-            background-color: #1e293b !important;
+        html.dark .bg-gray-300 {
+            background-color: #3d4a5c !important;
         }
         
-        .dark .border-gray-200 {
-            border-color: #334155 !important;
+        html.dark .bg-gray-400 {
+            background-color: #4a5a6e !important;
         }
         
-        .dark .text-gray-900 {
-            color: #f1f5f9 !important;
+        html.dark .bg-surface-container {
+            background-color: #1e2f44 !important;
         }
         
-        .dark .text-gray-700 {
-            color: #cbd5e1 !important;
+        html.dark .bg-surface-container-high {
+            background-color: #2d3e50 !important;
         }
         
-        .dark .text-gray-500 {
-            color: #94a3b8 !important;
+        html.dark .bg-surface-container-low {
+            background-color: #1a2b3c !important;
         }
         
-        .dark .text-gray-400 {
+        html.dark .bg-background {
+            background-color: #091d2e !important;
+        }
+        
+        /* Bordures */
+        html.dark .border,
+        html.dark .border-b,
+        html.dark .border-t,
+        html.dark .border-l,
+        html.dark .border-r,
+        html.dark .border-gray-200,
+        html.dark .border-gray-300,
+        html.dark .border-outline-variant {
+            border-color: #2d3748 !important;
+        }
+        
+        /* Texte */
+        html.dark .text-gray-900,
+        html.dark .text-gray-800,
+        html.dark .text-gray-700,
+        html.dark .text-on-surface {
+            color: #ffffff !important;
+        }
+        
+        html.dark .text-gray-600,
+        html.dark .text-gray-500,
+        html.dark .text-on-surface-variant {
+            color: #cbd5e0 !important;
+        }
+        
+        html.dark .text-gray-400,
+        html.dark .text-gray-300 {
             color: #64748b !important;
         }
         
-        .dark .text-gray-300 {
-            color: #94a3b8 !important;
+        /* Ombres */
+        html.dark .shadow-sm,
+        html.dark .shadow,
+        html.dark .shadow-md,
+        html.dark .shadow-lg,
+        html.dark .shadow-xl,
+        html.dark .shadow-2xl {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6) !important;
         }
         
-        .dark .text-gray-600 {
-            color: #94a3b8 !important;
+        /* Inputs */
+        html.dark input,
+        html.dark select,
+        html.dark textarea {
+            background-color: #1a2b3c !important;
+            border-color: #2d3748 !important;
+            color: #ffffff !important;
         }
         
-        .dark .bg-gray-200 {
-            background-color: #334155 !important;
-        }
-        
-        .dark .bg-gray-300 {
-            background-color: #475569 !important;
-        }
-        
-        .dark .bg-gray-400 {
-            background-color: #64748b !important;
-        }
-        
-        .dark .bg-gray-600 {
-            background-color: #475569 !important;
-        }
-        
-        .dark .bg-gray-700 {
-            background-color: #334155 !important;
-        }
-        
-        .dark .bg-gray-800 {
-            background-color: #1e293b !important;
-        }
-        
-        .dark .bg-gray-900 {
-            background-color: #0f172a !important;
-        }
-        
-        .dark .border {
-            border-color: #334155 !important;
-        }
-        
-        .dark .border-b {
-            border-bottom-color: #334155 !important;
-        }
-        
-        .dark .border-t {
-            border-top-color: #334155 !important;
-        }
-        
-        .dark .border-l {
-            border-left-color: #334155 !important;
-        }
-        
-        .dark .border-r {
-            border-right-color: #334155 !important;
-        }
-        
-        .dark .shadow-sm {
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.5) !important;
-        }
-        
-        .dark .shadow {
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.5), 0 1px 2px -1px rgba(0, 0, 0, 0.5) !important;
-        }
-        
-        .dark .shadow-md {
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.5) !important;
-        }
-        
-        .dark .shadow-lg {
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.5) !important;
-        }
-        
-        .dark .shadow-xl {
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5) !important;
-        }
-        
-        .dark .shadow-2xl {
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7) !important;
-        }
-        
-        /* Inputs en mode sombre */
-        .dark input, 
-        .dark select, 
-        .dark textarea {
-            background-color: #1e293b !important;
-            border-color: #334155 !important;
-            color: #f1f5f9 !important;
-        }
-        
-        .dark input:focus, 
-        .dark select:focus, 
-        .dark textarea:focus {
-            border-color: #A24E29 !important;
+        html.dark input:focus,
+        html.dark select:focus,
+        html.dark textarea:focus {
+            border-color: #c97c5d !important;
             outline: none !important;
         }
         
-        .dark input::placeholder, 
-        .dark textarea::placeholder {
+        html.dark input::placeholder,
+        html.dark textarea::placeholder {
             color: #64748b !important;
+        }
+        
+        /* Logo - Sans filtre en mode sombre */
+        html.dark img[src*="logo"] {
+            filter: none !important;
+        }
+        
+        /* Prose */
+        html.dark .prose {
+            color: #e4e6eb !important;
+        }
+        
+        html.dark .prose h1,
+        html.dark .prose h2,
+        html.dark .prose h3 {
+            color: #f1f5f9 !important;
+        }
+        
+        html.dark .prose p,
+        html.dark .prose li {
+            color: #cbd5e1 !important;
+        }
+        
+        html.dark .prose a {
+            color: #ffb599 !important;
+        }
+        
+        /* Badges */
+        html.dark .bg-secondary-container {
+            background-color: #2d3e50 !important;
+        }
+        
+        html.dark .bg-primary\/10 {
+            background-color: rgba(201, 124, 93, 0.1) !important;
+        }
+        
+        html.dark .bg-secondary\/20 {
+            background-color: rgba(72, 187, 120, 0.2) !important;
+        }
+        
+        html.dark .bg-primary\/20 {
+            background-color: rgba(201, 124, 93, 0.2) !important;
+        }
+        
+        html.dark .bg-error\/20 {
+            background-color: rgba(252, 129, 129, 0.2) !important;
+        }
+        
+        /* Sidebar en mode sombre */
+        html.dark .dark\:bg-inverse-surface {
+            background-color: #1a2b3c !important;
+        }
+        
+        html.dark .dark\:bg-surface-container-lowest {
+            background-color: #1a2b3c !important;
+        }
+        
+        /* Scrollbar mode sombre */
+        html.dark ::-webkit-scrollbar-track {
+            background: #1a2b3c !important;
+        }
+        
+        html.dark ::-webkit-scrollbar-thumb {
+            background: #2d3748 !important;
+            border-radius: 10px;
+        }
+        
+        html.dark ::-webkit-scrollbar-thumb:hover {
+            background: #c97c5d !important;
+        }
+        
+        /* Notification */
+        html.dark .bg-inverse-surface {
+            background-color: #e2e8f0 !important;
+        }
+        
+        html.dark .text-inverse-on-surface {
+            color: #091d2e !important;
         }
     </style>
     
     <?php echo $__env->yieldPushContent('styles'); ?>
-    <!-- Favicons - Multi-systèmes -->
-    <!-- Standard -->
+    
+    <!-- Favicons -->
     <link rel="icon" type="image/x-icon" href="<?php echo e(asset('favicon.ico')); ?>">
     <link rel="icon" type="image/png" sizes="16x16" href="<?php echo e(asset('favicon-16x16.png')); ?>">
     <link rel="icon" type="image/png" sizes="32x32" href="<?php echo e(asset('favicon-32x32.png')); ?>">
@@ -357,12 +396,9 @@ nav {
     
     <!-- Manifeste PWA -->
     <link rel="manifest" href="<?php echo e(asset('site.webmanifest')); ?>">
-    <!-- Favicon SVG (transparent, scalable, parfait pour tous écrans) -->
-    <link rel="icon" type="image/svg+xml" href="<?php echo e(asset('favicon.svg')); ?>">
     
-    <!-- Fallback PNG pour les navigateurs anciens -->
-    <link rel="icon" type="image/png" sizes="32x32" href="<?php echo e(asset('favicon-32x32.png')); ?>">
-    <link rel="icon" type="image/png" sizes="16x16" href="<?php echo e(asset('favicon-16x16.png')); ?>">
+    <!-- Favicon SVG -->
+    <link rel="icon" type="image/svg+xml" href="<?php echo e(asset('favicon.svg')); ?>">
     
     <!-- Apple Touch Icon (iOS) -->
     <link rel="apple-touch-icon" sizes="180x180" href="<?php echo e(asset('apple-touch-icon.png')); ?>">
@@ -384,5 +420,24 @@ nav {
 </div>
 
 <?php echo $__env->yieldPushContent('scripts'); ?>
+
+<script>
+    // ✅ Gestion du thème
+    document.addEventListener('DOMContentLoaded', function() {
+        const html = document.documentElement;
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        
+        if (savedTheme === 'dark') {
+            html.classList.add('dark');
+            html.classList.remove('light');
+        } else {
+            html.classList.remove('dark');
+            html.classList.add('light');
+        }
+        
+        html.className = savedTheme;
+    });
+</script>
+
 </body>
 </html><?php /**PATH C:\Users\pc\nearseo-laravel\resources\views/layouts/app.blade.php ENDPATH**/ ?>

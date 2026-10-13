@@ -9,7 +9,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
     
-    <!-- Tailwind Configuration -->
     <script>
         tailwind.config = {
             darkMode: "class",
@@ -224,11 +223,11 @@
 <!-- Main Content -->
 <main class="max-w-4xl mx-auto px-4 py-12">
 
-    <!-- Lien retour vers le blog -->
-    <a href="{{ route('blog.index') }}" 
+    <!-- Lien retour vers le blog de l'utilisateur -->
+    <a href="{{ route('blog.user', $user->slug) }}" 
        class="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-medium transition-colors mb-6">
         <span class="material-symbols-outlined">arrow_back</span>
-        Retour au Blog
+        Retour au blog de {{ $user->name }}
     </a>
 
     <!-- Hero Section / Header Article -->
@@ -276,82 +275,17 @@
         </section>
     @endif
 
-    <!-- Article Content WITH CLEANING -->
+    <!-- ✅ Article Content - BRUT (sans aucun nettoyage) -->
     <article class="prose max-w-none font-body text-body">
-        @php
-            $content = $article->content;
-            
-            // Nettoyage
-            $content = trim($content);
-            if (substr($content, 0, 1) === '"') $content = substr($content, 1);
-            if (substr($content, -1) === '"') $content = substr($content, 0, -1);
-            
-            $content = stripslashes($content);
-            $content = str_replace(['\\n', '\n', '\\r', '\r'], '', $content);
-            $content = str_replace('\"', '"', $content);
-            $content = str_replace("\'", "'", $content);
-            
-            // Restaurer les mots coupés
-            $corrections = [
-                'Introductio' => 'Introduction',
-                'Conclusio' => 'Conclusion',
-                'aiversaire' => 'anniversaire',
-                'persoalisée' => 'personnalisée',
-                'persoalisation' => 'personnalisation',
-                'sélectioée' => 'sélectionnée',
-                'sélectioons' => 'sélectionnons',
-                'quotidiees' => 'quotidiennes',
-                'exceptioelles' => 'exceptionnelles',
-                'professioelles' => 'professionnelles',
-                'professioels' => 'professionnels',
-                'boutoière' => 'boutonnière',
-                'aboements' => 'abonnements',
-                'coaissances' => 'connaissances',
-                'boe' => 'bonne',
-                'aée' => 'année',
-                'coaître' => 'connaître',
-                'taeries' => 'tanneries',
-                'traditioel' => 'traditionnel',
-                'impressioantes' => 'impressionnantes',
-                'passioant' => 'passionnant',
-                'attentioé' => 'attentionné',
-                'professioel' => 'professionnel',
-                'persoes' => 'personnes',
-                'coaissent' => 'connaissent',
-                'façoées' => 'façonnées',
-                'coaisseurs' => 'connaisseurs',
-                'randoées' => 'randonnées',
-                's\'adoer' => 's\'adonner',
-                'n2' => '',
-                'n3' => '',
-                'n4' => '',
-                'n5' => '',
-            ];
-            
-            foreach ($corrections as $wrong => $correct) {
-                $content = str_replace($wrong, $correct, $content);
-            }
-            
-            // Corriger les apostrophes
-            $content = str_replace("'est", "n'est", $content);
-            $content = str_replace("'hésitez", "n'hésitez", $content);
-            $content = str_replace("'a", "n'a", $content);
-            $content = str_replace("'attendez", "n'attendez", $content);
-            
-            // Nettoyer les espaces
-            $content = preg_replace('/\s+/', ' ', $content);
-            $content = trim($content);
-        @endphp
-
-        {!! $content !!}
+        {!! $article->content !!}
     </article>
 
     <!-- Article Footer -->
     <footer class="mt-12 pt-8 border-t border-outline-variant flex flex-col md:flex-row justify-between items-center gap-4">
-        <a href="{{ route('blog.index') }}" 
+        <a href="{{ route('blog.user', $user->slug) }}" 
            class="flex items-center gap-2 text-primary hover:underline transition-all">
             <span class="material-symbols-outlined">arrow_back</span>
-            <span class="font-label">Retour au Blog</span>
+            <span class="font-label">← Retour au blog de {{ $user->name }}</span>
         </a>
         
         <div class="flex items-center gap-4">
@@ -385,9 +319,9 @@
     
     function copyLink() {
         navigator.clipboard.writeText(window.location.href).then(() => {
-            alert('Lien copié dans le presse-papier !');
+            alert('✅ Lien copié dans le presse-papier !');
         }).catch(() => {
-            prompt('Copiez ce lien :', window.location.href);
+            prompt('📋 Copiez ce lien :', window.location.href);
         });
     }
 </script>
