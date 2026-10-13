@@ -1,6 +1,7 @@
 # NEARSEO
 
 **Plateforme SaaS d'optimisation SEO local assistée par Intelligence Artificielle**
+---
 
 ## Présentation
 
@@ -31,7 +32,7 @@ Durant un stage de cinq mois en SEO, trois difficultés majeures ont été ident
 ### Génération d'articles par Intelligence Artificielle
 
 - Génération automatique d'articles SEO en moins de 30 secondes
-- Utilisation de l'API Google Gemini (`gemini-2.5-flash`)
+- Utilisation de l'API Google Gemini
 - Structure HTML respectée : `<h1>`, `<h2>`, `<h3>`, `<p>`, `<ul>`, `<strong>`, `<a>`
 - Prompt optimisé (anti-IA, EEAT, storytelling terrain)
 
@@ -55,7 +56,7 @@ Durant un stage de cinq mois en SEO, trois difficultés majeures ont été ident
 
 ### SEO Local avec OpenStreetMap
 
-- Carte interactive Leaflet + OpenStreetMap
+- Carte interactive Leaflet et OpenStreetMap
 - Ancrage géographique du contenu (quartier, ville, pays)
 - Recherche d'adresse
 - Géolocalisation automatique
@@ -447,18 +448,6 @@ php artisan view:cache
 - Génération automatique d'images par IA
 - Intégration Google My Business
 - Système de paiement en ligne (CIH Bank, PayPal, Stripe)
-
----
-
-## Modèle économique
-
-| Formule | Prix | Fonctionnalités |
-|---|---|---|
-| Starter | 19 euros par mois | 5 articles par mois, blog NEARSEO |
-| Pro | 29 euros par mois | 20 articles par mois, publication WordPress |
-| Business | 49 euros par mois | Articles illimités, multi-sites, support prioritaire |
-
-Modèle SaaS classique avec revenus récurrents mensuels.
 
 ---
 
