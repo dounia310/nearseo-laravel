@@ -1,3 +1,9 @@
+![Laravel](https://img.shields.io/badge/Laravel-12-red)
+![PHP](https://img.shields.io/badge/PHP-8.2-blue)
+![MySQL](https://img.shields.io/badge/MySQL-8.0-orange)
+![Tailwind](https://img.shields.io/badge/Tailwind-3.x-cyan)
+![License](https://img.shields.io/badge/License-MIT-green)
+![Status](https://img.shields.io/badge/Status-Production--ready-success)
 # NEARSEO
 
 **Plateforme SaaS d'optimisation SEO local assistée par Intelligence Artificielle**
